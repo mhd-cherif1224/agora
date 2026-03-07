@@ -17,7 +17,8 @@ $row = $stmt->fetch();
 
 // 3. Vérifications
 if (!$row || !password_verify($inputPassword, $row['Password_hash'])) {
-    header('Location: ../view/html/login-admin.html?error=1');
+    header('Location: view/html/login-admin.html?error=1');
+
     exit();
 }
 
@@ -32,7 +33,8 @@ $_SESSION['admin_email']    = $admin->getEmail();
 $_SESSION['admin_username'] = $admin->getUserName();
 
 // 6. Rediriger vers le dashboard
-header('Location: ../view/html/dashboard.php');
+header('Location: view/html/dashboard.php');
+
 exit();
 ?>
 

@@ -32,9 +32,9 @@ public function getUsername():?string
 {
     return $this->Username;
 }
-public function setUsername($Username)
+public function setUserName(string $userName): self  
 {
-    $this->Username = $Username;
+    $this->Username = $userName;
 
     return $this;
 }
