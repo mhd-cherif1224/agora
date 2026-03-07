@@ -1,0 +1,49 @@
+<!-- login-admin interface -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/login-admin.css">
+    <title>Login-Admin</title>
+</head>
+<body>
+    
+    <div class="container">
+        
+        <div class="title">
+            <h1>Bonjour </h1>
+            <h1>Admin!</h1>
+        </div>
+
+        <!-- Ajout du form avec action vers le controller -->
+        <form action="../../Controller/login-admin.php" method="POST">
+
+            <div class="inputs">
+                <input type="email" name="email" id="in-email" placeholder="Entrez votre email">
+                <div class="password-container">
+                    <!-- Ajout de name="password" -->
+                    <input type="password" name="password" id="password" placeholder="Entrez votre mot de passe">
+                    <i class="fa-solid fa-eye" id="togglePassword"></i>
+                </div>
+            </div>
+
+            <div class="options">
+                <div class="remember">
+                    <input type="checkbox" id="checkbox">
+                    <label for="checkbox">remember me</label>
+                </div>
+                <a href="#">forgot password?</a>
+            </div>
+
+            <!-- type="submit" sur le bouton -->
+            <button type="submit">Login</button>
+
+        </form>
+    </div>
+
+    <script src="../js/login-admin.js"></script>
+
+</body>
+</html>
