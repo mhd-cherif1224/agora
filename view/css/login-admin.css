@@ -7,52 +7,47 @@
 }
 
 
-
+/* ================= PAGE LAYOUT ================= */
 body{
     background:#f3f2ef;
     height:100vh;
 
     display:flex;
-    justify-content:center;
-    align-items:center;   
+    justify-content:center; 
+    align-items:center;    
 }
 
 
-
+/* ================= LOGIN CARD ================= */
 .container{
     background:white;
     padding:40px;
-
     width:400px;
     height:500px;
-
     border-radius:25px;
-
-
     box-shadow:0 4px 12px rgba(0,0,0,0.1);
 }
 
 
-
+/* ================= TITLE ================= */
 .container h1{
     margin-bottom:25px;
-
     font-family:Arial, Helvetica, sans-serif;
     font-size:40px;
     font-weight:200;
     line-height:30px;
-
     color:#000;
 }
 
 
-
+/* ================= INPUT FIELDS ================= */
 .inputs{
     display:flex;
-    flex-direction:column; 
-    gap:15px;            
+    flex-direction:column;
+    gap:15px;          
     margin-top:40px;
 }
+
 
 input{
     width:100%;
@@ -67,10 +62,11 @@ input{
 
 .inputs input:focus{
     outline:none;
-    border-color:#0a66c2; 
+    border-color:#0a66c2; /* bleu au focus */
 }
 
 
+/* ================= OPTIONS ================= */
 .options{
     display:flex;
     justify-content:space-between; 
@@ -91,6 +87,7 @@ label{
     color:#555;
 }
 
+
 #checkbox{
     margin-left:5px;
 }
@@ -99,6 +96,7 @@ label{
 input[type="checkbox"]{
     width:auto;
 }
+
 
 .remember label{
     color:#16376E;
@@ -118,8 +116,13 @@ a:hover{
     text-decoration:none;
 }
 
+#Login{ 
+    text-decoration: none;
+    margin: 0;
+    color: White;
+}
 
-
+/* ================= LOGIN BUTTON ================= */
 button{
     width:100%;
     padding:12px;
@@ -145,10 +148,12 @@ button:hover{
 }
 
 
+/* ================= PASSWORD INPUT ================= */
 .password-container{
     position:relative;
     width:100%;
-}
+} 
+
 
 .password-container input{
     width:100%;
@@ -162,7 +167,7 @@ button:hover{
 
     right:10px;
     top:50%;
-    transform:translateY(-50%);
+    transform:translateY(-50%); /* centre verticalement l'icône */
 
     cursor:pointer;
     color:#555;

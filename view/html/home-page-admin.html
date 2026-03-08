@@ -1,0 +1,37 @@
+<!-- Home-page-admin -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/home-page-admin.css">
+    <title>Home page admin</title>
+</head>
+<body>
+    
+    <div class="container">
+        <header>
+            <nav class="admin-navbar">
+                <button class="MyBtns"><a href="../html/table-admin.html">Table d'Admin</a></button>
+                <details class="dropdown">
+                    <summary class="MyBtns">Table d'Utilisateurs</summary>
+
+                    <div class="dropdown-content">
+                        <a href="../html/table-etudiant.html">Table d'Étudiants</a>
+                        <a href="../html/table-enseignant.html">Table d'Enseignants</a>
+                    </div>
+                </details>
+                <button class="MyBtns"><a href="#">Table de Posts</a></button>
+                <button id="deconnexion-btn"><a href="#">Déconnexion</a></button>
+            </nav>
+        </header>
+
+        <div class="hero-image">
+            <img src="/Mini-Projet/images/welcome.jpg" alt="Bienvenue Admin">
+            <h1>Bienvenue sur le Dashboard Admin</h1>
+        </div>
+    </div>
+
+    <script src="../js/home-page-admin.js"></script>
+</body>
+</html>
