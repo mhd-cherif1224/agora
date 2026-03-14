@@ -1,0 +1,218 @@
+<!-- TABLE DE POSTS -->
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/table-admin.css">
+
+    <title>Table de Posts</title>
+
+</head>
+
+<body>
+
+    <header>
+
+        <nav class="admin-navbar">
+
+            <button class="MyBtns">
+                <a href="../html/table-admin.html">Table d'Admins</a>
+            </button>
+
+            <details class="dropdown">
+
+                <summary class="MyBtns">Table d'Utilisateurs</summary>
+
+                <div class="dropdown-content">
+                    <a href="../html/table-etudiant.html">Table d'Étudiants</a>
+                    <a href="../html/table-enseignant.html">Table d'Enseignants</a>
+                </div>
+
+            </details>
+
+            <button class="MyBtns" id="tab-Post">
+                <a href="../html/table-post.html">Table de Posts</a>
+            </button>
+
+            <button id="deconnexion-btn">
+                <a href="../html/login-admin.html">Déconnexion</a>
+            </button>
+
+        </nav>
+
+    </header>
+
+
+    <div class="container">
+
+        <p style="margin-bottom:10px;">
+            Table de Posts
+        </p>
+
+        <table id="postTable">
+
+            <thead>
+
+                <tr>
+                    <th>ID</th>
+                    <th>Titre</th>
+                    <th>Description</th>
+                    <th>DatePublication</th>
+                    <th>StatutService</th>
+                    <th>Prix</th>
+                    <th>Signalisation</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>1</td>
+                    <td>Aide Java</td>
+                    <td>Je peux aider en Java</td>
+                    <td>01/05/2026</td>
+                    <td>Disponible</td>
+                    <td>1000</td>
+                    <td>0</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+
+        <div class="buttons-container">
+
+            <button class="buttons" id="deleteBtn">
+                <i class="fa-solid fa-minus-square"></i>
+                Supprimer un Post
+            </button>
+
+            <button class="buttons" id="addBtn">
+                <i class="fa-solid fa-plus-square"></i>
+                Ajouter un Post
+            </button>
+
+        </div>
+
+
+
+        <!-- MODAL AJOUT -->
+
+        <div id="modal" class="modal">
+
+            <div class="modal-content" style="height:auto;width:500px;">
+
+                <div class="modal-header">
+                    <p>Ajouter un Post</p>
+                    <span class="close">&times;</span>
+                </div>
+
+
+                <div class="input-row">
+
+                    <div class="input-group">
+                        <label>Titre</label>
+                        <input type="text" id="titreInput">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Prix</label>
+                        <input type="number" id="prixInput">
+                    </div>
+
+                </div>
+
+
+                <div class="input-row">
+
+                    <div class="input-group">
+                        <label>Description</label>
+                        <input type="text" id="descriptionInput">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Statut service</label>
+                        <input type="text" id="statutInput">
+                    </div>
+
+                </div>
+
+
+                <div class="input-row">
+
+                    <div class="input-group">
+                        <label>Date de publication</label>
+                        <input type="date" id="dateInput">
+                    </div>
+
+                </div>
+
+
+                <div class="modal-buttons">
+
+                    <button class="buttons" id="confirmAdd">
+                        <i class="fa-solid fa-plus-square vert"></i>
+                        Ajouter
+                    </button>
+
+                    <button class="buttons" id="cancelAdd">
+                        Annuler
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- MODAL SUPPRESSION -->
+
+        <div id="confirmModal" class="modal">
+
+            <div class="modal-content confirm-modal">
+
+                <div class="modal-header">
+                    <p>Confirmer la suppression</p>
+                    <span class="closeConfirm">&times;</span>
+                </div>
+
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer ce post ?</p>
+                </div>
+
+                <div class="modal-buttons">
+
+                    <button class="buttons" id="confirmYes">
+                        <i class="fa-solid fa-minus-square rouge"></i>
+                        Supprimer
+                    </button>
+
+                    <button class="buttons" id="confirmNo">
+                        Annuler
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div id="notification"></div>
+
+    </div>
+
+
+    <script src="../js/table-post.js"></script>
+
+</body>
+</html>

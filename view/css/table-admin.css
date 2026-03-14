@@ -93,9 +93,12 @@ header {
 }
 
 
-#tab-Admin{
+#tab-Admin, 
+#tab-Utilisateur,
+#tab-Post{
     text-decoration: underline;
 }
+
 a{
     text-decoration: none;
     color: #333;
@@ -123,22 +126,23 @@ a{
 
 /* summary comme MyBtns */
 .dropdown summary {
-    background: none;
+   background: none;
     border: none;
     flex: 1;
     text-align: center;
     font-size: 18px;
     cursor: pointer;
     color: #333;
+
+    /* animation fluide */
     transition: all 0.3s ease;
-    list-style: none;
 }
 
 /* hover comme MyBtns */
 .dropdown summary:hover {
     color: #000;
-    transform: translateY(-2px);
-    text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transform: translateY(-2px);            /* léger déplacement vers le haut */
+    text-shadow: 0 2px 8px rgba(0,0,0,0.2); 
 }
 
 /* menu caché */
