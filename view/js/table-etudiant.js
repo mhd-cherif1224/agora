@@ -120,6 +120,14 @@ document.getElementById("confirmYes").onclick = function(){
 
 };
 
+document.querySelector(".closeConfirm").onclick = function(){
+
+    confirmModal.style.display = "none";
+
+    showNotification("Suppression annulée");
+
+};
+
 document.getElementById("confirmNo").onclick = function(){
     confirmModal.style.display = "none";
     showNotification("Suppression annulée");
