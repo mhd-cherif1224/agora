@@ -235,6 +235,7 @@ button:hover{
     margin:150px auto;
     border-radius:10px;
     text-align:center;
+    border: solid 1px #333;
 }
 
 .modal-content input{
