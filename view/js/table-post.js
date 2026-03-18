@@ -41,9 +41,7 @@ const addBtn = document.getElementById("addBtn");
 const cancelBtn = document.getElementById("cancelAdd");
 const closeModal = document.querySelector(".close");
 
-addBtn.onclick = () =>{
-    modal.style.display = "block";
-};
+
 
 cancelBtn.onclick = () =>{
     modal.style.display = "none";

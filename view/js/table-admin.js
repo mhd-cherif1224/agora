@@ -1,5 +1,3 @@
-// // table admin
-
 // ==============================
 // SELECTION LIGNE
 // ==============================
@@ -19,16 +17,16 @@ table.addEventListener("click", function(e){
     row.classList.add("selected");
 });
 
-// Désélection si clic en dehors d'une ligne (sauf boutons)
 document.addEventListener("click", function(e){
-    if(selectedRow && !e.target.closest("#adminTable tbody tr") && !e.target.closest(".buttons")){
+    if(selectedRow && !e.target.closest("#adminTable tbody tr") && !e.target.closest(".buttons") && !e.target.closest(".modal-content")){
         selectedRow.classList.remove("selected");
         selectedRow = null;
     }
 });
 
+
 /* ==============================
-MODAL
+MODAL AJOUT
 ============================== */
 
 const modal = document.getElementById("modal");
@@ -36,28 +34,25 @@ const addBtn = document.getElementById("addBtn");
 const cancelBtn = document.getElementById("cancelAdd");
 const closeModal = document.querySelector(".close");
 
-addBtn.onclick = () =>{
+addBtn.onclick = () => {
     modal.style.display = "block";
 };
 
-cancelBtn.onclick = () =>{
+cancelBtn.onclick = () => {
     modal.style.display = "none";
     showNotification("Ajout annulé");
 };
 
-closeModal.onclick = () => {
-    modal.style.display = "none";
-    showNotification("Ajout annulé");
-};
+closeModal.onclick = cancelBtn.onclick;
+
 
 /* ==============================
 AJOUTER ADMIN
 ============================== */
 
-const confirmAdd = document.getElementById("confirmAdd");
+document.getElementById("confirmAdd").onclick = function(){
 
-confirmAdd.onclick = function(){
-    let email = document.getElementById("emailInput").value.trim();
+    let email    = document.getElementById("emailInput").value.trim();
     let password = document.getElementById("passwordInput").value.trim();
 
     if(email === "" || password === ""){
@@ -65,41 +60,101 @@ confirmAdd.onclick = function(){
         return;
     }
 
-    // Sélection du tbody
     let tbody = document.querySelector("#adminTable tbody");
 
-    // Calculer le prochain ID réel
     let maxId = 0;
     for(let row of tbody.rows){
         let rowId = parseInt(row.cells[0].innerText);
         if(rowId > maxId) maxId = rowId;
     }
-    let id = maxId + 1;
 
-    // Créer la ligne et ajouter le contenu
     let newRow = tbody.insertRow();
     newRow.innerHTML = `
-        <td>${id}</td>
+        <td>${maxId + 1}</td>
         <td>${email}</td>
         <td>${password}</td>
     `;
 
-    // Réinitialiser le formulaire et fermer le modal
     document.getElementById("emailInput").value = "";
     document.getElementById("passwordInput").value = "";
     modal.style.display = "none";
 
     showNotification("Admin ajouté avec succès");
+
 };
 
 
-// ==============================
-// MODAL CONFIRMATION SUPPRESSION
-// ==============================
+/* ==============================
+MODIFIER ADMIN
+============================== */
+
+const modifierModal = document.getElementById("modifierModal");
+const editBtn = document.getElementById("editBtn");
+
+editBtn.onclick = function(){
+
+    if(!selectedRow){
+        showNotification("Il faut d'abord sélectionner un Admin");
+        return;
+    }
+
+    // Convert DD/MM/YYYY → YYYY-MM-DD for the date input
+    let rawDate = selectedRow.cells[3].innerText;
+    let parts = rawDate.split("/");
+    let formattedDate = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : rawDate;
+
+    document.getElementById("nomInput").value    = selectedRow.cells[1].innerText;
+    document.getElementById("prenomInput").value = selectedRow.cells[2].innerText;
+    document.getElementById("dateInput").value   = formattedDate;
+    document.getElementById("sexeInput").value   = selectedRow.cells[4].innerText;
+    document.getElementById("emailInput").value  = selectedRow.cells[5].innerText;
+    document.getElementById("telInput").value    = selectedRow.cells[6].innerText;
+
+    modifierModal.style.display = "block";
+
+};
+
+document.getElementById("confirmModifier").onclick = function(){
+
+    let nom      = document.getElementById("nomInput").value;
+    let prenom   = document.getElementById("prenomInput").value;
+    let dateVal  = document.getElementById("dateInput").value;
+    let sexe     = document.getElementById("sexeInput").value;
+    let email    = document.getElementById("emailInput").value;
+    let tel      = document.getElementById("telInput").value;
+
+    if(nom == "" || prenom == "" || email == "" || dateVal == "" || sexe == ""){
+        showNotification("Veuillez remplir les champs");
+        return;
+    }
+
+    // Convert YYYY-MM-DD → DD/MM/YYYY
+    let parts = dateVal.split("-");
+    let formattedDate = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateVal;
+
+    selectedRow.cells[1].innerText = nom;
+    selectedRow.cells[2].innerText = prenom;
+    selectedRow.cells[3].innerText = formattedDate;
+    selectedRow.cells[4].innerText = sexe;
+    selectedRow.cells[5].innerText = email;
+    selectedRow.cells[6].innerText = tel;
+
+    modifierModal.style.display = "none";
+    showNotification("Admin modifié");
+
+};
+
+document.querySelector(".closeModifier").onclick = function(){
+    modifierModal.style.display = "none";
+    showNotification("Modification annulée");
+};
+
+
+/* ==============================
+SUPPRESSION ADMIN
+============================== */
+
 const confirmModal = document.getElementById("confirmModal");
-const confirmYes = document.getElementById("confirmYes");
-const confirmNo = document.getElementById("confirmNo");
-const closeConfirm = document.querySelector(".closeConfirm");
 const deleteBtn = document.getElementById("deleteBtn");
 
 deleteBtn.onclick = function(){
@@ -107,23 +162,26 @@ deleteBtn.onclick = function(){
         showNotification("Il faut d'abord sélectionner un Admin");
         return;
     }
-
     confirmModal.style.display = "block";
 };
 
-confirmYes.onclick = function(){
+document.getElementById("confirmYes").onclick = function(){
     selectedRow.remove();
     selectedRow = null;
     confirmModal.style.display = "none";
     showNotification("Admin supprimé");
 };
 
-confirmNo.onclick = closeConfirm.onclick = function(){
+document.querySelector(".closeConfirm").onclick = function(){
     confirmModal.style.display = "none";
     showNotification("Suppression annulée");
 };
 
-// Fermer si clic en dehors du modal
+document.getElementById("confirmNo").onclick = function(){
+    confirmModal.style.display = "none";
+    showNotification("Suppression annulée");
+};
+
 window.onclick = function(event){
     if(event.target === modal){
         modal.style.display = "none";
@@ -133,11 +191,17 @@ window.onclick = function(event){
         confirmModal.style.display = "none";
         showNotification("Suppression annulée");
     }
+    if(event.target === modifierModal){
+        modifierModal.style.display = "none";
+        showNotification("Modification annulée");
+    }
 };
 
-// ==============================
-// NOTIFICATION
-// ==============================
+
+/* ==============================
+NOTIFICATION
+============================== */
+
 function showNotification(message){
     const notif = document.getElementById("notification");
     notif.innerText = message;
@@ -147,17 +211,3 @@ function showNotification(message){
         notif.style.display = "none";
     }, 3000);
 }
-
-// ==============================
-// DROPDOWN
-// ==============================
-
-const dropdown = document.querySelector(".dropdown");
-
-document.addEventListener("click", function(event) {
-
-    if (!dropdown.contains(event.target)) {
-        dropdown.removeAttribute("open");
-    }
-
-});

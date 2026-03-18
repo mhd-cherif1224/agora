@@ -10,24 +10,27 @@
 </head>
 <body>
 
+    <header>
+        <nav class="admin-navbar">
 
-    
-        <header>
-            <nav class="admin-navbar">
-                <button class="MyBtns" id="tab-Admin"><a href="../html/table-admin.html">Table d'Admin</a></button>
-                <details class="dropdown">
-                    <summary class="MyBtns">Table d'Utilisateurs</summary>
+            <button class="MyBtns">
+                <a href="../html/table-admin.html">Table d'Admins</a>
+            </button>
 
-                    <div class="dropdown-content">
-                        <a href="../html/table-etudiant.html">Table d'Étudiants</a>
-                        <a href="../html/table-enseignant.html">Table d'Enseignants</a>
-                    </div>
-                </details>
-                <button class="MyBtns"><a href="../html/table-post.html">Table de Posts</a></button>
-                <button id="deconnexion-btn"><a href="../html/login-admin.html">Déconnexion</a></button>
-            </nav>
-        </header>
+            <button class="MyBtns">
+                <a href="../html/table-etudiant.html">Table d'Utilisateurs</a>
+            </button>
 
+            <button class="MyBtns">
+                <a href="../html/table-post.html">Table de Posts</a>
+            </button>
+
+            <button id="deconnexion-btn">
+                <a href="../html/login-admin.html">Déconnexion</a>
+            </button>
+
+        </nav>
+    </header>
 
     <div class="container">
 
@@ -35,32 +38,35 @@
             <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>DateNaissance</th>
+                    <th>Sexe</th>
                     <th>Email</th>
-                    <th>Mot de passe</th>
+                    <th>NumTel</th>
                 </tr>
             </thead>
-
             <tbody>
                 <tr>
                     <td>1</td>
-                    <td>Email1</td>
-                    <td>Motdepasse1</td>
-                </tr>
-
-                <tr>
-                    <td>2</td>
-                    <td>Email2</td>
-                    <td>Motdepasse2</td>
+                    <td>Nom1</td>
+                    <td>Prenom1</td>
+                    <td>01/01/2005</td>
+                    <td>M</td>
+                    <td>example@gmail.com</td>
+                    <td>0550000000</td>
                 </tr>
             </tbody>
-
         </table>
-
 
         <div class="buttons-container">
             <button class="buttons" id="deleteBtn">
                 <i class="fa-solid fa-minus-square"></i>
                 Supprimer un Admin
+            </button>
+            <button class="buttons" id="editBtn">
+                <i class="fa-solid fa-edit"></i>
+                Modifier un Admin
             </button>
             <button class="buttons" id="addBtn">
                 <i class="fa-solid fa-plus-square"></i>
@@ -69,70 +75,124 @@
         </div>
 
 
-        <!-- MODAL -->
+        <!-- MODAL AJOUT -->
 
         <div id="modal" class="modal">
-
             <div class="modal-content">
+
                 <div class="modal-header">
                     <p>Ajouter un Admin</p>
                     <span class="close">&times;</span>
                 </div>
 
                 <div class="input-row">
-
                     <div class="input-group">
-                        <label for="emailInput">Email<span class="mandatory-star">*</span></label>
+                        <label>Email<span class="mandatory-star">*</span></label>
                         <input type="email" id="emailInput">
                     </div>
-
                     <div class="input-group">
-                        <label for="passwordInput">Mot de passe<span class="mandatory-star">*</span></label>
+                        <label>Mot de passe<span class="mandatory-star">*</span></label>
                         <input type="password" id="passwordInput">
                     </div>
-
                 </div>
 
                 <br>
 
                 <div class="modal-buttons">
                     <button class="buttons" id="confirmAdd">
-                        <i class="fa-solid fa-plus-square vert">  </i>
+                        <i class="fa-solid fa-plus-square vert"></i>
                         Ajouter
                     </button>
                     <button class="buttons" id="cancelAdd">Annuler</button>
                 </div>
 
             </div>
-
         </div>
 
 
-        <div id="notification"></div>
+        <!-- MODAL MODIFIER -->
 
-        <!-- MODAL CONFIRMATION SUPPRESSION -->
-        <div id="confirmModal" class="modal">
-            <div class="modal-content confirm-modal">
+        <div id="modifierModal" class="modal">
+            <div class="modal-content">
+
                 <div class="modal-header">
-                    <p id="confirmTitle">Confirmer la suppression</p>
-                    <span class="closeConfirm">&times;</span>
+                    <p>Modifier un Admin</p>
+                    <span class="closeModifier">&times;</span>
                 </div>
-                <div class="modal-body">
-                    <p id="confirmMessage">Êtes-vous sûr de vouloir supprimer cet admin ?</p>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Nom<span class="mandatory-star">*</span></label>
+                        <input type="text" id="nomInput">
+                    </div>
+                    <div class="input-group">
+                        <label>Prénom<span class="mandatory-star">*</span></label>
+                        <input type="text" id="prenomInput">
+                    </div>
                 </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Date de naissance<span class="mandatory-star">*</span></label>
+                        <input type="date" id="dateInput">
+                    </div>
+                    <div class="input-group">
+                        <label>Sexe<span class="mandatory-star">*</span></label>
+                        <input type="text" id="sexeInput">
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Email<span class="mandatory-star">*</span></label>
+                        <input type="email" id="emailInput2">
+                    </div>
+                    <div class="input-group">
+                        <label>NumTel</label>
+                        <input type="text" id="telInput">
+                    </div>
+                </div>
+
                 <div class="modal-buttons">
-                    <button class="buttons" id="confirmYes">
-                        <i class="fa-solid fa-minus-square rouge"></i>
-                        Supprimer 
+                    <button class="buttons" id="confirmModifier">
+                        <i class="fa-solid fa-edit vert"></i>
+                        Modifier
                     </button>
-                    <button class="buttons" id="confirmNo">Annuler</button>
+                    <button class="buttons" id="cancelModifier">Annuler</button>
                 </div>
+
             </div>
         </div>
 
-    </div>
-    
 
+        <!-- MODAL CONFIRMATION SUPPRESSION -->
+
+        <div id="confirmModal" class="modal">
+            <div class="modal-content confirm-modal">
+
+                <div class="modal-header">
+                    <p>Confirmer la suppression</p>
+                    <span class="closeConfirm">&times;</span>
+                </div>
+
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer cet admin ?</p>
+                </div>
+
+                <div class="modal-buttons">
+                    <button class="buttons" id="confirmYes">
+                        <i class="fa-solid fa-minus-square rouge"></i>
+                        Supprimer
+                    </button>
+                    <button class="buttons" id="confirmNo">Annuler</button>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="notification"></div>
+
+    </div>
 
     <script src="../js/table-admin.js"></script>
 </body>

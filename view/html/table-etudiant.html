@@ -20,14 +20,9 @@
             <a href="../html/table-admin.html">Table d'Admins</a>
         </button>
 
-        <details class="dropdown" open>
-            <summary class="MyBtns" id="tab-Utilisateur">Table d'Utilisateurs</summary>
-
-            <div class="dropdown-content">
-                <a href="../html/table-etudiant.html">Table d'Étudiants</a>
-                <a href="../html/table-enseignant.html">Table d'Enseignants</a>
-            </div>
-        </details>
+        <button class="MyBtns">
+            <a href="../html/table-etudiant.html">Table d'Utilisateurs</a>
+        </button>
 
         <button class="MyBtns">
             <a href="../html/table-post.html">Table de Posts</a>
@@ -42,9 +37,6 @@
 
     <div class="container">
 
-        <p style="margin-bottom:10px;">
-            Table d'Utilisateurs > <b>Table d'Étudiants</b>
-        </p>
 
         <table id="studentTable">
 
@@ -89,9 +81,9 @@
                 Supprimer un Utilisateur
             </button>
 
-            <button class="buttons" id="addBtn">
-                <i class="fa-solid fa-plus-square"></i>
-                Ajouter un Utilisateur
+            <button class="buttons" id="modifierBtn">
+                <i class="fa-solid fa-edit"></i>
+                Modifier un Utilisateur
             </button>
 
         </div>
@@ -103,7 +95,7 @@
             <div class="modal-content" style="height:auto;width:500px;">
 
                 <div class="modal-header">
-                    <p>Ajouter un Étudiant</p>
+                    <p>Modifier un Utilisateur</p>
                     <span class="close">&times;</span>
                 </div>
 
@@ -166,8 +158,8 @@
                 <div class="modal-buttons">
 
                     <button class="buttons" id="confirmAdd">
-                        <i class="fa-solid fa-plus-square vert"></i>
-                        Ajouter
+                        <i class="fa-solid fa-edit vert"></i>
+                        Modifier
                     </button>
 
                     <button class="buttons" id="cancelAdd">Annuler</button>
@@ -210,7 +202,7 @@
 
     </div>
 
-    <script src="../js/table-etudiant.js"></script>
+    <script src="../js/table-utilisateur.js"></script>
 
 </body>
 </html>
