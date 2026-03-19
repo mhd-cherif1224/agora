@@ -271,6 +271,19 @@ button:hover{
     background:#ececec;
     transform:scale(1.1);
 }
+
+.closeModifier{
+    font-size: 35px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition:all 0.2s ease;
+}
+
+.closeModifier:hover{
+    background:#ececec;
+    transform:scale(1.1);
+}
 .mandatory-star{
     color: rgb(255, 0, 0)
 }

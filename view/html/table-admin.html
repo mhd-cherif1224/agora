@@ -18,7 +18,7 @@
             </button>
 
             <button class="MyBtns">
-                <a href="../html/table-etudiant.html">Table d'Utilisateurs</a>
+                <a href="../html/table-utilisateur.html">Table d'Utilisateurs</a>
             </button>
 
             <button class="MyBtns">
@@ -44,6 +44,7 @@
                     <th>Sexe</th>
                     <th>Email</th>
                     <th>NumTel</th>
+                    <th>Mot de passe</th>
                 </tr>
             </thead>
             <tbody>
@@ -55,6 +56,7 @@
                     <td>M</td>
                     <td>example@gmail.com</td>
                     <td>0550000000</td>
+                    <td>parrword1</td>
                 </tr>
             </tbody>
         </table>
@@ -78,22 +80,66 @@
         <!-- MODAL AJOUT -->
 
         <div id="modal" class="modal">
-            <div class="modal-content">
+            <div class="modal-content" style="height:auto;width:500px;">
 
                 <div class="modal-header">
                     <p>Ajouter un Admin</p>
                     <span class="close">&times;</span>
                 </div>
-
+<!-- 
                 <div class="input-row">
                     <div class="input-group">
                         <label>Email<span class="mandatory-star">*</span></label>
                         <input type="email" id="emailInput">
+                        
                     </div>
                     <div class="input-group">
                         <label>Mot de passe<span class="mandatory-star">*</span></label>
                         <input type="password" id="passwordInput">
                     </div>
+                </div> -->
+
+                
+                <div class="input-row">
+                    
+                    <div class="input-group">
+                        <label>Nom<span class="mandatory-star">*</span></label>
+                        <input type="text" id="nomInputAdd">
+                    </div>
+                    <div class="input-group">
+                        <label>Prénom<span class="mandatory-star">*</span></label>
+                        <input type="text" id="prenomInputAdd">
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Date de naissance<span class="mandatory-star">*</span></label>
+                        <input type="date" id="dateInputAdd">
+                    </div>
+                    <div class="input-group">
+                        <label>Sexe<span class="mandatory-star">*</span></label>
+                        <input type="text" id="sexeInputAdd">
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Email<span class="mandatory-star">*</span></label>
+                        <input type="email" id="emailInputAdd">
+                    </div>
+                    <div class="input-group">
+                        <label>NumTel</label>
+                        <input type="text" id="telInputAdd">
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Mot de passe<span class="mandatory-star">*</span></label>
+                        <input type="password" id="passWordAdd">
+                    </div>
+    
                 </div>
 
                 <br>
@@ -113,7 +159,7 @@
         <!-- MODAL MODIFIER -->
 
         <div id="modifierModal" class="modal">
-            <div class="modal-content">
+            <div class="modal-content" style="height:auto;width:500px;">
 
                 <div class="modal-header">
                     <p>Modifier un Admin</p>
@@ -121,6 +167,7 @@
                 </div>
 
                 <div class="input-row">
+                    
                     <div class="input-group">
                         <label>Nom<span class="mandatory-star">*</span></label>
                         <input type="text" id="nomInput">
@@ -151,6 +198,13 @@
                         <label>NumTel</label>
                         <input type="text" id="telInput">
                     </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Mot de passe<span class="mandatory-star">*</span></label>
+                        <input type="password" id="passWord">
+                    </div>
+    
                 </div>
 
                 <div class="modal-buttons">

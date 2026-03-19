@@ -52,10 +52,17 @@ AJOUTER ADMIN
 
 document.getElementById("confirmAdd").onclick = function(){
 
-    let email    = document.getElementById("emailInput").value.trim();
-    let password = document.getElementById("passwordInput").value.trim();
+    
+    
+    let nomAdd      = document.getElementById("nomInputAdd").value;
+    let prenomAdd   = document.getElementById("prenomInputAdd").value;
+    let dateValAdd  = document.getElementById("dateInputAdd").value;
+    let sexeAdd     = document.getElementById("sexeInputAdd").value;
+    let emailAdd    = document.getElementById("emailInputAdd").value;
+    let telAdd      = document.getElementById("telInputAdd").value;
+    let passWordAdd      = document.getElementById("passWordAdd").value;
 
-    if(email === "" || password === ""){
+    if(nomAdd == "" || prenomAdd == "" || emailAdd == "" || dateValAdd == "" || sexeAdd == "" || passWordAdd == ""){
         showNotification("Veuillez remplir les champs");
         return;
     }
@@ -71,12 +78,22 @@ document.getElementById("confirmAdd").onclick = function(){
     let newRow = tbody.insertRow();
     newRow.innerHTML = `
         <td>${maxId + 1}</td>
-        <td>${email}</td>
-        <td>${password}</td>
+        <td>${nomAdd}</td>
+        <td>${prenomAdd}</td>
+        <td>${dateValAdd}</td>
+        <td>${sexeAdd}</td>
+        <td>${emailAdd}</td>
+        <td>${telAdd}</td>
+        <td>${passWordAdd}</td>
     `;
 
-    document.getElementById("emailInput").value = "";
-    document.getElementById("passwordInput").value = "";
+    nomAdd = "";
+    prenomAdd = "";
+    dateValAdd = "";
+    sexeAdd = "";
+    emailAdd = "";
+    telAdd = "";
+    passWordAdd = "";
     modal.style.display = "none";
 
     showNotification("Admin ajouté avec succès");
@@ -107,8 +124,9 @@ editBtn.onclick = function(){
     document.getElementById("prenomInput").value = selectedRow.cells[2].innerText;
     document.getElementById("dateInput").value   = formattedDate;
     document.getElementById("sexeInput").value   = selectedRow.cells[4].innerText;
-    document.getElementById("emailInput").value  = selectedRow.cells[5].innerText;
+    document.getElementById("emailInput2").value  = selectedRow.cells[5].innerText;
     document.getElementById("telInput").value    = selectedRow.cells[6].innerText;
+    document.getElementById("passWord").value    = selectedRow.cells[7].innerText;
 
     modifierModal.style.display = "block";
 
@@ -120,10 +138,11 @@ document.getElementById("confirmModifier").onclick = function(){
     let prenom   = document.getElementById("prenomInput").value;
     let dateVal  = document.getElementById("dateInput").value;
     let sexe     = document.getElementById("sexeInput").value;
-    let email    = document.getElementById("emailInput").value;
+    let email    = document.getElementById("emailInput2").value;
     let tel      = document.getElementById("telInput").value;
+    let passWord = document.getElementById("passWord").value;
 
-    if(nom == "" || prenom == "" || email == "" || dateVal == "" || sexe == ""){
+    if(nom == "" || prenom == "" || email == "" || dateVal == "" || sexe == "" || passWord == ""){
         showNotification("Veuillez remplir les champs");
         return;
     }
@@ -138,6 +157,7 @@ document.getElementById("confirmModifier").onclick = function(){
     selectedRow.cells[4].innerText = sexe;
     selectedRow.cells[5].innerText = email;
     selectedRow.cells[6].innerText = tel;
+    selectedRow.cells[7].innerText = passWord;
 
     modifierModal.style.display = "none";
     showNotification("Admin modifié");

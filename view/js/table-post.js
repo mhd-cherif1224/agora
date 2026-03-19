@@ -23,7 +23,7 @@ table.addEventListener("click", function(e){
 
 document.addEventListener("click", function(e){
 
-if(selectedRow && !e.target.closest("#postTable tbody tr") && !e.target.closest(".buttons")){
+if(selectedRow && !e.target.closest("#postTable tbody tr") && !e.target.closest(".buttons") && !e.target.closest(".modal-content")){
     selectedRow.classList.remove("selected");
     selectedRow = null;
 }
@@ -39,12 +39,12 @@ if(selectedRow && !e.target.closest("#postTable tbody tr") && !e.target.closest(
 const modal = document.getElementById("modal");
 const addBtn = document.getElementById("addBtn");
 const cancelBtn = document.getElementById("cancelAdd");
-const closeModal = document.querySelector(".close");
+const closeModal = document.querySelector(".closeConfirm");
 
 
 
 cancelBtn.onclick = () =>{
-    modal.style.display = "none";
+    confirmModal.style.display = "none";
     showNotification("Ajout annulé");
 };
 
@@ -127,6 +127,14 @@ document.getElementById("confirmYes").onclick = function(){
 };
 
 document.getElementById("confirmNo").onclick = function(){
+
+    confirmModal.style.display = "none";
+
+    showNotification("Suppression annulée");
+
+};
+
+document.querySelector(".close").onclick = function(){
 
     confirmModal.style.display = "none";
 
