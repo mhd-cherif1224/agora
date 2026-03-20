@@ -5,7 +5,7 @@
 body{
     font-family: Arial;
     background:#f3f3f3;
-    padding:40px;
+    padding-top :40px;
     height: 100vh;
 }
 
@@ -87,7 +87,7 @@ header {
 
 .MyBtns:hover,
 #deconnexion-btn:hover {
-    color: #000;
+    color: #333;
     transform: translateY(-2px);            /* léger déplacement vers le haut */
     text-shadow: 0 2px 8px rgba(0,0,0,0.2);      /* effet lumière */
 }
@@ -116,6 +116,11 @@ a{
     margin-right: 10px;
     margin-left: 20px;   
 }
+#deconnexion-btn:hover, #deconnexion-btn:hover a {
+    background-color: #333;
+    color: #fff;          
+    text-shadow: 0 2px 8px rgba(0,0,0,0.2);     
+}
 
 
 /* ================= DROPDOWN UTILISATEURS ================= */
@@ -140,7 +145,7 @@ a{
 
 /* hover comme MyBtns */
 .dropdown summary:hover {
-    color: #000;
+    color: #333;
     transform: translateY(-2px);            /* léger déplacement vers le haut */
     text-shadow: 0 2px 8px rgba(0,0,0,0.2); 
 }
@@ -202,7 +207,7 @@ button{
 }
 
 button:hover{
-    color: #000;
+    color: #333;
     transform: translateY(-2px);            /* léger déplacement vers le haut */
     text-shadow: 0 2px 8px rgba(0,0,0,0.2);      /* effet lumière */
 }
@@ -230,6 +235,7 @@ button:hover{
     margin:150px auto;
     border-radius:10px;
     text-align:center;
+    border: solid 1px #333;
 }
 
 .modal-content input{
@@ -264,6 +270,22 @@ button:hover{
 .close:hover{
     background:#ececec;
     transform:scale(1.1);
+}
+
+.closeModifier{
+    font-size: 35px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition:all 0.2s ease;
+}
+
+.closeModifier:hover{
+    background:#ececec;
+    transform:scale(1.1);
+}
+.mandatory-star{
+    color: rgb(255, 0, 0)
 }
 
 /* ===== INPUTS ROW ===== */
@@ -306,6 +328,7 @@ button:hover{
 /* ===== BUTTONS ===== */
 
 .modal-buttons{
+    margin-top: 10px;
     display:flex;
     justify-content:space-between;
 }
@@ -345,7 +368,7 @@ button:hover{
 }
 
 #confirmModal .buttons {
-    margin: 0 10px;
+    
     padding: 8px 15px;
 }
 
@@ -353,7 +376,7 @@ button:hover{
     float: right;
     font-size: 35px;
     cursor: pointer;
-    color: red;
+    color: rgb(0, 0, 0);
     padding:6px 12px;
     border-radius:8px;
     transition:all 0.2s ease;

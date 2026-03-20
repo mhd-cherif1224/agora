@@ -12,7 +12,7 @@
 body{
     background:#f3f2ef;
     height:100vh;
-    margin-top: 70px;
+
 }
 
 /* ================= HEADER ADMIN ================= */
@@ -49,10 +49,12 @@ header {
 
 .MyBtns:hover,
 #deconnexion-btn:hover {
-    color: #000;
+    color: #333;
     transform: translateY(-2px);           
     text-shadow: 0 2px 8px rgba(0,0,0,0.2);     
 }
+
+
 
   
 a{
@@ -68,21 +70,27 @@ a{
     border-radius: 5px;
     font-size: 15px;
     cursor: pointer;
-    color: #333;
+    color: #ffffff;
     margin-right: 10px;
     margin-left: 20px;   
 }
+#deconnexion-btn:hover, #deconnexion-btn:hover a {
+    background-color: #333;
+    color: #fff;          
+    text-shadow: 0 2px 8px rgba(0,0,0,0.2);     
+}
 
 .hero-image {
-    margin-top: 70px; 
+    margin-top: 70px;
     text-align: center;
 }
 
 .hero-image img {
     width: 100%;
-    max-height: 300px;
+    padding-top: 10px;
     object-fit: cover;
     border-radius: 15px;
+    padding-bottom: 20px;
 }
 
 /* titre sous l'image */
@@ -92,6 +100,7 @@ a{
     font-size: 36px;
     font-weight: bold;
     text-align: center;
+    
 }
 
 /* ================= DROPDOWN UTILISATEURS ================= */
@@ -115,7 +124,7 @@ a{
 
 /* hover comme MyBtns */
 .dropdown summary:hover {
-    color: #000;
+    color: #333;
     transform: translateY(-2px);
     text-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
@@ -144,4 +153,12 @@ a{
     background: #f3f2ef;
     transform: translateY(-2px);
 }
-
+/* image made bigger and contained  */
+#bg-img {
+    display: block;
+    margin: 0 auto;
+    width: 90%;          
+    max-width: 1100px;   
+    height: auto;    
+    object-fit: contain;
+}
