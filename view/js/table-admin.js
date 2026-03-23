@@ -169,6 +169,12 @@ document.querySelector(".closeModifier").onclick = function(){
     showNotification("Modification annulée");
 };
 
+document.querySelector("#cancelModifier").onclick = function(){
+    modifierModal.style.display = "none";
+    showNotification("Modification annulée");
+};
+
+
 
 /* ==============================
 SUPPRESSION ADMIN
