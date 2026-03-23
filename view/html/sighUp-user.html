@@ -1,3 +1,4 @@
+<!-- Sign-up User -->
 <!-- login-admin interface -->
 <!DOCTYPE html>
 <html lang="en">
@@ -5,20 +6,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/login-admin.css">
-    <title>Login-Admin</title>
+    <link rel="stylesheet" href="../css/sighUp-user.css">
+    <title>Sigh-up User</title>
 </head>
 <body>
     
     <div class="container">
         
         <div class="title">
-            <h1>Bonjour </h1>
-            <h1>Admin!</h1>
+            <h1>Bonjour et </h1>
+            <h1>Bienvenu!!</h1>
         </div>
-
-        <!-- Ajout du form avec action vers le controller -->
-        <form action="../../Controller/login-admin.php" method="POST">
 
             <div class="inputs">
                 <input type="email" name="email" id="in-email" placeholder="Entrez votre email">
@@ -27,6 +25,14 @@
                     <input type="password" name="password" id="password" placeholder="Entrez votre mot de passe">
                     <i class="fa-solid fa-eye-slash" id="togglePassword"></i>
                 </div>
+                <div class="confirmation">
+                    <!-- Confirmation de password -->
+                    <input type="password" name="confirmation-password" id="confirmation-password" placeholder="Confirmez votre mot de passe">
+                    <i class="fa-solid fa-eye-slash" id="toggleConfirm"></i>
+                </div>
+                <p id="error-message">
+                    Les mots de passe ne correspondent pas
+                </p>
             </div>
 
             <div class="options">
@@ -38,12 +44,15 @@
             </div>
 
             <!-- type="submit" sur le bouton -->
-            <button type="submit"><a href="../html/home-page-admin.html" id="Login">Login</a></button>
+            <button type="submit"><a href="#" id="Login">Login</a></button>
 
-        </form>
+            
+            <div class="no-account">
+                <p>Vous n'avez pas de compte? <a href="#">Sign up!</a></p>
+            </div>
     </div>
 
-    <script src="../js/login-admin.js"></script>
+    <script src="../js/signUp-user.js"></script>
 
 </body>
 </html>
