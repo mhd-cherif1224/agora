@@ -1,5 +1,5 @@
 let selectedRow = null;
-const table = document.getElementById("studentTable");
+const table = document.getElementById("userTable");
 
 table.addEventListener("click", function(e){
 
@@ -18,7 +18,7 @@ table.addEventListener("click", function(e){
 
 document.addEventListener("click", function(e){
 
-    if(selectedRow && !e.target.closest("#studentTable tbody tr") && !e.target.closest(".buttons") && !e.target.closest(".modal-content")){
+    if(selectedRow && !e.target.closest("#userTable tbody tr") && !e.target.closest(".buttons") && !e.target.closest(".modal-content")){
         selectedRow.classList.remove("selected");
         selectedRow = null;
     }
@@ -61,7 +61,7 @@ modifierBtn.onclick = function(){
 
 cancelBtn.onclick = () =>{
     modal.style.display = "none";
-    showNotification("Ajout annulé");
+    showNotification("Modification annulée");
 };
 
 closeModal.onclick = cancelBtn.onclick;
@@ -91,14 +91,14 @@ document.getElementById("confirmAdd").onclick = function(){
     selectedRow.cells[1].innerText = nom;
     selectedRow.cells[2].innerText = prenom;
     selectedRow.cells[3].innerText = formattedDate;
-    selectedRow.cells[4].innerText = sexe;
+    selectedRow.cells[4].innerText = (sexe === "M") ? "Masculin" : "Féminin";
     selectedRow.cells[5].innerText = email;
     selectedRow.cells[6].innerText = tel;
     selectedRow.cells[7].innerText = niveau;
     selectedRow.cells[8].innerText = specialite;
 
     modal.style.display = "none";
-    showNotification("Étudiant modifié");
+    showNotification("Utilisateur modifié");
 
 };
 
@@ -157,3 +157,28 @@ function showNotification(message){
     },3000);
 
 }
+
+// Ce code s'exécute lorsque la page est complètement chargée
+window.onload = function(){
+
+    // Récupère le rôle de l'utilisateur depuis le localStorage
+    // La valeur a été stockée lors du login (super_admin ou admin)
+    let role = localStorage.getItem("role");
+
+    // Sélectionne le bouton "Table d'Admins" sur la page
+    let btn = document.getElementById("adminTableBtn");
+
+    // Si l'utilisateur est un admin simple (pas super_admin)
+    if(role === "admin"){
+        // On grise le bouton pour montrer qu'il n'est pas cliquable
+        btn.style.opacity = "0.5";
+
+        // On désactive complètement le clic sur le bouton
+        btn.style.pointerEvents = "none";
+    }
+
+    // Affiche l'email de l'utilisateur connecté dans la page
+    // Récupéré depuis le localStorage
+    let email = localStorage.getItem("email");
+    document.getElementById("userName").innerText = email;
+};
