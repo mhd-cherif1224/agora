@@ -1,0 +1,213 @@
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* ================= PAGE LAYOUT ================= */
+body{
+    background:#f3f2ef;
+    height:100vh;
+
+    display:flex;
+    justify-content:center; 
+    align-items:center;    
+}
+
+
+/* ================= LOGIN CARD ================= */
+.container{
+    background:white;
+    padding:40px;
+    width:400px;
+    height:auto;
+    border-radius:25px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+
+    display:flex;
+    flex-direction:column;
+}
+
+
+/* ================= TITLE ================= */
+.container h1{
+    margin-bottom:25px;
+    font-size:40px;
+    font-weight:200;
+    line-height:30px;
+    color:#000;
+}
+
+.container p{
+    font-weight:200;
+    color:#333;
+    line-height: 25px;
+}
+
+/* ================= INPUT FIELDS ================= */
+.inputs{
+    display:flex;
+    flex-direction:column;
+    gap:15px;          
+    margin-top:30px;
+}
+
+
+input{
+    width:100%;
+    padding:12px;
+
+    border:1px solid #898989;
+    border-radius:30px;
+
+    font-size:14px;
+    transition:0.2s ease;
+}
+
+
+.inputs input:focus{
+    outline:none;
+    border-color:#0a66c2; /* bleu au focus */
+    box-shadow:0 0 0 2px rgba(10,102,194,0.1); /* léger effet */
+}
+
+
+/* ================= OPTIONS ================= */
+.options{
+    display:flex;
+    justify-content:space-between; 
+    align-items:center;
+    margin-top:10px;
+}
+
+
+.remember{
+    display:flex;
+    align-items:center;
+    gap:5px;
+}
+
+
+label{
+    font-size:14px;
+    color:#555;
+}
+
+
+#checkbox{
+    margin-left:5px;
+}
+
+
+input[type="checkbox"]{
+    width:auto;
+}
+
+
+.remember label{
+    color:#16376E;
+}
+
+
+a{
+    display:block;
+    margin-top:10px;
+    margin-bottom:20px;
+
+    font-size:14px;
+    color:#16376E;
+}
+
+a:hover{
+    text-decoration:none;
+}
+
+#Sign-up{ 
+    text-decoration: none;
+    margin: 0;
+    color: White;
+}
+
+/* ================= LOGIN BUTTON ================= */
+button{
+    width:100%;
+    padding:12px;
+
+    background:#16376E;
+    color:white;
+
+    border:none;
+    border-radius:25px;
+
+    font-size:16px;
+    font-weight:bold;
+
+    margin-top:25px;
+    margin-bottom:25px;
+    letter-spacing:1px;
+
+    transition:0.2s ease;
+    cursor:pointer;
+}
+
+
+button:hover{
+    background:#004182;
+}
+
+
+/* ================= PASSWORD INPUT ================= */
+.password-container,
+.confirmation{
+    position:relative;
+    width:100%;
+} 
+
+
+.password-container input,
+.confirmation input{
+    width:100%;
+    padding:12px;
+    padding-right:40px;
+}
+
+
+#togglePassword,
+#toggleConfirm{
+    position:absolute;
+
+    right:10px;
+    top:50%;
+    transform:translateY(-50%); /* centre verticalement l'icône */
+
+    cursor:pointer;
+    color:#555;
+}
+
+/* ================= NO-ACCOUNT TEXT ================= */
+
+.no-account{
+    margin-top: auto;
+    text-align:center;
+}
+
+.no-account p{
+    display: inline;    
+    font-size: 12px;
+}
+
+.no-account a{
+    display: inline;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+/* ================= Error message ================= */
+#error-message{
+    color:rgb(221, 0, 0); 
+    font-size:12px; 
+    display:none;
+}

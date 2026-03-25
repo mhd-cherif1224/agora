@@ -5,20 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/login-admin.css">
-    <title>Login-Admin</title>
+    <link rel="stylesheet" href="../css/login-user.css">
+    <title>Login User</title>
 </head>
 <body>
     
     <div class="container">
         
         <div class="title">
-            <h1>Bonjour </h1>
-            <h1>Admin!</h1>
+            <h1>Bonjour!</h1>
+            <p>Vous trouverez tous les échanges de tous les services auxquels vous pouvez penser</p>
         </div>
-
-        <!-- Ajout du form avec action vers le controller -->
-        <form action="../../Controller/login-admin.php" method="POST">
 
             <div class="inputs">
                 <input type="email" name="email" id="in-email" placeholder="Entrez votre email">
@@ -38,9 +35,12 @@
             </div>
 
             <!-- type="submit" sur le bouton -->
-            <button type="submit"><a href="../html/home-page-admin.html" id="Login">Login</a></button>
+            <button type="submit"><a href="#" id="Login">Login</a></button>
 
-        </form>
+            
+            <div class="no-account">
+                <p>Vous n'avez pas de compte? <a href="/Mini-Projet/view/html/sighUp-user.html">Sign up!</a></p>
+            </div>
     </div>
 
     <script src="../js/login-admin.js"></script>
