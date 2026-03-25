@@ -1,40 +1,54 @@
 <?php
 session_start();
 
-require_once '../model/database.php';
-require_once '../model/admin.php';
+require_once '../model/Database.php';
+require_once '../model/Admin.php';
 
-$email         = $_POST['email']    ?? '';
-$inputPassword = $_POST['password'] ?? '';
+// 1. Récupérer les données du formulaire
+$email         = trim($_POST['email']    ?? '');
+$motDePassSaisi = trim($_POST['password'] ?? '');
 
-// 1. Connexion BDD
-$pdo = Database::getConnection();
-
-// 2. Chercher l'admin par email
-$stmt = $pdo->prepare("SELECT * FROM admin WHERE Email = :email LIMIT 1");
-$stmt->execute([':email' => $email]);
-$row = $stmt->fetch();
-
-// 3. Vérifications
-if (!$row || !password_verify($inputPassword, $row['Password_hash'])) {
-    header('Location: view/html/login-admin.html?error=1');
-
+// 2. Validation basique — champs vides
+if (empty($email) || empty($motDePassSaisi)) {
+    header('Location: ../view/html/login-admin.html?error=champs_vides');
     exit();
 }
 
-// 4. Créer l'objet Admin
-$admin = new Admin($row['Email'], $inputPassword);
-$admin->setIdAdmin($row['Id_admin']);
-$admin->setUserName($row['UserName']);
+// 3. Connexion BDD
+$pdo = Database::getConnection();
 
-// 5. Stocker en session
-$_SESSION['admin_id']       = $admin->getIdAdmin();
-$_SESSION['admin_email']    = $admin->getEmail();
-$_SESSION['admin_username'] = $admin->getUserName();
+// 4. Chercher l'admin par email
+$stmt = $pdo->prepare("SELECT * FROM Admin WHERE email = :email LIMIT 1");
+$stmt->execute([':email' => $email]);
+$row = $stmt->fetch();
 
-// 6. Rediriger vers le dashboard
-header('Location: view/html/dashboard.php');
+// 5. Vérifier si l'admin existe
+if (!$row) {
+    header('Location: ../view/html/login-admin.html?error=introuvable');
+    exit();
+}
 
+// 6. Construire l'objet Admin depuis la BDD
+$admin = Admin::fromBDD($row);
+
+// 7. Vérifier le mot de passe
+if (!$admin->verifierMotDePasse($motDePassSaisi)) {
+    header('Location: ../view/html/login-admin.html?error=mot_de_passe');
+    exit();
+}
+
+// 8. Stocker les infos en SESSION (jamais en localStorage !)
+$_SESSION['admin_id']     = $admin->getId();
+$_SESSION['admin_email']  = $admin->getEmail();
+$_SESSION['admin_nom']    = $admin->getNom();
+$_SESSION['admin_prenom'] = $admin->getPrenom();
+$_SESSION['admin_role']   = $admin->getRole();
+
+// 9. Rediriger selon le rôle
+if ($admin->estSuperAdmin()) {
+    header('Location: ../view/html/home-page-admin.html');
+} else {
+    header('Location: ../view/html/home-page-admin.html');
+}
 exit();
 ?>
-
