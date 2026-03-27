@@ -1,0 +1,140 @@
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: linear-gradient(120deg, #49c6d9, #1e3c72);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* CONTAINER */
+.container {
+    width: 450px;
+    background: #f4f4f4;
+    padding: 30px;
+    border-radius: 12px;
+}
+
+/* HEADER */
+.top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.progress {
+    flex: 1;
+    height: 6px;
+    background: #4BBFCC;
+    border-radius: 10px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 100%;
+    background: #16376E;
+    border-radius: 10px;
+}
+
+.back img{
+    margin-top: 4px;
+    width: 30px;
+    height: 25px;
+    cursor: pointer;
+}
+
+/* TEXT */
+h1 {
+    text-align: center;
+    color: #16376E;
+}
+
+p {
+    text-align: center;
+    font-size: 16px;
+}
+
+/* BANNER */
+.banner {
+    margin-top: 20px;
+    height: 120px;
+    background: linear-gradient(to right, #777, #bbb);
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.camera {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* PROFILE */
+.profile-container {
+    display: flex;
+    justify-content: center;
+    margin-top: -40px;
+}
+
+.profile {
+    width: 80px;
+    height: 80px;
+    background: #ccc;
+    border-radius: 50%;
+    border: 3px solid white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.profile img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile label {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    cursor: pointer;
+}
+
+/* BUTTONS */
+.buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+button:hover {
+    transform: translateY(-5px);
+}
+.skip {
+    background: transparent;
+    color: #16376E;
+    border: 2px solid #16376E;
+    padding: 5px 30px;
+    border-radius: 20px;
+}
+
+.finish {
+    background: linear-gradient(to right, #49c6d9, #1e3c72);
+    border: none;
+    padding: 7px 30px;
+    color: white;
+    border-radius: 20px;
+}

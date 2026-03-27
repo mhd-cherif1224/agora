@@ -9,41 +9,64 @@
     <title>Login User</title>
 </head>
 <body>
-    
+
     <div class="container">
+
+        <!-- LEFT -->
+        <div class="left">
+
+            <div class="logo"></div>
+
+            <h1>Bienvenue</h1>
+            <p>Connecter-vous pour continuer</p>
+
+                <form>
+
+                    <div class="input-group">
+                        <i class="fa-solid fa-envelope icon-left"></i>
+                        <input type="email" placeholder="entrez votre email" required>
+                    </div>
+
+                    <div class="input-group">
+                        <i class="fa-solid fa-lock icon-left"></i>
+                        <input type="password" placeholder="entrez votre mot de passe" required>
+                        <i class="fa-solid fa-eye-slash icon-right" id="togglePassword"></i>
+                    </div>
+
+                    <div class="options">
+                        <label>
+                            <input type="checkbox"> remember me
+                        </label>
+                        <a href="#">forgot password?</a>
+                    </div>
+
+                    <button type="submit">Se connecter</button>
+
+                </form>
         
-        <div class="title">
-            <h1>Bonjour!</h1>
-            <p>Vous trouverez tous les échanges de tous les services auxquels vous pouvez penser</p>
+
+            <footer>
+                <p class="bottom-text" id="bottom-text">
+                    Vous n'avez pas de compte? <a href="../html/signUp-user.html">inscrivez-vous!</a>
+                </p>
+            </footer>
+            
+
         </div>
 
-            <div class="inputs">
-                <input type="email" name="email" id="in-email" placeholder="Entrez votre email">
-                <div class="password-container">
-                    <!-- Ajout de name="password" -->
-                    <input type="password" name="password" id="password" placeholder="Entrez votre mot de passe">
-                    <i class="fa-solid fa-eye-slash" id="togglePassword"></i>
-                </div>
+        <!-- RIGHT -->
+        <div class="right">
+            <h2>Gérez tous vos services</h2>
+            <span>en un seul endroit.</span>
+            <div class="picture-container">
+                <img src="../images/USER2.png" alt="User-picture">
+                <img src="../images/Blanc.png" alt="white">
             </div>
+        </div>
 
-            <div class="options">
-                <div class="remember">
-                    <input type="checkbox" id="checkbox">
-                    <label for="checkbox">remember me</label>
-                </div>
-                <a href="#">forgot password?</a>
-            </div>
-
-            <!-- type="submit" sur le bouton -->
-            <button type="submit"><a href="#" id="Login">Login</a></button>
-
-            
-            <div class="no-account">
-                <p>Vous n'avez pas de compte? <a href="/Mini-Projet/view/html/sighUp-user.html">Sign up!</a></p>
-            </div>
     </div>
 
-    <script src="../js/login-admin.js"></script>
+    <script src="../js/login-user.js"></script>
 
 </body>
 </html>

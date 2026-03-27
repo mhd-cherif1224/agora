@@ -1,0 +1,120 @@
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: linear-gradient(120deg, #49c6d9, #1e3c72);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* CONTAINER */
+.container {
+    width: 500px;
+    background: #f4f4f4;
+    padding: 30px;
+    border-radius: 12px;
+}
+
+/* HEADER */
+.top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.progress {
+    flex: 1;
+    height: 6px;
+    background: #4BBFCC;
+    border-radius: 10px;
+}
+
+.progress-bar {
+    width: 60%;
+    height: 100%;
+    background: #16376E;
+    border-radius: 10px;
+}
+
+.back img{
+    margin-top: 4px;
+    width: 30px;
+    height: 25px;
+    cursor: pointer;
+}
+
+/* TEXT */
+h1 {
+    text-align: center;
+    color: #16376E;
+}
+
+p {
+    text-align: center;
+    font-size: 18px;
+}
+
+/* FORM */
+.form {
+    margin-top: 20px;
+}
+
+.row {
+    display: flex;
+    gap: 50px;
+    margin-bottom: 15px;
+}
+
+.field {
+    flex: 1;
+}
+
+label {
+    font-size: 16px;
+}
+
+label span {
+    color: red;
+}
+
+/* INPUTS */
+input, select {
+    font-size: 16px;
+    width: 100%;
+    padding: 10px;
+    border-radius: 12px;
+    border: 2px solid #1e3c72;
+    outline: none;
+    margin-top: 5px;
+}
+
+/* DATE */
+.date {
+    display: flex;
+    gap: 5px;
+}
+
+.date input {
+    text-align: center;
+}
+
+/* BUTTON */
+.btn-container {
+    display: flex;
+    justify-content: flex-end; /* aligne à droite */
+    margin-top: 20px;
+}
+
+button {
+    background: linear-gradient(to right, #49c6d9, #1e3c72);
+    border: none;
+    padding: 10px 25px;
+    color: white;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+button:hover {
+    transform: translateY(-5px);
+}

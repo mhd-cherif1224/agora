@@ -1,0 +1,52 @@
+<!-- INTERFACE 1 : Choix utilisateur -->
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup Step 1</title>
+    <link rel="stylesheet" href="../css/user-choice.css">
+</head>
+<body>
+
+        
+    <div class="container">
+
+        <!-- HEADER -->
+        <div class="top">
+            <span class="back"><img src="../images/fleche.png" alt="fleche" id="back"></span>
+            <div class="progress">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <h1>Créez votre profil</h1>
+        <p>Vous cherchez un service ou vous proposez un service ?</p>
+
+        <!-- CHOICES -->
+        <div class="choices">
+            <div class="card" data-role="chercheur">
+                <div class="icon"><img src="../images/loupe.png" alt="Loupe"></div>
+                <h2>chercheur</h2>
+                <small>20k chercheurs</small>
+            </div>
+
+            <p class="ou"> ou </p>
+
+            <div class="card" data-role="proposeur">
+                <div class="icon"><img src="../images/notes.png" alt="Note"></div>
+                <h2>proposeur</h2>
+                <small>20k proposeurs</small>
+            </div>
+        </div>
+
+        <div class="btn-container">
+            <button id="continueBtn">Continuer</button>
+        </div>
+        
+
+    </div>
+
+    <script src="../js/user-choice.js"></script>
+</body>
+</html>
