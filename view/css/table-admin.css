@@ -95,7 +95,7 @@ header {
 
 #tab-Admin, 
 #tab-Utilisateur,
-#tab-Post{
+#tab-Service{
     text-decoration: underline;
 }
 
@@ -310,7 +310,8 @@ button:hover{
     margin-bottom: 3px;
 }
 
-.input-group input{
+.input-group input,
+.input-group select{
     padding:8px;
     border-radius:10px;
     border:1px solid #818181;

@@ -1,4 +1,4 @@
-<!-- TABLE DE POSTS -->
+<!-- TABLE DES SERVICES -->
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="../css/table-admin.css">
 
+    <title>Table des Services</title>
 </head>
 
 <body>
@@ -17,7 +18,7 @@
     <header>
         <nav class="admin-navbar">
 
-        <button class="MyBtns">
+        <button id="adminTableBtn" class="MyBtns">
             <a href="../html/table-admin.html">Table d'Admins</a>
         </button>
 
@@ -26,7 +27,11 @@
         </button>
 
         <button class="MyBtns">
-            <a href="../html/table-post.html">Table de Posts</a>
+            <a href="../html/table-service.html">Table des Services</a>
+        </button>
+
+        <button class="MyBtns">
+            <a href="../html/table-categorie.html">Table des Catégories</a>
         </button>
 
         <button id="deconnexion-btn">
@@ -40,10 +45,10 @@
     <div class="container">
 
         <p style="margin-bottom:10px;">
-            Table de Posts
+            Table des Services
         </p>
 
-        <table id="postTable">
+        <table id="serviceTable">
 
             <thead>
 
@@ -54,7 +59,6 @@
                     <th>DatePublication</th>
                     <th>StatutService</th>
                     <th>Prix</th>
-                    <th>Signalisation</th>
                 </tr>
 
             </thead>
@@ -68,7 +72,6 @@
                     <td>01/05/2026</td>
                     <td>Disponible</td>
                     <td>1000</td>
-                    <td>0</td>
                 </tr>
 
             </tbody>
@@ -80,7 +83,7 @@
 
             <button class="buttons" id="deleteBtn">
                 <i class="fa-solid fa-minus-square"></i>
-                Supprimer un Post
+                Supprimer un Service
             </button>
 
             
@@ -91,12 +94,12 @@
 
         <!-- MODAL AJOUT -->
 
-        <div id="modal" class="modal">
+        <!-- <div id="modal" class="modal">
 
             <div class="modal-content" style="height:auto;width:500px;">
 
                 <div class="modal-header">
-                    <p>Ajouter un Post</p>
+                    <p>Ajouter un Service</p>
                     <span class="close">&times;</span>
                 </div>
 
@@ -156,7 +159,7 @@
 
             </div>
 
-        </div>
+        </div> -->
 
 
 
@@ -172,7 +175,7 @@
                 </div>
 
                 <div class="modal-body">
-                    <p>Êtes-vous sûr de vouloir supprimer ce post ?</p>
+                    <p>Êtes-vous sûr de vouloir supprimer ce service ?</p>
                 </div>
 
                 <div class="modal-buttons">
@@ -198,7 +201,7 @@
     </div>
 
 
-    <script src="../js/table-post.js"></script>
+    <script src="../js/table-service.js"></script>
 
 </body>
 </html>

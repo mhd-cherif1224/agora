@@ -1,4 +1,4 @@
-<!-- TABLE ETUDIANT -->
+<!-- TABLE UTILISATEURS -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="../css/table-admin.css">
 
-    <title>Table d'Étudiants</title>
+    <title>Table d'Utilisateurs</title>
 </head>
 
 <body>
@@ -16,7 +16,7 @@
     <header>
         <nav class="admin-navbar">
 
-        <button class="MyBtns">
+        <button id="adminTableBtn" class="MyBtns">
             <a href="../html/table-admin.html">Table d'Admins</a>
         </button>
 
@@ -25,7 +25,11 @@
         </button>
 
         <button class="MyBtns">
-            <a href="../html/table-post.html">Table de Posts</a>
+            <a href="../html/table-service.html">Table des Services</a>
+        </button>
+
+        <button class="MyBtns">
+            <a href="../html/table-categorie.html">Table des Catégories</a>
         </button>
 
         <button id="deconnexion-btn">
@@ -38,7 +42,7 @@
     <div class="container">
 
 
-        <table id="studentTable">
+        <table id="userTable">
 
             <thead>
                 <tr>
@@ -51,7 +55,6 @@
                     <th>NumTel</th>
                     <th>Niveau</th>
                     <th>Spécialité</th>
-                    <th>Signalisation</th>
                 </tr>
             </thead>
 
@@ -67,7 +70,6 @@
                     <td>0550000000</td>
                     <td>L3</td>
                     <td>Informatique</td>
-                    <td>0</td>
                 </tr>
 
             </tbody>
@@ -122,7 +124,10 @@
 
                     <div class="input-group">
                         <label>Sexe<span class="mandatory-star">*</span></label>
-                        <input type="text" id="sexeInput">
+                        <select name="sexe" id="sexeInput" class="input-group">
+                            <option value="M">Masculin</option>
+                            <option value="F">Féminin</option>
+                        </select>
                     </div>
 
                 </div>
