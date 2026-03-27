@@ -61,7 +61,8 @@ document.getElementById("confirmAdd").onclick = function(){
     let telAdd      = document.getElementById("telInputAdd").value;
     let passWordAdd      = document.getElementById("passWordAdd").value;
     let role    = document.getElementById("roleInputAdd").value;
-
+    
+    
     if(nomAdd == "" || prenomAdd == "" || emailAdd == "" || dateValAdd == "" || sexeAdd == "" || passWordAdd == "" || role == ""){
         showNotification("Veuillez remplir les champs");
         return;
