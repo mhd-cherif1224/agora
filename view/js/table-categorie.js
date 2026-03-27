@@ -43,47 +43,58 @@ cancelBtn.onclick = () => {
     showNotification("Ajout annulé");
 };
 
-
 closeModal.onclick = cancelBtn.onclick;
 
 
 /* ==============================
-AJOUTER ADMIN
+AJOUTER CATEGORIE (FETCH)
 ============================== */
 
 document.getElementById("confirmAdd").onclick = function(){
-    
-    let nomAdd      = document.getElementById("nomInputAdd").value;
 
-    if(nomAdd == ""){
+    let nomAdd = document.getElementById("nomInputAdd").value.trim();
+
+    if(nomAdd === ""){
         showNotification("Veuillez remplir les champs");
         return;
     }
 
-    let tbody = document.querySelector("#categorieTable tbody");
+    fetch("../../Controller/categorie-actions.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            action: "ajouter",
+            titre: nomAdd
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
 
-    let maxId = 0;
-    for(let row of tbody.rows){
-        let rowId = parseInt(row.cells[0].innerText);
-        if(rowId > maxId) maxId = rowId;
-    }
+            let tbody = document.querySelector("#categorieTable tbody");
+            let newRow = tbody.insertRow();
+            newRow.innerHTML = `
+                <td>${data.id}</td>
+                <td>${nomAdd}</td>
+            `;
 
-    let newRow = tbody.insertRow();
-    newRow.innerHTML = `
-        <td>${maxId + 1}</td>
-        <td>${nomAdd}</td>
-    `;
+            document.getElementById("nomInputAdd").value = "";
+            modal.style.display = "none";
+            showNotification("Catégorie ajoutée avec succès");
 
-    nomAdd = "";
-    modal.style.display = "none";
-
-    showNotification("Catégorie ajoutée avec succès");
-
+        } else {
+            showNotification("Erreur : " + data.message);
+        }
+    })
+    .catch(err => {
+        showNotification("Erreur de connexion au serveur");
+        console.error(err);
+    });
 };
 
 
 /* ==============================
-MODIFIER ADMIN
+MODIFIER CATEGORIE
 ============================== */
 
 const modifierModal = document.getElementById("modifierModal");
@@ -96,32 +107,53 @@ editBtn.onclick = function(){
         return;
     }
 
-    document.getElementById("nomInput").value  = selectedRow.cells[1].innerText;
-
+    document.getElementById("nomInput").value = selectedRow.cells[1].innerText;
     modifierModal.style.display = "block";
-
 };
 
 document.getElementById("confirmModifier").onclick = function(){
 
-    let nom  = document.getElementById("nomInput").value;
+    let nom = document.getElementById("nomInput").value.trim();
 
-    if(nom == ""){
+    if(nom === ""){
         showNotification("Veuillez remplir les champs");
         return;
     }
 
-    selectedRow.cells[1].innerText = nom;
+    let id = selectedRow.cells[0].innerText;
 
-    modifierModal.style.display = "none";
-    showNotification("Catégorie modifiée");
+    fetch("../../Controller/categorie-actions.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            action: "modifier",
+            id: id,
+            titre: nom
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
 
+            selectedRow.cells[1].innerText = nom;
+            modifierModal.style.display = "none";
+            showNotification("Catégorie modifiée");
+
+        } else {
+            showNotification("Erreur : " + data.message);
+        }
+    })
+    .catch(err => {
+        showNotification("Erreur de connexion au serveur");
+        console.error(err);
+    });
 };
 
 document.querySelector(".closeModifier").onclick = function(){
     modifierModal.style.display = "none";
     showNotification("Modification annulée");
 };
+
 document.querySelector("#cancelModifier").onclick = function(){
     modifierModal.style.display = "none";
     showNotification("Modification annulée");
@@ -129,7 +161,7 @@ document.querySelector("#cancelModifier").onclick = function(){
 
 
 /* ==============================
-SUPPRESSION ADMIN
+SUPPRESSION CATEGORIE (FETCH)
 ============================== */
 
 const confirmModal = document.getElementById("confirmModal");
@@ -144,10 +176,34 @@ deleteBtn.onclick = function(){
 };
 
 document.getElementById("confirmYes").onclick = function(){
-    selectedRow.remove();
-    selectedRow = null;
-    confirmModal.style.display = "none";
-    showNotification("Catégorie supprimée");
+
+    let id = selectedRow.cells[0].innerText;
+
+    fetch("../../Controller/categorie-actions.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            action: "supprimer",
+            id: id
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+
+            selectedRow.remove();
+            selectedRow = null;
+            confirmModal.style.display = "none";
+            showNotification("Catégorie supprimée");
+
+        } else {
+            showNotification("Erreur : " + data.message);
+        }
+    })
+    .catch(err => {
+        showNotification("Erreur de connexion au serveur");
+        console.error(err);
+    });
 };
 
 document.querySelector(".closeConfirm").onclick = function(){
@@ -190,27 +246,54 @@ function showNotification(message){
     }, 3000);
 }
 
-// Ce code s'exécute lorsque la page est complètement chargée
+
+// ==============================
+// CHARGEMENT AU DÉMARRAGE
+// ==============================
+
 window.onload = function(){
 
-    // Récupère le rôle de l'utilisateur depuis le localStorage
-    // La valeur a été stockée lors du login (super_admin ou admin)
     let role = localStorage.getItem("role");
-
-    // Sélectionne le bouton "Table d'Admins" sur la page
     let btn = document.getElementById("adminTableBtn");
 
-    // Si l'utilisateur est un admin simple (pas super_admin)
     if(role === "admin"){
-        // On grise le bouton pour montrer qu'il n'est pas cliquable
         btn.style.opacity = "0.5";
-
-        // On désactive complètement le clic sur le bouton
         btn.style.pointerEvents = "none";
     }
 
-    // Affiche l'email de l'utilisateur connecté dans la page
-    // Récupéré depuis le localStorage
     let email = localStorage.getItem("email");
-    document.getElementById("userName").innerText = email;
+    let userNameEl = document.getElementById("userName");
+    if(userNameEl) {
+        userNameEl.innerText = email ?? "Admin";
+    }
+
+    // FETCH — Charger les catégories depuis la BDD
+    fetch("../../Controller/categorie-actions.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "lister" })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+
+            let tbody = document.querySelector("#categorieTable tbody");
+            tbody.innerHTML = "";
+
+            data.categories.forEach(cat => {
+                let row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${cat.ID}</td>
+                    <td>${cat.titre}</td>
+                `;
+            });
+
+        } else {
+            showNotification("Erreur chargement : " + data.message);
+        }
+    })
+    .catch(err => {
+        showNotification("Erreur de connexion au serveur");
+        console.error("Erreur chargement:", err);
+    });
 };

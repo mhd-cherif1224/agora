@@ -1,3 +1,6 @@
+// ==============================
+// SELECTION LIGNE
+// ==============================
 let selectedRow = null;
 const table = document.getElementById("userTable");
 
@@ -26,13 +29,14 @@ document.addEventListener("click", function(e){
 });
 
 
-/* MODAL */
+/* ==============================
+MODAL MODIFIER
+============================== */
 
 const modal = document.getElementById("modal");
 const modifierBtn = document.getElementById("modifierBtn");
 const cancelBtn = document.getElementById("cancelAdd");
 const closeModal = document.querySelector(".close");
-
 
 modifierBtn.onclick = function(){
 
@@ -59,7 +63,7 @@ modifierBtn.onclick = function(){
 
 };
 
-cancelBtn.onclick = () =>{
+cancelBtn.onclick = () => {
     modal.style.display = "none";
     showNotification("Modification annulée");
 };
@@ -67,43 +71,83 @@ cancelBtn.onclick = () =>{
 closeModal.onclick = cancelBtn.onclick;
 
 
-/* MODIFICATION */
+/* ==============================
+MODIFIER UTILISATEUR — AVEC PHP
+============================== */
+
 document.getElementById("confirmAdd").onclick = function(){
 
-    let nom        = document.getElementById("nomInput").value;
-    let prenom     = document.getElementById("prenomInput").value;
-    let dateVal    = document.getElementById("dateInput").value;  // renamed
+    let nom        = document.getElementById("nomInput").value.trim();
+    let prenom     = document.getElementById("prenomInput").value.trim();
+    let dateVal    = document.getElementById("dateInput").value;
     let sexe       = document.getElementById("sexeInput").value;
-    let email      = document.getElementById("emailInput").value;
-    let tel        = document.getElementById("telInput").value;
-    let niveau     = document.getElementById("niveauInput").value;
-    let specialite = document.getElementById("specialiteInput").value;
+    let email      = document.getElementById("emailInput").value.trim();
+    let tel        = document.getElementById("telInput").value.trim();
+    let niveau     = document.getElementById("niveauInput").value.trim();
+    let specialite = document.getElementById("specialiteInput").value.trim();
 
-    if(nom == "" || prenom == "" || email == "" || dateVal =="" || sexe ==""){
+    // Vérification des champs obligatoires
+    if(nom == "" || prenom == "" || email == "" || dateVal == "" || sexe == ""){
         showNotification("Veuillez remplir les champs");
         return;
     }
 
-    // Convert YYYY-MM-DD → DD/MM/YYYY
-    let parts = dateVal.split("-");
-    let formattedDate = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateVal;
+    // Récupère l'ID de la ligne sélectionnée
+    let userId = selectedRow.cells[0].innerText;
 
-    selectedRow.cells[1].innerText = nom;
-    selectedRow.cells[2].innerText = prenom;
-    selectedRow.cells[3].innerText = formattedDate;
-    selectedRow.cells[4].innerText = (sexe === "M") ? "Masculin" : "Féminin";
-    selectedRow.cells[5].innerText = email;
-    selectedRow.cells[6].innerText = tel;
-    selectedRow.cells[7].innerText = niveau;
-    selectedRow.cells[8].innerText = specialite;
+    // Envoie les données vers le Controller PHP
+    fetch("../../Controller/utilisateur-actions.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            action    : "modifier",
+            id        : userId,
+            nom       : nom,
+            prenom    : prenom,
+            date      : dateVal,
+            sexe      : sexe,
+            email     : email,
+            tel       : tel,
+            niveau    : niveau,
+            specialite: specialite
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
 
-    modal.style.display = "none";
-    showNotification("Utilisateur modifié");
+            // Convert YYYY-MM-DD → DD/MM/YYYY
+            let parts = dateVal.split("-");
+            let formattedDate = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateVal;
+
+            // Met à jour la ligne dans le tableau HTML
+            selectedRow.cells[1].innerText = nom;
+            selectedRow.cells[2].innerText = prenom;
+            selectedRow.cells[3].innerText = formattedDate;
+            selectedRow.cells[4].innerText = (sexe === "M") ? "Masculin" : "Féminin";
+            selectedRow.cells[5].innerText = email;
+            selectedRow.cells[6].innerText = tel;
+            selectedRow.cells[7].innerText = niveau;
+            selectedRow.cells[8].innerText = specialite;
+
+            modal.style.display = "none";
+            showNotification("Utilisateur modifié avec succès ✅");
+
+        } else {
+            showNotification("Erreur : " + data.message);
+        }
+    })
+    .catch(err => {
+        showNotification("Erreur de connexion au serveur");
+        console.error(err);
+    });
 
 };
 
 
-/* SUPPRESSION */
+/* ==============================
+SUPPRESSION UTILISATEUR — AVEC PHP
+============================== */
 
 const confirmModal = document.getElementById("confirmModal");
 const deleteBtn = document.getElementById("deleteBtn");
@@ -121,20 +165,40 @@ deleteBtn.onclick = function(){
 
 document.getElementById("confirmYes").onclick = function(){
 
-    selectedRow.remove();
-    selectedRow = null;
-    confirmModal.style.display = "none";
+    // Récupère l'ID de l'utilisateur sélectionné
+    let userId = selectedRow.cells[0].innerText;
 
-    showNotification("Utilisateur supprimé");
+    // Envoie la demande de suppression au PHP
+    fetch("../../Controller/utilisateur-actions.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            action: "supprimer",
+            id    : userId
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+            // Supprime la ligne du tableau HTML
+            selectedRow.remove();
+            selectedRow = null;
+            confirmModal.style.display = "none";
+            showNotification("Utilisateur supprimé avec succès ✅");
+        } else {
+            showNotification("Erreur : " + data.message);
+        }
+    })
+    .catch(err => {
+        showNotification("Erreur de connexion au serveur");
+        console.error(err);
+    });
 
 };
 
 document.querySelector(".closeConfirm").onclick = function(){
-
     confirmModal.style.display = "none";
-
     showNotification("Suppression annulée");
-
 };
 
 document.getElementById("confirmNo").onclick = function(){
@@ -142,8 +206,21 @@ document.getElementById("confirmNo").onclick = function(){
     showNotification("Suppression annulée");
 };
 
+window.onclick = function(event){
+    if(event.target === modal){
+        modal.style.display = "none";
+        showNotification("Modification annulée");
+    }
+    if(event.target === confirmModal){
+        confirmModal.style.display = "none";
+        showNotification("Suppression annulée");
+    }
+};
 
-/* NOTIFICATION */
+
+/* ==============================
+NOTIFICATION
+============================== */
 
 function showNotification(message){
 
@@ -152,33 +229,58 @@ function showNotification(message){
     notif.innerText = message;
     notif.style.display = "block";
 
-    setTimeout(()=>{
-        notif.style.display="none";
-    },3000);
+    setTimeout(() => {
+        notif.style.display = "none";
+    }, 3000);
 
 }
 
-// Ce code s'exécute lorsque la page est complètement chargée
+
+/* ==============================
+CHARGEMENT DES DONNÉES BDD
+============================== */
+
 window.onload = function(){
 
-    // Récupère le rôle de l'utilisateur depuis le localStorage
-    // La valeur a été stockée lors du login (super_admin ou admin)
+    // Récupère le rôle depuis localStorage
     let role = localStorage.getItem("role");
 
-    // Sélectionne le bouton "Table d'Admins" sur la page
+    // Grise le bouton Table d'Admins si admin simple
     let btn = document.getElementById("adminTableBtn");
-
-    // Si l'utilisateur est un admin simple (pas super_admin)
     if(role === "admin"){
-        // On grise le bouton pour montrer qu'il n'est pas cliquable
         btn.style.opacity = "0.5";
-
-        // On désactive complètement le clic sur le bouton
         btn.style.pointerEvents = "none";
     }
 
-    // Affiche l'email de l'utilisateur connecté dans la page
-    // Récupéré depuis le localStorage
-    let email = localStorage.getItem("email");
-    document.getElementById("userName").innerText = email;
+    // Charge les utilisateurs depuis la BDD via PHP
+    fetch("../../Controller/utilisateur-actions.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "lister" })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+            let tbody = document.querySelector("#userTable tbody");
+            tbody.innerHTML = ""; // Vide les données statiques HTML
+
+            // Remplit le tableau avec les vraies données de la BDD
+            data.utilisateurs.forEach(user => {
+                let row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${user.ID}</td>
+                    <td>${user.nom}</td>
+                    <td>${user.prenom}</td>
+                    <td>${user.DtaeDeNaissance}</td>
+                    <td>${user.sexe}</td>
+                    <td>${user.email}</td>
+                    <td>${user.NumTel ?? ''}</td>
+                    <td>${user.niveau ?? ''}</td>
+                    <td>${user.specialite ?? ''}</td>
+                `;
+            });
+        }
+    })
+    .catch(err => console.error("Erreur chargement utilisateurs:", err));
+
 };

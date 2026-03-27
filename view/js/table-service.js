@@ -23,10 +23,10 @@ table.addEventListener("click", function(e){
 
 document.addEventListener("click", function(e){
 
-if(selectedRow && !e.target.closest("#serviceTable tbody tr") && !e.target.closest(".buttons") && !e.target.closest(".modal-content")){
-    selectedRow.classList.remove("selected");
-    selectedRow = null;
-}
+    if(selectedRow && !e.target.closest("#serviceTable tbody tr") && !e.target.closest(".buttons") && !e.target.closest(".modal-content")){
+        selectedRow.classList.remove("selected");
+        selectedRow = null;
+    }
 
 });
 
@@ -37,15 +37,12 @@ if(selectedRow && !e.target.closest("#serviceTable tbody tr") && !e.target.close
 // ==============================
 
 const modal = document.getElementById("modal");
-const addBtn = document.getElementById("addBtn");
 const cancelBtn = document.getElementById("cancelAdd");
 const closeModal = document.querySelector(".closeConfirm");
 
-
-
-cancelBtn.onclick = () =>{
+cancelBtn.onclick = () => {
     confirmModal.style.display = "none";
-    showNotification("Ajout annulé");
+    showNotification("Annulé");
 };
 
 closeModal.onclick = cancelBtn.onclick;
@@ -53,53 +50,17 @@ closeModal.onclick = cancelBtn.onclick;
 
 
 // ==============================
-// AJOUTER SERVICE
+// AJOUTER SERVICE — commenté par ton binôme, on ne touche pas
 // ==============================
 
 // document.getElementById("confirmAdd").onclick = function(){
-
-//     let titre = document.getElementById("titreInput").value.trim();
-//     let description = document.getElementById("descriptionInput").value.trim();
-//     let date = document.getElementById("dateInput").value;
-//     let statut = document.getElementById("statutInput").value.trim();
-//     let prix = document.getElementById("prixInput").value;
-
-//     if(titre === "" || description === ""){
-//         showNotification("Veuillez remplir les champs obligatoires");
-//         return;
-//     }
-
-//     let tbody = document.querySelector("#serviceTable tbody");
-
-//     let maxId = 0;
-
-//     for(let row of tbody.rows){
-//         let id = parseInt(row.cells[0].innerText);
-//         if(id > maxId) maxId = id;
-//     }
-
-//     let newRow = tbody.insertRow();
-
-//     newRow.innerHTML = `
-//         <td>${maxId+1}</td>
-//         <td>${titre}</td>
-//         <td>${description}</td>
-//         <td>${date}</td>
-//         <td>${statut}</td>
-//         <td>${prix}</td>
-//         <td>0</td>
-//     `;
-
-//     modal.style.display = "none";
-
-//     showNotification("Service ajouté avec succès");
-
+//     ...
 // };
 
 
 
 // ==============================
-// SUPPRESSION
+// SUPPRESSION SERVICE — AVEC PHP
 // ==============================
 
 const confirmModal = document.getElementById("confirmModal");
@@ -117,12 +78,34 @@ document.getElementById("deleteBtn").onclick = function(){
 
 document.getElementById("confirmYes").onclick = function(){
 
-    selectedRow.remove();
-    selectedRow = null;
+    // Récupère l'ID du service sélectionné
+    let serviceId = selectedRow.cells[0].innerText;
 
-    confirmModal.style.display = "none";
-
-    showNotification("Service supprimé");
+    // Envoie la demande de suppression au PHP
+    fetch("../../Controller/service-actions.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            action: "supprimer",
+            id    : serviceId
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+            // Supprime la ligne du tableau HTML
+            selectedRow.remove();
+            selectedRow = null;
+            confirmModal.style.display = "none";
+            showNotification("Service supprimé avec succès ✅");
+        } else {
+            showNotification("Erreur : " + data.message);
+        }
+    })
+    .catch(err => {
+        showNotification("Erreur de connexion au serveur");
+        console.error(err);
+    });
 
 };
 
@@ -162,27 +145,50 @@ function showNotification(message){
     }, 3000);
 
 }
-// Ce code s'exécute lorsque la page est complètement chargée
+
+
+// ==============================
+// CHARGEMENT DES DONNÉES BDD
+// ==============================
+
 window.onload = function(){
 
-    // Récupère le rôle de l'utilisateur depuis le localStorage
-    // La valeur a été stockée lors du login (super_admin ou admin)
+    // Récupère le rôle depuis localStorage
     let role = localStorage.getItem("role");
 
-    // Sélectionne le bouton "Table d'Admins" sur la page
+    // Grise le bouton Table d'Admins si admin simple
     let btn = document.getElementById("adminTableBtn");
-
-    // Si l'utilisateur est un admin simple (pas super_admin)
     if(role === "admin"){
-        // On grise le bouton pour montrer qu'il n'est pas cliquable
         btn.style.opacity = "0.5";
-
-        // On désactive complètement le clic sur le bouton
         btn.style.pointerEvents = "none";
     }
 
-    // Affiche l'email de l'utilisateur connecté dans la page
-    // Récupéré depuis le localStorage
-    let email = localStorage.getItem("email");
-    document.getElementById("userName").innerText = email;
+    // Charge les services depuis la BDD via PHP
+    fetch("../../Controller/service-actions.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "lister" })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+            let tbody = document.querySelector("#serviceTable tbody");
+            tbody.innerHTML = ""; // Vide les données statiques HTML
+
+            // Remplit le tableau avec les vraies données de la BDD
+            data.services.forEach(service => {
+                let row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${service.ID}</td>
+                    <td>${service.titre}</td>
+                    <td>${service.description}</td>
+                    <td>${service.DateDePublication}</td>
+                    <td>${service.status}</td>
+                    <td>${service.prix}</td>
+                `;
+            });
+        }
+    })
+    .catch(err => console.error("Erreur chargement services:", err));
+
 };
