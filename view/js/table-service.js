@@ -20,10 +20,14 @@ table.addEventListener("click", function(e){
 
 });
 
-
 document.addEventListener("click", function(e){
 
-    if(selectedRow && !e.target.closest("#serviceTable tbody tr") && !e.target.closest(".buttons") && !e.target.closest(".modal-content")){
+    if(
+        selectedRow &&
+        !e.target.closest("#serviceTable tbody tr") &&
+        !e.target.closest(".buttons") &&
+        !e.target.closest(".modal-content")
+    ){
         selectedRow.classList.remove("selected");
         selectedRow = null;
     }
@@ -31,33 +35,14 @@ document.addEventListener("click", function(e){
 });
 
 
-
 // ==============================
-// MODAL
-// ==============================
-
-const modal = document.getElementById("modal");
-const cancelBtn = document.getElementById("deleteBtn");
-const closeModal = document.querySelector(".closeConfirm");
-
-cancelBtn.onclick = () => {
-    confirmModal.style.display = "none";
-    showNotification("Annulé");
-};
-
-closeModal.onclick = cancelBtn.onclick;
-
-
-
-
-
-// ==============================
-// SUPPRESSION SERVICE — AVEC PHP
+// SUPPRESSION SERVICE
 // ==============================
 
 const confirmModal = document.getElementById("confirmModal");
 const deleteBtn = document.getElementById("deleteBtn");
-document.getElementById("deleteBtn").onclick = function(){
+
+deleteBtn.onclick = function(){
 
     if(!selectedRow){
         showNotification("Il faut d'abord sélectionner un service");
@@ -70,22 +55,20 @@ document.getElementById("deleteBtn").onclick = function(){
 
 document.getElementById("confirmYes").onclick = function(){
 
-    // Récupère l'ID du service sélectionné
     let serviceId = selectedRow.cells[0].innerText;
 
-    // Envoie la demande de suppression au PHP
     fetch("../../Controller/service-actions.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             action: "supprimer",
-            id    : serviceId
+            id: serviceId
         })
     })
     .then(res => res.json())
     .then(data => {
+
         if(data.success){
-            // Supprime la ligne du tableau HTML
             selectedRow.remove();
             selectedRow = null;
             confirmModal.style.display = "none";
@@ -93,30 +76,24 @@ document.getElementById("confirmYes").onclick = function(){
         } else {
             showNotification("Erreur : " + data.message);
         }
+
     })
     .catch(err => {
-        showNotification("Erreur de connexion au serveur");
         console.error(err);
+        showNotification("Erreur serveur");
     });
 
 };
 
 document.getElementById("confirmNo").onclick = function(){
-
     confirmModal.style.display = "none";
-
     showNotification("Suppression annulée");
-
 };
 
-document.querySelector(".close").onclick = function(){
-
+document.querySelector(".closeConfirm").onclick = function(){
     confirmModal.style.display = "none";
-
     showNotification("Suppression annulée");
-
 };
-
 
 
 // ==============================
@@ -131,33 +108,18 @@ function showNotification(message){
     notif.style.display = "block";
 
     setTimeout(() => {
-
         notif.style.display = "none";
-
     }, 3000);
 
 }
 
 
 // ==============================
-// CHARGEMENT DES DONNÉES BDD
+// CHARGEMENT DES DONNÉES
 // ==============================
 
 window.onload = function(){
 
-    // Récupère le rôle depuis localStorage
-    let role = localStorage.getItem("role");
-
-    // Grise le bouton Table d'Admins si admin simple
-    let btn = document.getElementById("adminTableBtn");
-    if(role === "admin"){
-        btn.style.opacity = "0.5";
-        btn.style.pointerEvents = "none";
-    }
-
-    
-
-    // Charge les services depuis la BDD via PHP
     fetch("../../Controller/service-actions.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -165,13 +127,16 @@ window.onload = function(){
     })
     .then(res => res.json())
     .then(data => {
-        if(data.success){
-            let tbody = document.querySelector("#serviceTable tbody");
-            tbody.innerHTML = ""; // Vide les données statiques HTML
 
-            // Remplit le tableau avec les vraies données de la BDD
+        if(data.success){
+
+            let tbody = document.querySelector("#serviceTable tbody");
+            tbody.innerHTML = "";
+
             data.services.forEach(service => {
+
                 let row = tbody.insertRow();
+
                 row.innerHTML = `
                     <td>${service.ID}</td>
                     <td>${service.titre}</td>
@@ -180,14 +145,17 @@ window.onload = function(){
                     <td>${service.status}</td>
                     <td>${service.prix}</td>
                 `;
+
             });
+
+        } else {
+            showNotification("Erreur chargement données");
         }
+
     })
-    .catch(err => console.error("Erreur chargement services:", err));
+    .catch(err => {
+        console.error(err);
+        showNotification("Erreur serveur");
+    });
 
 };
-
-
-document.getquerySelector("#deleteBtn").addEventListener("click", () => {
-    modal.style.display = "none"
-});

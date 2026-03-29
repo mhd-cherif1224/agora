@@ -117,13 +117,15 @@ document.getElementById("confirmAdd").onclick = function(){
         if(data.success){
 
             // Convert YYYY-MM-DD → DD/MM/YYYY
-            let parts = dateVal.split("-");
-            let formattedDate = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateVal;
+            // let parts = dateVal.split("-");
+            // let formattedDate = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateVal;
 
+
+            
             // Met à jour la ligne dans le tableau HTML
             selectedRow.cells[1].innerText = nom;
             selectedRow.cells[2].innerText = prenom;
-            selectedRow.cells[3].innerText = formattedDate;
+            selectedRow.cells[3].innerText = dateVal.split("-").reverse().join("/");
             selectedRow.cells[4].innerText = (sexe === "M") ? "Masculin" : "Féminin";
             selectedRow.cells[5].innerText = email;
             selectedRow.cells[6].innerText = tel;
@@ -271,7 +273,7 @@ window.onload = function(){
                     <td>${user.ID}</td>
                     <td>${user.nom}</td>
                     <td>${user.prenom}</td>
-                    <td>${user.DtaeDeNaissance}</td>
+                    <td>${user.DateDeNaissance}</td>
                     <td>${user.sexe}</td>
                     <td>${user.email}</td>
                     <td>${user.NumTel ?? ''}</td>
