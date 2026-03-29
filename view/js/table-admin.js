@@ -1,352 +1,339 @@
-// ============================================================
-// CONFIGURATION — chemin vers le fichier PHP
-// ============================================================
-const PHP_URL = "../../controller/admin-actions.php";
-
-
-
-window.onload = function () {
-
-    // Grise le bouton Table d'Admins si admin simple
-    let role = localStorage.getItem("role");
-    let btn  = document.getElementById("adminTableBtn");
-    if (btn && role === "admin") {
-        btn.style.opacity       = "0.5";
-        btn.style.pointerEvents = "none";
-    }
-
-    // Charge les admins depuis la BDD
-    chargerAdmins();
-};
-
-function chargerAdmins() {
-    fetch(PHP_URL, {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ action: "lister" })
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (!data.success) {
-            showNotification("Erreur lors du chargement des admins");
-            return;
-        }
-        const tbody = document.querySelector("#adminTable tbody");
-        tbody.innerHTML = "";
-
-        data.admins.forEach(a => {
-            const row = tbody.insertRow();
-            row.innerHTML = `
-                <td>${a.ID}</td>
-                <td>${a.nom}</td>
-                <td>${a.prenom}</td>
-                <td>${a.DateDeNaissance}</td>
-                <td>${a.email}</td>
-                <td>${a.numTel ?? ""}</td>
-                <td>${a.role}</td>
-            `;
-        });
-    })
-    .catch(err => {
-        console.error(err);
-        showNotification("Impossible de contacter le serveur");
-    });
-}
-
-
-// ============================================================
-// SÉLECTION DE LIGNE
-// ============================================================
+// ==============================
+// SELECTION LIGNE
+// ==============================
 let selectedRow = null;
 const table = document.getElementById("adminTable");
 
-table.addEventListener("click", function (e) {
-    const row = e.target.closest("tr");
-    if (!row || row.rowIndex === 0) return;
-
-    if (selectedRow) selectedRow.classList.remove("selected");
+table.addEventListener("click", function(e){
+    let row = e.target.closest("tr");
+    if(!row || row.rowIndex === 0) return;
+    if(selectedRow) selectedRow.classList.remove("selected");
     selectedRow = row;
     row.classList.add("selected");
 });
 
-document.addEventListener("click", function (e) {
-    if (
-        selectedRow &&
-        !e.target.closest("#adminTable tbody tr") &&
-        !e.target.closest(".buttons") &&
-        !e.target.closest(".modal-content")
-    ) {
+document.addEventListener("click", function(e){
+    if(selectedRow && !e.target.closest("#adminTable tbody tr") && !e.target.closest(".buttons") && !e.target.closest(".modal-content")){
         selectedRow.classList.remove("selected");
         selectedRow = null;
     }
 });
 
 
-// ============================================================
-// MODAL AJOUT
-// ============================================================
-const modal      = document.getElementById("modal");
-const addBtn     = document.getElementById("addBtn");
-const cancelBtn  = document.getElementById("cancelAdd");
+/* ==============================
+MODAL AJOUT
+============================== */
+
+const modal = document.getElementById("modal");
+const addBtn = document.getElementById("addBtn");
+const cancelBtn = document.getElementById("cancelAdd");
 const closeModal = document.querySelector(".close");
 
 addBtn.onclick = () => { modal.style.display = "block"; };
-
-cancelBtn.onclick = () => {
-    modal.style.display = "none";
-    showNotification("Ajout annulé");
-};
-
+cancelBtn.onclick = () => { modal.style.display = "none"; showNotification("Ajout annulé"); };
 closeModal.onclick = cancelBtn.onclick;
 
 
-// ============================================================
-// AJOUTER UN ADMIN
-// ============================================================
-document.getElementById("confirmAdd").onclick = function () {
+/* ==============================
+AJOUTER ADMIN — AVEC PHP
+============================== */
 
-    const nomAdd    = document.getElementById("nomInputAdd").value.trim();
-    const prenomAdd = document.getElementById("prenomInputAdd").value.trim();
-    const dateAdd   = document.getElementById("dateInputAdd").value;
-    const emailAdd  = document.getElementById("emailInputAdd").value.trim();
-    const telAdd    = document.getElementById("telInputAdd").value.trim();
-    const passAdd   = document.getElementById("passWordAdd").value;
-    const roleAdd   = document.getElementById("roleInputAdd").value;
+document.getElementById("confirmAdd").onclick = function(){
 
-    if (!nomAdd || !prenomAdd || !dateAdd || !emailAdd || !passAdd || !roleAdd) {
-        showNotification("Veuillez remplir tous les champs obligatoires");
+    let nomAdd     = document.getElementById("nomInputAdd").value.trim();
+    let prenomAdd  = document.getElementById("prenomInputAdd").value.trim();
+    let dateValAdd = document.getElementById("dateInputAdd").value;
+    let sexeAdd    = document.getElementById("sexeInputAdd").value;
+    let emailAdd   = document.getElementById("emailInputAdd").value.trim();
+    let telAdd     = document.getElementById("telInputAdd").value.trim();
+    let passWordAdd = document.getElementById("passWordAdd").value;
+    let role       = document.getElementById("roleInputAdd").value;
+
+    // Vérification des champs obligatoires
+    if(nomAdd == "" || prenomAdd == "" || emailAdd == "" || dateValAdd == "" || passWordAdd == "" || role == ""){
+        showNotification("Veuillez remplir les champs obligatoires");
         return;
     }
 
-    fetch(PHP_URL, {
-        method:  "POST",
+    // Envoie les données vers le Controller PHP
+    // fetch() = envoie une requête HTTP sans recharger la page
+    fetch("../../Controller/admin-actions.php", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            action:   "ajouter",
-            nom:      nomAdd,
-            prenom:   prenomAdd,
-            date:     dateAdd,
-            email:    emailAdd,
-            tel:      telAdd,
-            password: passAdd,
-            role:     roleAdd
+            action   : "ajouter",   // indique au PHP quelle action faire
+            nom      : nomAdd,
+            prenom   : prenomAdd,
+            date     : dateValAdd,
+            sexe     : sexeAdd,
+            email    : emailAdd,
+            tel      : telAdd,
+            password : passWordAdd,
+            role     : role
         })
     })
-    .then(r => r.json())
+    .then(res => res.json()) // convertit la réponse PHP en objet JS
     .then(data => {
-        if (!data.success) {
-            showNotification(data.message);
-            return;
+        if(data.success){
+            // Ajoute la ligne dans le tableau HTML
+            let tbody = document.querySelector("#adminTable tbody");
+            let newRow = tbody.insertRow();
+            newRow.innerHTML = `
+                <td>${data.id}</td>
+                <td>${nomAdd}</td>
+                <td>${prenomAdd}</td>
+                <td>${dateValAdd}</td>
+                <td>${sexeAdd}</td>
+                <td>${emailAdd}</td>
+                <td>${NumTelAdd}</td>
+                <td>********</td>
+                <td>${role}</td>
+            `;
+            modal.style.display = "none";
+            showNotification("Admin ajouté avec succès ✅");
+
+            // Vide les champs du formulaire
+            document.getElementById("nomInputAdd").value = "";
+            document.getElementById("prenomInputAdd").value = "";
+            document.getElementById("dateInputAdd").value = "";
+            document.getElementById("emailInputAdd").value = "";
+            document.getElementById("telInputAdd").value = "";
+            document.getElementById("passWordAdd").value = "";
+
+        } else {
+            // Affiche l'erreur retournée par PHP
+            showNotification("Erreur : " + data.message);
         }
-
-        const tbody  = document.querySelector("#adminTable tbody");
-        const newRow = tbody.insertRow();
-        newRow.innerHTML = `
-            <td>${data.id}</td>
-            <td>${nomAdd}</td>
-            <td>${prenomAdd}</td>
-            <td>${dateAdd}</td>
-            <td>${emailAdd}</td>
-            <td>${telAdd}</td>
-            <td>${roleAdd}</td>
-        `;
-
-        document.getElementById("nomInputAdd").value    = "";
-        document.getElementById("prenomInputAdd").value = "";
-        document.getElementById("dateInputAdd").value   = "";
-        document.getElementById("emailInputAdd").value  = "";
-        document.getElementById("telInputAdd").value    = "";
-        document.getElementById("passWordAdd").value    = "";
-        document.getElementById("roleInputAdd").value   = "";
-
-        modal.style.display = "none";
-        showNotification("Admin ajouté avec succès ✅");
     })
     .catch(err => {
+        // Erreur réseau ou PHP
+        showNotification("Erreur de connexion au serveur");
         console.error(err);
-        showNotification("Erreur réseau lors de l'ajout");
     });
 };
 
 
-// ============================================================
-// MODAL MODIFIER
-// ============================================================
-const modifierModal = document.getElementById("modifierModal");
-const editBtn       = document.getElementById("editBtn");
+/* ==============================
+MODIFIER ADMIN
+============================== */
 
-editBtn.onclick = function () {
-    if (!selectedRow) {
+const modifierModal = document.getElementById("modifierModal");
+const editBtn = document.getElementById("editBtn");
+
+editBtn.onclick = function(){
+    if(!selectedRow){
         showNotification("Il faut d'abord sélectionner un Admin");
         return;
     }
 
-    const rawDate = selectedRow.cells[3].innerText;
-    const parts   = rawDate.split("/");
-    const formattedDate = parts.length === 3
-        ? `${parts[2]}-${parts[1]}-${parts[0]}`
-        : rawDate;
+    // Convertit DD/MM/YYYY → YYYY-MM-DD pour l'input date
+    let rawDate = selectedRow.cells[3].innerText;
+    let parts = rawDate.split("/");
+    let formattedDate = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : rawDate;
 
-    document.getElementById("nomInput").value        = selectedRow.cells[1].innerText;
-    document.getElementById("prenomInput").value     = selectedRow.cells[2].innerText;
-    document.getElementById("dateInput").value       = formattedDate;
-    document.getElementById("emailInput2").value     = selectedRow.cells[4].innerText;
-    document.getElementById("telInput").value        = selectedRow.cells[5].innerText;
-    document.getElementById("passWordEdit").value    = ""; // ne jamais pré-remplir
-    document.getElementById("roleInputEdit").value   = selectedRow.cells[6].innerText;
+    document.getElementById("nomInput").value       = selectedRow.cells[1].innerText;
+    document.getElementById("prenomInput").value    = selectedRow.cells[2].innerText;
+    document.getElementById("dateInput").value      = formattedDate;
+    document.getElementById("sexeInput").value      = selectedRow.cells[4].innerText;
+    document.getElementById("emailInput2").value    = selectedRow.cells[5].innerText;
+    document.getElementById("telInput").value       = selectedRow.cells[6].innerText;
+    document.getElementById("passWordEdit").value   = "";  // vide pour sécurité
+    document.getElementById("roleInputEdit").value  = selectedRow.cells[8].innerText;
 
     modifierModal.style.display = "block";
 };
 
-document.getElementById("confirmModifier").onclick = function () {
+document.getElementById("confirmModifier").onclick = function(){
 
-    const id     = parseInt(selectedRow.cells[0].innerText);
-    const nom    = document.getElementById("nomInput").value.trim();
-    const prenom = document.getElementById("prenomInput").value.trim();
-    const date   = document.getElementById("dateInput").value;
-    const email  = document.getElementById("emailInput2").value.trim();
-    const tel    = document.getElementById("telInput").value.trim();
-    const pass   = document.getElementById("passWordEdit").value;
-    const role   = document.getElementById("roleInputEdit").value;
+    let nom      = document.getElementById("nomInput").value.trim();
+    let prenom   = document.getElementById("prenomInput").value.trim();
+    let dateVal  = document.getElementById("dateInput").value;
+    let sexe     = document.getElementById("sexeInput").value;
+    let email    = document.getElementById("emailInput2").value.trim();
+    let tel      = document.getElementById("telInput").value.trim();
+    let passWord = document.getElementById("passWordEdit").value;
+    let role     = document.getElementById("roleInputEdit").value;
 
-    if (!nom || !prenom || !date || !email || !role) {
-        showNotification("Veuillez remplir tous les champs obligatoires");
+    if(nom == "" || prenom == "" || email == "" || dateVal == "" || role == ""){
+        showNotification("Veuillez remplir les champs obligatoires");
         return;
     }
 
-    fetch(PHP_URL, {
-        method:  "POST",
+    // Récupère l'ID de la ligne sélectionnée
+    let adminId = selectedRow.cells[0].innerText;
+
+    // Envoie les données vers le Controller PHP
+    fetch("../../Controller/admin-actions.php", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        // ERREUR 2 CORRIGÉE : tu envoyais dateDeNaissance/numTel/motDePass
-        // au lieu de date/tel/password attendus par admin-actions.php
         body: JSON.stringify({
-            action:   "modifier",
-            id:       id,
-            nom:      nom,
-            prenom:   prenom,
-            date:     date,
-            email:    email,
-            tel:      tel,
-            password: pass,
-            role:     role
+            action  : "modifier",
+            id      : adminId,   // ID indispensable pour savoir quel admin modifier
+            nom     : nom,
+            prenom  : prenom,
+            date    : dateVal,
+            sexe    : sexe,
+            email   : email,
+            tel     : tel,
+            password: passWord,  // vide = on ne change pas le mot de passe
+            role    : role
         })
     })
-    .then(r => r.json())
+    .then(res => res.json())
     .then(data => {
-        if (!data.success) {
-            showNotification(data.message);
-            return;
+        if(data.success){
+            // Convertit YYYY-MM-DD → DD/MM/YYYY pour l'affichage
+            let parts = dateVal.split("-");
+            let formattedDate = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateVal;
+
+            // Met à jour la ligne dans le tableau HTML
+            selectedRow.cells[1].innerText = nom;
+            selectedRow.cells[2].innerText = prenom;
+            selectedRow.cells[3].innerText = formattedDate;
+            selectedRow.cells[4].innerText = sexe;
+            selectedRow.cells[5].innerText = email;
+            selectedRow.cells[6].innerText = tel;
+            selectedRow.cells[8].innerText = role;
+
+            modifierModal.style.display = "none";
+            showNotification("Admin modifié avec succès ✅");
+        } else {
+            showNotification("Erreur : " + data.message);
         }
-
-        const p = date.split("-");
-        const displayDate = p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : date;
-
-        selectedRow.cells[1].innerText = nom;
-        selectedRow.cells[2].innerText = prenom;
-        selectedRow.cells[3].innerText = displayDate;
-        selectedRow.cells[4].innerText = email;
-        selectedRow.cells[5].innerText = tel;
-        selectedRow.cells[6].innerText = role;
-
-        modifierModal.style.display = "none";
-        showNotification("Admin modifié avec succès ✅");
     })
     .catch(err => {
+        showNotification("Erreur de connexion au serveur");
         console.error(err);
-        showNotification("Erreur réseau lors de la modification");
     });
 };
 
-document.querySelector(".closeModifier").onclick = function () {
+document.querySelector(".closeModifier").onclick = function(){
+    modifierModal.style.display = "none";
+    showNotification("Modification annulée");
+};
+document.querySelector("#cancelModifier").onclick = function(){
     modifierModal.style.display = "none";
     showNotification("Modification annulée");
 };
 
-document.getElementById("cancelModifier").onclick = function () {
-    modifierModal.style.display = "none";
-    showNotification("Modification annulée");
-};
 
+/* ==============================
+SUPPRESSION ADMIN — AVEC PHP
+============================== */
 
-// ============================================================
-// SUPPRESSION D'UN ADMIN
-// ============================================================
 const confirmModal = document.getElementById("confirmModal");
-const deleteBtn    = document.getElementById("deleteBtn");
+const deleteBtn = document.getElementById("deleteBtn");
 
-deleteBtn.onclick = function () {
-    if (!selectedRow) {
+deleteBtn.onclick = function(){
+    if(!selectedRow){
         showNotification("Il faut d'abord sélectionner un Admin");
         return;
     }
     confirmModal.style.display = "block";
 };
 
-document.getElementById("confirmYes").onclick = function () {
+document.getElementById("confirmYes").onclick = function(){
 
-    const id = parseInt(selectedRow.cells[0].innerText);
+    // Récupère l'ID de l'admin sélectionné
+    let adminId = selectedRow.cells[0].innerText;
 
-    fetch(PHP_URL, {
-        method:  "POST",
+    // Envoie la demande de suppression au PHP
+    fetch("../../Controller/admin-actions.php", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "supprimer", id: id })
+        body: JSON.stringify({
+            action: "supprimer",
+            id    : adminId
+        })
     })
-    .then(r => r.json())
+    .then(res => res.json())
     .then(data => {
-        if (!data.success) {
-            showNotification(data.message);
-            return;
+        if(data.success){
+            // Supprime la ligne du tableau HTML
+            selectedRow.remove();
+            selectedRow = null;
+            confirmModal.style.display = "none";
+            showNotification("Admin supprimé avec succès ✅");
+        } else {
+            showNotification("Erreur : " + data.message);
         }
-        selectedRow.remove();
-        selectedRow = null;
-        confirmModal.style.display = "none";
-        showNotification("Admin supprimé avec succès ✅");
     })
     .catch(err => {
+        showNotification("Erreur de connexion au serveur");
         console.error(err);
-        showNotification("Erreur réseau lors de la suppression");
     });
 };
 
-document.querySelector(".closeConfirm").onclick = function () {
+document.querySelector(".closeConfirm").onclick = function(){
+    confirmModal.style.display = "none";
+    showNotification("Suppression annulée");
+};
+document.getElementById("confirmNo").onclick = function(){
     confirmModal.style.display = "none";
     showNotification("Suppression annulée");
 };
 
-document.getElementById("confirmNo").onclick = function () {
-    confirmModal.style.display = "none";
-    showNotification("Suppression annulée");
+window.onclick = function(event){
+    if(event.target === modal){ modal.style.display = "none"; showNotification("Ajout annulé"); }
+    if(event.target === confirmModal){ confirmModal.style.display = "none"; showNotification("Suppression annulée"); }
+    if(event.target === modifierModal){ modifierModal.style.display = "none"; showNotification("Modification annulée"); }
 };
 
 
-// ============================================================
-// FERMETURE DES MODALS EN CLIQUANT À L'EXTÉRIEUR
-// ============================================================
-window.onclick = function (event) {
-    if (event.target === modal) {
-        modal.style.display = "none";
-        showNotification("Ajout annulé");
-    }
-    if (event.target === confirmModal) {
-        confirmModal.style.display = "none";
-        showNotification("Suppression annulée");
-    }
-    if (event.target === modifierModal) {
-        modifierModal.style.display = "none";
-        showNotification("Modification annulée");
-    }
-};
+/* ==============================
+NOTIFICATION
+============================== */
 
-
-// ============================================================
-// NOTIFICATION
-// ============================================================
-function showNotification(message) {
+function showNotification(message){
     const notif = document.getElementById("notification");
-    notif.innerText     = message;
+    notif.innerText = message;
     notif.style.display = "block";
-
-    setTimeout(() => {
-        notif.style.display = "none";
-    }, 3000);
+    setTimeout(() => { notif.style.display = "none"; }, 3000);
 }
+
+
+/* ==============================
+CHARGEMENT DES DONNÉES BDD
+============================== */
+
+window.onload = function(){
+
+    // Vérifie que c'est bien un super_admin
+    let role = localStorage.getItem("role");
+    if(role !== "super_admin"){
+        alert("Accès refusé !");
+        window.location.href = "home-page-admin.html";
+        return;
+    }
+
+    // Charge les admins depuis la BDD via PHP
+    fetch("../../Controller/admin-actions.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "lister" })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+            let tbody = document.querySelector("#adminTable tbody");
+            tbody.innerHTML = ""; // Vide les données statiques HTML
+
+            // Remplit le tableau avec les vraies données de la BDD
+            data.admins.forEach(admin => {
+                let row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${admin.ID}</td>
+                    <td>${admin.nom}</td>
+                    <td>${admin.prenom}</td>
+                    <td>${admin.DateDeNaissance}</td>
+                    <td>${admin.sexe}</td>
+                    <td>${admin.email}</td>
+                    <td>${admin.NumTel ?? ''}</td>
+                    <td>********</td>
+                    <td>${admin.role}</td>
+                `;
+            });
+        }
+    })
+    .catch(err => console.error("Erreur chargement admins:", err));
+};

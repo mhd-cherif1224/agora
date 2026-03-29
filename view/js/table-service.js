@@ -1,7 +1,6 @@
 // ==============================
 // SELECTION LIGNE
 // ==============================
-const PHP_URL = "../../controller/service-actions.php";
 
 let selectedRow = null;
 const table = document.getElementById("serviceTable");
@@ -51,69 +50,12 @@ closeModal.onclick = cancelBtn.onclick;
 
 
 // ==============================
-// AJOUTER SERVICE 
+// AJOUTER SERVICE — commenté par ton binôme, on ne touche pas
 // ==============================
-document.getElementById("confirmAdd").onclick = function () {
 
-    const titreAdd    = document.getElementById("titreInputAdd").value.trim();
-    const descriptionAdd   = document.getElementById("descriptionInputAdd").value;
-    const DateDePublicationAdd  = document.getElementById("DateDePublicationInputAdd").value.trim();
-    const statusAdd    = document.getElementById("statusInputAdd").value.trim();
-    const prixAdd   = document.getElementById("prixInputAdd").value;
-   
-
-    if (!nomtitre || !descriptionAdd || !DateDePublicationAddAdd || !statusAdd || !prixAdd) {
-        showNotification("Veuillez remplir tous les champs obligatoires");
-        return;
-    }
-
-    fetch(PHP_URL, {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            action:   "ajouter",
-            titre:      titreAdd,
-            description:   descriptionAdd,
-            DateDePublication:     DateDePublicationAdd,
-            status:    statusAdd,
-            prix:      prixAdd,
-        })
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (!data.success) {
-            showNotification(data.message);
-            return;
-        }
-
-        const tbody  = document.querySelector("#adminTable tbody");
-        const newRow = tbody.insertRow();
-        newRow.innerHTML = `
-            <td>${data.id}</td>
-            <td>${titreAdd}</td>
-            <td>${descriptionAdd}</td>
-            <td>${DateDePublicationAddAdd}</td>
-            <td>${statusAdd}</td>
-            <td>${prixAdd}</td>
-            
-        `;
-
-        document.getElementById("nomInputAdd").value    = "";
-        document.getElementById("prenomInputAdd").value = "";
-        document.getElementById("dateInputAdd").value   = "";
-        document.getElementById("emailInputAdd").value  = "";
-        document.getElementById("telInputAdd").value    = "";
-        document.getElementById("passWordAdd").value    = "";
-        document.getElementById("roleInputAdd").value   = "";
-
-        modal.style.display = "none";
-        showNotification("Admin ajouté avec succès ✅");
-    })
-    .catch(err => {
-        console.error(err);
-        showNotification("Erreur réseau lors de l'ajout");
-    });
-};
+// document.getElementById("confirmAdd").onclick = function(){
+//     ...
+// };
 
 
 
@@ -140,12 +82,12 @@ document.getElementById("confirmYes").onclick = function(){
     let serviceId = selectedRow.cells[0].innerText;
 
     // Envoie la demande de suppression au PHP
-    fetch(PHP_URL, {
+    fetch("../../Controller/service-actions.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             action: "supprimer",
-            id    : id
+            id    : serviceId
         })
     })
     .then(res => res.json())
