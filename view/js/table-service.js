@@ -186,3 +186,8 @@ window.onload = function(){
     .catch(err => console.error("Erreur chargement services:", err));
 
 };
+
+
+document.getquerySelector("#deleteBtn").addEventListener("click", () => {
+    modal.style.display = "none"
+});

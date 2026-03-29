@@ -1,4 +1,45 @@
+function showError(inputId, message){
+    const input = document.getElementById(inputId);
+
+    // Ajouter bordure rouge
+    input.classList.add("error");
+
+    // Supprimer ancien message s'il existe
+    let oldError = input.parentElement.querySelector(".error-message");
+    if(oldError) oldError.remove();
+
+    // Créer nouveau message
+    const error = document.createElement("div");
+    error.className = "error-message";
+    error.innerText = message;
+
+    input.parentElement.appendChild(error);
+}
+
+
+function clearErrors(){
+    document.querySelectorAll(".error").forEach(el => el.classList.remove("error"));
+    document.querySelectorAll(".error-message").forEach(el => {
+        if(el.id !== "date-error"){
+            el.remove();
+        }
+    });
+
+    const dateError = document.getElementById("date-error");
+    if(dateError){
+        dateError.innerText = "";
+    }
+}
+
+function showDateError(message){
+    const error = document.getElementById("date-error");
+    error.innerText = message;
+}
+
+
 document.getElementById("continueBtn").addEventListener("click", () => {
+
+    clearErrors();
 
     // Récupération des valeurs
     let nom = document.getElementById("nom").value.trim();
@@ -10,10 +51,34 @@ document.getElementById("continueBtn").addEventListener("click", () => {
     let annee = document.getElementById("annee").value.trim();
 
     // Vérification des champs obligatoires
-    if (!nom || !prenom || sexe === "- choisissez -" || !jour || !mois || !annee) {
-        alert("Remplissez tous les champs !");
-        return;
+    let hasError = false;
+
+    if (!nom){
+        showError("nom", "*Entrez un nom*");
+        hasError = true;
     }
+
+    if (!prenom){
+        showError("prenom", "*Entrez un prénom*");
+        hasError = true;
+    }
+
+    if (sexe === "- choisissez -"){
+        showError("sexe", "*Choisissez un sexe*");
+        hasError = true;
+    }
+
+    if (!jour || !mois || !annee){
+        showDateError("*Complétez toute la date*");
+        
+        if(!jour) document.getElementById("jour").classList.add("error");
+        if(!mois) document.getElementById("mois").classList.add("error");
+        if(!annee) document.getElementById("annee").classList.add("error");
+
+        hasError = true;
+    }
+
+    if(hasError) return;
 
     // Validation de la date
     let day = parseInt(jour, 10);
@@ -21,35 +86,43 @@ document.getElementById("continueBtn").addEventListener("click", () => {
     let year = parseInt(annee, 10);
 
     if (isNaN(day) || isNaN(month) || isNaN(year)) {
-        alert("La date doit être composée uniquement de chiffres !");
+        showDateError("*La date doit contenir uniquement des chiffres*");
+
+        if(isNaN(day)) document.getElementById("jour").classList.add("error");
+        if(isNaN(month)) document.getElementById("mois").classList.add("error");
+        if(isNaN(year)) document.getElementById("annee").classList.add("error");
+
         return;
     }
 
-    if (day < 1 || day > 31) {
-        alert("Jour invalide (1-31)");
-        return;
-    }
-
+    // Vérification du mois
     if (month < 1 || month > 12) {
-        alert("Mois invalide (1-12)");
+        showDateError("*Choisissez un mois entre 1 et 12*");
+        document.getElementById("mois").classList.add("error");
         return;
     }
 
-    let currentYear = new Date().getFullYear();
-    if (year < 1900 || year > currentYear) {
-        alert(`Année invalide (1900-${currentYear})`);
+    // Vérification du jour selon le mois
+    const mois30 = [4, 6, 9, 11]; // avril, juin, septembre, novembre
+
+    if (mois30.includes(month) && day > 30) {
+        showDateError("*Ce mois contient maximum 30 jours*");
+        document.getElementById("jour").classList.add("error");
         return;
     }
 
-    // Vérification des mois avec 30 jours et février 
-    if ([4, 6, 9, 11].includes(month) && day > 30) {
-        alert("Ce mois ne peut pas avoir plus de 30 jours");
+    if (!mois30.includes(month) && month !== 2 && day > 31) {
+        showDateError("*Ce mois contient maximum 31 jours*");
+        document.getElementById("jour").classList.add("error");
         return;
     }
+
     if (month === 2 && day > 29) {
-        alert("Février ne peut pas avoir plus de 29 jours");
+        showDateError("*Février max 29 jours*");
+        document.getElementById("jour").classList.add("error");
         return;
     }
+
 
     //  stockage temporaire
     localStorage.setItem("nom", nom);
