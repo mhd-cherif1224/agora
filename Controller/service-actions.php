@@ -34,7 +34,7 @@ switch ($action) {
 function listerService($pdo) {
 
     $stmt = $pdo->prepare("
-        SELECT ID, titre, DateDePublication, status, prixdescription, 
+        SELECT ID, titre, description, DateDePublication, status, prix, 
         FROM Service 
         ORDER BY ID ASC
     ");

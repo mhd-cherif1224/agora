@@ -49,14 +49,6 @@ closeModal.onclick = cancelBtn.onclick;
 
 
 
-// ==============================
-// AJOUTER SERVICE — commenté par ton binôme, on ne touche pas
-// ==============================
-
-// document.getElementById("confirmAdd").onclick = function(){
-//     ...
-// };
-
 
 
 // ==============================
@@ -64,7 +56,7 @@ closeModal.onclick = cancelBtn.onclick;
 // ==============================
 
 const confirmModal = document.getElementById("confirmModal");
-
+const deleteBtn = document.getElementById("deleteBtn");
 document.getElementById("deleteBtn").onclick = function(){
 
     if(!selectedRow){
@@ -163,6 +155,8 @@ window.onload = function(){
         btn.style.pointerEvents = "none";
     }
 
+    
+
     // Charge les services depuis la BDD via PHP
     fetch("../../Controller/service-actions.php", {
         method: "POST",
@@ -181,7 +175,7 @@ window.onload = function(){
                 row.innerHTML = `
                     <td>${service.ID}</td>
                     <td>${service.titre}</td>
-                    <td>${service.description}</td>
+                    <td>${service.description ?? ''}</td>
                     <td>${service.DateDePublication}</td>
                     <td>${service.status}</td>
                     <td>${service.prix}</td>

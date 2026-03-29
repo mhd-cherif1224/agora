@@ -33,9 +33,8 @@ addBtn.onclick = () => { modal.style.display = "block"; };
 cancelBtn.onclick = () => { modal.style.display = "none"; showNotification("Ajout annulé"); };
 closeModal.onclick = cancelBtn.onclick;
 
-
 /* ==============================
-AJOUTER ADMIN — AVEC PHP
+AJOUTER ADMIN — VERSION DEBUG (à coller)
 ============================== */
 
 document.getElementById("confirmAdd").onclick = function(){
@@ -50,18 +49,17 @@ document.getElementById("confirmAdd").onclick = function(){
     let role       = document.getElementById("roleInputAdd").value;
 
     // Vérification des champs obligatoires
-    if(nomAdd == "" || prenomAdd == "" || emailAdd == "" || dateValAdd == "" || passWordAdd == "" || role == ""){
+    if(nomAdd === "" || prenomAdd === "" || emailAdd === "" || dateValAdd === "" || passWordAdd === "" || role === ""){
         showNotification("Veuillez remplir les champs obligatoires");
         return;
     }
 
-    // Envoie les données vers le Controller PHP
-    // fetch() = envoie une requête HTTP sans recharger la page
+    // ==================== CODE DEBUG À UTILISER ====================
     fetch("../../Controller/admin-actions.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            action   : "ajouter",   // indique au PHP quelle action faire
+            action   : "ajouter",
             nom      : nomAdd,
             prenom   : prenomAdd,
             date     : dateValAdd,
@@ -72,10 +70,19 @@ document.getElementById("confirmAdd").onclick = function(){
             role     : role
         })
     })
-    .then(res => res.json()) // convertit la réponse PHP en objet JS
+    .then(res => {
+        return res.text().then(text => {
+            console.log("Réponse brute du serveur :", text);   // ← Regarde ici dans la console
+            try {
+                return JSON.parse(text);
+            } catch(e) {
+                console.error("Réponse non-JSON :", text);
+                throw new Error("Le serveur n'a pas renvoyé du JSON valide");
+            }
+        });
+    })
     .then(data => {
         if(data.success){
-            // Ajoute la ligne dans le tableau HTML
             let tbody = document.querySelector("#adminTable tbody");
             let newRow = tbody.insertRow();
             newRow.innerHTML = `
@@ -85,35 +92,32 @@ document.getElementById("confirmAdd").onclick = function(){
                 <td>${dateValAdd}</td>
                 <td>${sexeAdd}</td>
                 <td>${emailAdd}</td>
-                <td>${NumTelAdd}</td>
+                <td>${telAdd || ''}</td>
                 <td>********</td>
                 <td>${role}</td>
             `;
+
             modal.style.display = "none";
             showNotification("Admin ajouté avec succès ✅");
 
-            // Vide les champs du formulaire
+            // Reset du formulaire
             document.getElementById("nomInputAdd").value = "";
             document.getElementById("prenomInputAdd").value = "";
             document.getElementById("dateInputAdd").value = "";
             document.getElementById("emailInputAdd").value = "";
             document.getElementById("telInputAdd").value = "";
             document.getElementById("passWordAdd").value = "";
-
-        } else {
-            // Affiche l'erreur retournée par PHP
-            showNotification("Erreur : " + data.message);
+        } 
+        else {
+            showNotification("Erreur : " + (data.message || "Erreur inconnue"));
         }
     })
     .catch(err => {
-        // Erreur réseau ou PHP
-        showNotification("Erreur de connexion au serveur");
-        console.error(err);
+        console.error("Erreur complète :", err);
+        showNotification("Erreur de connexion au serveur - Vérifie la console (F12)");
     });
-};
-
-
-/* ==============================
+    };
+/* ===============================================================
 MODIFIER ADMIN
 ============================== */
 
