@@ -185,6 +185,16 @@ header nav ul li:hover,
     display: inline;
 }
 
-
+.MyBtns {
+    background: none;
+    border: 1px solid #333;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 15px;
+    cursor: pointer;
+    color: #333;
+    margin-right: 10px;
+    margin-left: 20px;     
+}
 
 

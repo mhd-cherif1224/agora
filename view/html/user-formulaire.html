@@ -1,0 +1,70 @@
+<!-- INTERFACE 2 : Formulaire -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/user-formulaire.css">
+    <title>Signup Step 2</title>
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- HEADER -->
+        <div class="top">
+            <span class="back"><img src="../images/fleche.png" alt="fleche" id="back"></span>
+            <div class="progress">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <h1>2 eme etape</h1>
+        <p>Remplissez ce formulaire</p>
+
+        <!-- FORM -->
+        <div class="form">
+
+            <div class="row">
+                <div class="field">
+                    <label>Nom <span>*</span></label>
+                    <input type="text" id="nom">
+                </div>
+
+                <div class="field">
+                    <label>Prenom <span>*</span></label>
+                    <input type="text" id="prenom">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="field">
+                    <label>Sexe <span>*</span></label>
+                    <select id="sexe">
+                        <option>- choisissez -</option>
+                        <option>Homme</option>
+                        <option>Femme</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Date de naissance <span>*</span></label>
+                    <div class="date">
+                        <input type="text" placeholder="JJ" id="jour">
+                        <input type="text" placeholder="MM" id="mois">
+                        <input type="text" placeholder="AAAA" id="annee">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="btn-container">
+            <button id="continueBtn">Continuer</button>
+        </div>
+
+    </div>
+
+    <script src="../js/user-formulaire.js"></script>
+</body>
+</html>

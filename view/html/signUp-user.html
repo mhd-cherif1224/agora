@@ -1,0 +1,70 @@
+<!-- Sign-up User -->
+<!-- login-admin interface -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/login-user.css">
+    <title>Sigh-up User</title>
+</head>
+<body>
+
+    <div class="container">
+
+        <div class="left">
+
+            <div class="logo"></div>
+
+            <h1>Bienvenue</h1>
+            <p>Inscrivez-vous pour continuer</p>
+
+            <form>
+                
+                    <div class="input-group">
+                        <i class="fa-solid fa-envelope icon-left"></i>
+                        <input type="email" placeholder="Entrez votre email" required>
+                    </div>
+
+                    <div class="input-group">
+                        <i class="fa-solid fa-lock icon-left"></i>
+                        <input type="password" placeholder="Entrez votre mot de passe" required>
+                        <i class="fa-solid fa-eye-slash icon-right" id="togglePassword"></i>
+                    </div>
+
+                    <div class="input-group">
+                        <i class="fa-solid fa-lock icon-left"></i>
+                        <input type="password" placeholder="Confirmez votre mot de passe" required>
+                        <i class="fa-solid fa-eye-slash icon-right" id="togglePassword"></i>
+                    </div>
+
+                    <div class="options">
+                        <label>
+                            <input type="checkbox"> remember me
+                        </label>
+                        <a href="#">forgot password?</a>
+                    </div>
+
+                    <button type="submit">S'inscrire</button>
+
+            </form>
+
+            <footer>
+                <p class="bottom-text" id="bottom-text">
+                    Vous avez un compte? <a href="../html/login-user.html">Connectez-vous!</a>
+                </p>
+            </footer>
+        </div>
+
+        <div class="right">
+            <h2>Gérez tous vos services</h2>
+            <span>en un seul endroit.</span>
+        </div>
+
+    </div>
+
+    <script src="../js/signUp-user.js"></script>
+
+</body>
+</html>
