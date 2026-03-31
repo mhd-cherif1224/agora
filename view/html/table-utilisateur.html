@@ -55,6 +55,8 @@
                     <th>NumTel</th>
                     <th>Niveau</th>
                     <th>Spécialité</th>
+                    <th>localisation</th>
+                    <th>status</th>
                 </tr>
             </thead>
 
@@ -70,6 +72,8 @@
                     <td>0550000000</td>
                     <td>L3</td>
                     <td>Informatique</td>
+                    <td>univ de Bejaia</td>
+                    <td>proposeur</td>
                 </tr>
 
             </tbody>
@@ -158,6 +162,21 @@
                         <input type="text" id="specialiteInput">
                     </div>
 
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Localisation</label>
+                        <input type="text" id="localInput">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Statut</label>
+                        <select name="statut" id="statutInput" class="input-group">
+                            <option value="proposeur">proposeur</option>
+                            <option value="chercheur">chercheur</option>
+                        </select>
+                    </div>
+                
                 </div>
 
                 <div class="modal-buttons">
