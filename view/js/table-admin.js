@@ -98,7 +98,7 @@ document.getElementById("confirmAdd").onclick = function(){
             `;
 
             modal.style.display = "none";
-            showNotification("Admin ajouté avec succès ✅");
+            showNotification("Admin ajouté avec succès");
 
             // Reset du formulaire
             document.getElementById("nomInputAdd").value = "";
@@ -200,7 +200,7 @@ document.getElementById("confirmModifier").onclick = function(){
             selectedRow.cells[8].innerText = role;
 
             modifierModal.style.display = "none";
-            showNotification("Admin modifié avec succès ✅");
+            showNotification("Admin modifié avec succès");
         } else {
             showNotification("Erreur : " + data.message);
         }
@@ -257,7 +257,7 @@ document.getElementById("confirmYes").onclick = function(){
             selectedRow.remove();
             selectedRow = null;
             confirmModal.style.display = "none";
-            showNotification("Admin supprimé avec succès ✅");
+            showNotification("Admin supprimé avec succès");
         } else {
             showNotification("Erreur : " + data.message);
         }

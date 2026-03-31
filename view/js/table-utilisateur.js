@@ -150,10 +150,10 @@ document.getElementById("confirmAdd").onclick = function(){
             selectedRow.cells[7].innerText = niveau;
             selectedRow.cells[8].innerText = specialite;
             selectedRow.cells[9].innerText = localisation;
-            selectedRow.cells[10].innerText = (status === "chercheur") ? "chercheur" : "proposeur";
+            selectedRow.cells[10].innerText = (status === "Chercheur") ? "Chercheur" : "Proposeur";
 
             modal.style.display = "none";
-            showNotification("Utilisateur modifié avec succès ✅");
+            showNotification("Utilisateur modifié avec succès");
 
         } else {
             showNotification("Erreur : " + data.message);
@@ -206,7 +206,7 @@ document.getElementById("confirmYes").onclick = function(){
             selectedRow.remove();
             selectedRow = null;
             confirmModal.style.display = "none";
-            showNotification("Utilisateur supprimé avec succès ✅");
+            showNotification("Utilisateur supprimé avec succès");
         } else {
             showNotification("Erreur : " + data.message);
         }
