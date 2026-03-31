@@ -16,11 +16,7 @@ form.addEventListener("submit", function(e) {
     
   }
 
-  if(password && email){
-        alert("bienvenue")
-    }else{
-        alert("tghletet")
-    }
+  
 
     console.log("Login envoyé :", email, password);
 });
