@@ -35,6 +35,12 @@ MODAL MODIFIER - VERSION CORRIGÉE
 
 const modal = document.getElementById("modal");
 const modifierBtn = document.getElementById("modifierBtn");
+const cancelBtn = document.getElementById("cancelAdd");
+const closeModal = document.querySelector(".close");
+
+cancelBtn.onclick = () => { modal.style.display = "none"; showNotification("Modification annulé"); };
+closeModal.onclick = () => { modal.style.display = "none"; showNotification("Modification annulé"); };
+
 
 modifierBtn.onclick = function(){
 
@@ -72,8 +78,8 @@ modifierBtn.onclick = function(){
     document.getElementById("telInput").value        = selectedRow.cells[6].innerText || "";
     document.getElementById("niveauInput").value     = selectedRow.cells[7].innerText || "";
     document.getElementById("specialiteInput").value = selectedRow.cells[8].innerText || "";
-    document.getElementById("localisationInput").value      = selectedRow.cells[9].innerText;
-    document.getElementById("statusInput").value     = selectedRow.cells[10].innerText;
+    document.getElementById("localisationInput").value      = selectedRow.cells[9].innerText || "";
+    document.getElementById("statusInput").value     = selectedRow.cells[10].innerText || "";
 
 
     modal.style.display = "block";
@@ -92,8 +98,8 @@ document.getElementById("confirmAdd").onclick = function(){
     let tel        = document.getElementById("telInput").value.trim();
     let niveau     = document.getElementById("niveauInput").value.trim();
     let specialite = document.getElementById("specialiteInput").value.trim();
-    let local      = document.getElementById("localisationInput").value.trim();
-    let statut     = document.getElementById("statusInput").value;
+    let localisation      = document.getElementById("localisationInput").value.trim();
+    let status     = document.getElementById("statusInput").value;
 
     // Vérification des champs obligatoires
     if(nom == "" || prenom == "" || email == "" || dateVal == "" || sexe == ""){
@@ -144,7 +150,7 @@ document.getElementById("confirmAdd").onclick = function(){
             selectedRow.cells[7].innerText = niveau;
             selectedRow.cells[8].innerText = specialite;
             selectedRow.cells[9].innerText = localisation;
-            selectedRow.cells[10].innerText = (status === "chercheur") ? "chercheur" : "proposeur";;
+            selectedRow.cells[10].innerText = (status === "chercheur") ? "chercheur" : "proposeur";
 
             modal.style.display = "none";
             showNotification("Utilisateur modifié avec succès ✅");
@@ -221,6 +227,8 @@ document.getElementById("confirmNo").onclick = function(){
     confirmModal.style.display = "none";
     showNotification("Suppression annulée");
 };
+
+
 
 window.onclick = function(event){
     if(event.target === modal){

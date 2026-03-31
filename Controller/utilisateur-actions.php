@@ -70,7 +70,7 @@ function modifierUser($pdo, $data) {
     $date       = trim($data['date']       ?? '');
     $sexe       = trim($data['sexe']       ?? '');
     $email      = trim($data['email']      ?? '');
-    $status     = trim($data['satus']);
+    $status     = trim($data['status']);
     $tel        = trim($data['tel']        ?? '') ?: null;
     $niveau     = trim($data['niveau']     ?? '') ?: null;
     $specialite = trim($data['specialite'] ?? '') ?: null;
@@ -100,7 +100,7 @@ function modifierUser($pdo, $data) {
     $stmt = $pdo->prepare("
         UPDATE Utilisateur 
         SET nom=:nom, prenom=:prenom, DateDeNaissance=:date, sexe=:sexe,
-            email=:email, NumTel=:tel, niveau=:niveau, specialite=:specialite, localisation=:localisation, status:=status
+            email=:email, NumTel=:tel, niveau=:niveau, specialite=:specialite, localisation=:localisation, status=:status
         WHERE ID=:id
     "); 
 
