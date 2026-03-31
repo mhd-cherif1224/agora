@@ -13,19 +13,22 @@ table.addEventListener("click", function(e){
 });
 
 document.addEventListener("click", function(e){
-    if(selectedRow && !e.target.closest("#serviceTable tbody tr") && !e.target.closest(".buttons") && !e.target.closest(".modal-content")){
+    if(
+        selectedRow &&
+        !e.target.closest("#serviceTable tbody tr") &&
+        !e.target.closest(".buttons") &&
+        !e.target.closest(".modal-content")
+    ){
         selectedRow.classList.remove("selected");
         selectedRow = null;
     }
 });
 
-
 // ==============================
-// SUPPRESSION SERVICE — AVEC PHP
+// SUPPRESSION SERVICE
 // ==============================
 const confirmModal = document.getElementById("confirmModal");
 const deleteBtn    = document.getElementById("deleteBtn");
-
 
 deleteBtn.onclick = function(){
     if(!selectedRow){
@@ -36,16 +39,12 @@ deleteBtn.onclick = function(){
 };
 
 document.getElementById("confirmYes").onclick = function(){
-
     let serviceId = selectedRow.cells[0].innerText;
 
     fetch("../../Controller/service-actions.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            action: "supprimer",
-            id    : serviceId
-        })
+        body: JSON.stringify({ action: "supprimer", id: serviceId })
     })
     .then(res => res.json())
     .then(data => {
@@ -59,8 +58,8 @@ document.getElementById("confirmYes").onclick = function(){
         }
     })
     .catch(err => {
-        showNotification("Erreur de connexion au serveur");
         console.error(err);
+        showNotification("Erreur serveur");
     });
 };
 
@@ -74,14 +73,12 @@ document.querySelector(".closeConfirm").onclick = function(){
     showNotification("Suppression annulée");
 };
 
-
 window.onclick = function(event){
     if(event.target === confirmModal){
         confirmModal.style.display = "none";
         showNotification("Suppression annulée");
     }
 };
-
 
 // ==============================
 // NOTIFICATION
@@ -93,19 +90,10 @@ function showNotification(message){
     setTimeout(() => { notif.style.display = "none"; }, 3000);
 }
 
-
 // ==============================
-// CHARGEMENT DES DONNÉES BDD
+// CHARGEMENT DES DONNÉES
 // ==============================
 window.onload = function(){
-
-    let role = localStorage.getItem("role");
-    let btn  = document.getElementById("adminTableBtn");
-    if(role === "admin"){
-        btn.style.opacity       = "0.5";
-        btn.style.pointerEvents = "none";
-    }
-
     fetch("../../Controller/service-actions.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -128,8 +116,12 @@ window.onload = function(){
                     <td>${service.prix}</td>
                 `;
             });
+        } else {
+            showNotification("Erreur chargement données");
         }
     })
-    .catch(err => console.error("Erreur chargement services:", err));
-
-}; 
+    .catch(err => {
+        console.error(err);
+        showNotification("Erreur serveur");
+    });
+};

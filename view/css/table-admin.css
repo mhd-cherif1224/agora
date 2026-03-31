@@ -31,7 +31,7 @@ table{
 td{
     padding:12px;
     text-align:center;
-    border-bottom:1px solid #ddd;
+    border-bottom:1px solid #ffffff;
 }
 
 th{
@@ -232,7 +232,7 @@ button:hover{
     padding:20px;
     width: 400px;
     height: 200px;
-    margin:150px auto;
+    margin: 100px auto;
     border-radius:10px;
     text-align:center;
     border: solid 1px #333;
