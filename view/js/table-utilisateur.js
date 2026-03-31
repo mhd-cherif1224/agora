@@ -58,6 +58,8 @@ modifierBtn.onclick = function(){
     document.getElementById("telInput").value        = selectedRow.cells[6].innerText;
     document.getElementById("niveauInput").value     = selectedRow.cells[7].innerText;
     document.getElementById("specialiteInput").value = selectedRow.cells[8].innerText;
+    document.getElementById("localInput").value      = selectedRow.cells[9].innerText;
+    document.getElementById("statutInput").value     = selectedRow.cells[10].innerText;
 
     modal.style.display = "block";
 
@@ -85,6 +87,8 @@ document.getElementById("confirmAdd").onclick = function(){
     let tel        = document.getElementById("telInput").value.trim();
     let niveau     = document.getElementById("niveauInput").value.trim();
     let specialite = document.getElementById("specialiteInput").value.trim();
+    let local      = document.getElementById("localInput").value.trim();
+    let statut     = document.getElementById("statutInput").value;
 
     // Vérification des champs obligatoires
     if(nom == "" || prenom == "" || email == "" || dateVal == "" || sexe == ""){
@@ -109,7 +113,10 @@ document.getElementById("confirmAdd").onclick = function(){
             email     : email,
             tel       : tel,
             niveau    : niveau,
-            specialite: specialite
+            specialite: specialite,
+            local : local,
+            statut : statut
+
         })
     })
     .then(res => res.json())
@@ -131,6 +138,8 @@ document.getElementById("confirmAdd").onclick = function(){
             selectedRow.cells[6].innerText = tel;
             selectedRow.cells[7].innerText = niveau;
             selectedRow.cells[8].innerText = specialite;
+            selectedRow.cells[9].innerText = local;
+            selectedRow.cells[10].innerText = statut;
 
             modal.style.display = "none";
             showNotification("Utilisateur modifié avec succès ✅");
@@ -279,6 +288,8 @@ window.onload = function(){
                     <td>${user.NumTel ?? ''}</td>
                     <td>${user.niveau ?? ''}</td>
                     <td>${user.specialite ?? ''}</td>
+                    <td>${user.local ?? ''}</td>
+                    <td>${user.statut ?? ''}</td>
                 `;
             });
         }

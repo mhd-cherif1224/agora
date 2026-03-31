@@ -11,6 +11,17 @@ form.addEventListener("submit", function(e) {
         return;
     }
 
+    if (!email.includes("@")) {
+    alert("Enter a valid email.");
+    
+  }
+
+  if(password && email){
+        alert("bienvenue")
+    }else{
+        alert("tghletet")
+    }
+
     console.log("Login envoyé :", email, password);
 });
 
@@ -26,5 +37,8 @@ toggle.addEventListener("click", () => {
         toggle.classList.replace("fa-eye-slash", "fa-eye");
     }
 });
+
+
+
 
 

@@ -48,7 +48,7 @@ switch ($action) {
 function listerUser($pdo) {
 
     $stmt = $pdo->prepare("
-        SELECT ID, nom, prenom, DateDeNaissance, sexe, email, NumTel, niveau, specialite 
+        SELECT ID, nom, prenom, DateDeNaissance, sexe, email, NumTel, niveau, specialite, local, statut
         FROM Utilisateur 
         ORDER BY ID ASC
     "); 
@@ -73,6 +73,8 @@ function modifierUser($pdo, $data) {
     $tel        = trim($data['tel']        ?? '') ?: null;
     $niveau     = trim($data['niveau']     ?? '') ?: null;
     $specialite = trim($data['specialite'] ?? '') ?: null;
+    $specialite = trim($data['local'] ?? '') ?: null;
+    $specialite = trim($data['satut'] ?? '') ?: null;
 
     // Vérifie que l'ID est valide
     if ($id <= 0) {
@@ -97,7 +99,7 @@ function modifierUser($pdo, $data) {
     $stmt = $pdo->prepare("
         UPDATE Utilisateur 
         SET nom=:nom, prenom=:prenom, DateDeNaissance=:date, sexe=:sexe,
-            email=:email, NumTel=:tel, niveau=:niveau, specialite=:specialite
+            email=:email, NumTel=:tel, niveau=:niveau, specialite=:specialite, local=:local, statut:=statut
         WHERE ID=:id
     "); 
 
@@ -110,6 +112,8 @@ function modifierUser($pdo, $data) {
         ':tel'        => $tel,
         ':niveau'     => $niveau,
         ':specialite' => $specialite,
+        ':local'      => $local,
+        ':statut'     => $statut,
         ':id'         => $id
     ]);
 
