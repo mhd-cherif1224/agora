@@ -30,13 +30,11 @@ document.addEventListener("click", function(e){
 
 
 /* ==============================
-MODAL MODIFIER
+MODAL MODIFIER - VERSION CORRIGÉE
 ============================== */
 
 const modal = document.getElementById("modal");
 const modifierBtn = document.getElementById("modifierBtn");
-const cancelBtn = document.getElementById("cancelAdd");
-const closeModal = document.querySelector(".close");
 
 modifierBtn.onclick = function(){
 
@@ -45,32 +43,37 @@ modifierBtn.onclick = function(){
         return;
     }
 
-    // Convert DD/MM/YYYY → YYYY-MM-DD for the date input
-    let rawDate = selectedRow.cells[3].innerText;
-    let parts = rawDate.split("/");
-    let formattedDate = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : rawDate;
+    // Récupération sécurisée de la date (gère "undefined", null, ou chaîne vide)
+    let rawDate = selectedRow.cells[3].innerText.trim();
 
-    document.getElementById("nomInput").value        = selectedRow.cells[1].innerText;
-    document.getElementById("prenomInput").value     = selectedRow.cells[2].innerText;
-    document.getElementById("dateInput").value       = formattedDate;
-    document.getElementById("sexeInput").value       = selectedRow.cells[4].innerText;
-    document.getElementById("emailInput").value      = selectedRow.cells[5].innerText;
-    document.getElementById("telInput").value        = selectedRow.cells[6].innerText;
-    document.getElementById("niveauInput").value     = selectedRow.cells[7].innerText;
-    document.getElementById("specialiteInput").value = selectedRow.cells[8].innerText;
+    let formattedDate = "";
+
+    if (rawDate && rawDate !== "undefined" && rawDate !== "Non définie") {
+        // Cas 1 : Format DD/MM/YYYY (comme affiché dans le tableau)
+        if (rawDate.includes("/")) {
+            let parts = rawDate.split("/");
+            if (parts.length === 3) {
+                formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+        } 
+        // Cas 2 : Format YYYY-MM-DD (déjà bon)
+        else if (rawDate.includes("-")) {
+            formattedDate = rawDate;
+        }
+    }
+
+    // Remplissage du formulaire
+    document.getElementById("nomInput").value        = selectedRow.cells[1].innerText || "";
+    document.getElementById("prenomInput").value     = selectedRow.cells[2].innerText || "";
+    document.getElementById("dateInput").value       = formattedDate;   // ← Plus jamais "undefined"
+    document.getElementById("sexeInput").value       = selectedRow.cells[4].innerText || "";
+    document.getElementById("emailInput").value      = selectedRow.cells[5].innerText || "";
+    document.getElementById("telInput").value        = selectedRow.cells[6].innerText || "";
+    document.getElementById("niveauInput").value     = selectedRow.cells[7].innerText || "";
+    document.getElementById("specialiteInput").value = selectedRow.cells[8].innerText || "";
 
     modal.style.display = "block";
-
 };
-
-cancelBtn.onclick = () => {
-    modal.style.display = "none";
-    showNotification("Modification annulée");
-};
-
-closeModal.onclick = cancelBtn.onclick;
-
-
 /* ==============================
 MODIFIER UTILISATEUR — AVEC PHP
 ============================== */
@@ -271,7 +274,7 @@ window.onload = function(){
                     <td>${user.ID}</td>
                     <td>${user.nom}</td>
                     <td>${user.prenom}</td>
-                    <td>${user.DtaeDeNaissance}</td>
+                    <td>${user.DateDeNaissance}</td>
                     <td>${user.sexe}</td>
                     <td>${user.email}</td>
                     <td>${user.NumTel ?? ''}</td>

@@ -34,7 +34,7 @@ cancelBtn.onclick = () => { modal.style.display = "none"; showNotification("Ajou
 closeModal.onclick = cancelBtn.onclick;
 
 /* ==============================
-AJOUTER ADMIN — VERSION DEBUG (à coller)
+AJOUTER ADMIN avec PHP
 ============================== */
 
 document.getElementById("confirmAdd").onclick = function(){
@@ -54,7 +54,7 @@ document.getElementById("confirmAdd").onclick = function(){
         return;
     }
 
-    // ==================== CODE DEBUG À UTILISER ====================
+
     fetch("../../Controller/admin-actions.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -72,7 +72,7 @@ document.getElementById("confirmAdd").onclick = function(){
     })
     .then(res => {
         return res.text().then(text => {
-            console.log("Réponse brute du serveur :", text);   // ← Regarde ici dans la console
+          
             try {
                 return JSON.parse(text);
             } catch(e) {
@@ -114,10 +114,10 @@ document.getElementById("confirmAdd").onclick = function(){
     })
     .catch(err => {
         console.error("Erreur complète :", err);
-        showNotification("Erreur de connexion au serveur - Vérifie la console (F12)");
+        showNotification("Erreur de connexion au serveur ");
     });
     };
-/* ===============================================================
+/* ===========================
 MODIFIER ADMIN
 ============================== */
 
