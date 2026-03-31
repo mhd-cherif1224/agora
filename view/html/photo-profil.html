@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <title>Signup Step 3</title>
     <link rel="stylesheet" href="../css/photo-profile.css">
 </head>
@@ -11,9 +12,11 @@
 
     <div class="container">
 
+        <div id="notification"></div>
+
         <!-- HEADER -->
         <div class="top">
-            <span class="back"><img src="../images/fleche.png" alt="fleche" id="back"></span>
+            <i class="fa-solid fa-chevron-left back-icon" id="back"></i>
             <div class="progress">
                 <div class="progress-bar"></div>
             </div>
@@ -25,14 +28,18 @@
         <!-- BANNER -->
         <div class="banner">
             <input type="file" id="bannerInput" hidden>
-            <label for="bannerInput" class="camera">📷</label>
+            <label for="bannerInput" class="camera">
+                <i class="fa-solid fa-camera"></i>
+            </label>
         </div>
 
         <!-- PROFILE -->
         <div class="profile-container">
             <div class="profile">
                 <input type="file" id="profileInput" hidden>
-                <label for="profileInput">📷</label>
+                <label for="profileInput">
+                    <i class="fa-solid fa-camera"></i>
+                </label>
             </div>
         </div>
 
@@ -42,6 +49,7 @@
             <button class="finish">Terminez</button>
         </div>
 
+        
     </div>
 
     <script src="../js/photo-profile.js"></script>
