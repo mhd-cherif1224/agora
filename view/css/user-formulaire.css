@@ -150,20 +150,36 @@ input:focus, select:focus {
     justify-content: flex-end; /* aligne à droite */
     margin-top: 20px;
 }
-
 button {
-    background: linear-gradient(to right, #49c6d9, #1e3c72);
-    border: none;
     padding: 10px 25px;
+    border: none;
+    border-radius: 25px;
+    letter-spacing: 1px;
     color: white;
-    border-radius: 20px;
+
     cursor: pointer;
+
+    background: linear-gradient(270deg, #4BBFCC, #16376E, #4BBFCC);
+    background-size: 300% 300%;
+
+    animation: moveGradient 4s ease infinite;
+}
+
+@keyframes moveGradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 button:hover {
-    transform: translateY(-5px);
+    opacity: 0.9;
 }
-
 /* ERREURS FORMULAIRE */
 
 input.error, select.error {
