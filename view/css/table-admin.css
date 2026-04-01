@@ -388,7 +388,7 @@ button:hover {
     display: flex;
     justify-content: end;
     align-items: end;
-    height: 50px;
+    height: 60px;
 }
 
 #toggleBtn {
