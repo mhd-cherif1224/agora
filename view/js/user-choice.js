@@ -27,7 +27,9 @@ document.getElementById("back").addEventListener("click", () => {
     window.location.href = "signUp-user.html";
 });
 
-// Progress bar
+// ========================
+// PROGRESS BAR
+// ========================
 function animateProgress(from, to, duration = 600){
     const style = document.createElement('style');
     const animName = `loadProgress${Date.now()}`;
@@ -44,8 +46,12 @@ function animateProgress(from, to, duration = 600){
 }
 
 if(progressBar){
-    if(step == 1) progressBar.style.width = "30%";
-    if(step == "back") animateProgress("60%", "30%");
+    if(step == "back"){
+        animateProgress("60%", "30%");
+        localStorage.setItem("step", 1); // reset
+    } else {
+        animateProgress("0%", "30%");
+    }
 }
 
 // Notification

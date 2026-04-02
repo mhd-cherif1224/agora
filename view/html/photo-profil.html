@@ -26,19 +26,40 @@
         <p>Ajoutez une photo de profil et un banner</p>
 
         <!-- BANNER -->
-        <div class="banner">
+        <!-- <div class="banner">
             <input type="file" id="bannerInput" hidden>
             <label for="bannerInput" class="camera">
                 <i class="fa-solid fa-camera"></i>
             </label>
-        </div>
+        </div> -->
 
         <!-- PROFILE -->
-        <div class="profile-container">
+        <!-- <div class="profile-container">
             <div class="profile">
                 <input type="file" id="profileInput" hidden>
                 <label for="profileInput">
+                    <img src="../images/person.png" alt="person" id="profilePreview">
                     <i class="fa-solid fa-camera"></i>
+                </label>
+            </div>
+        </div> -->
+
+
+        <div class="banner">
+            <div class="banner-top">
+                <input type="file" id="bannerInput" hidden>
+                <label for="bannerInput" class="camera-banner">
+                    <i class="fa-solid fa-camera"></i>
+                </label>
+            </div>
+            <div class="banner-bottom"></div>
+
+            <!-- PROFILE dedans -->
+            <div class="profile">
+                <input type="file" id="profileInput" hidden>
+                <label for="profileInput">
+                    <img src="../images/person.png" id="profilePreview">
+                    <i class="fa-solid fa-camera profile-icon"></i>
                 </label>
             </div>
         </div>

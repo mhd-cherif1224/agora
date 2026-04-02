@@ -1,7 +1,7 @@
 body {
     margin: 0;
     font-family:Arial, Helvetica, sans-serif;
-    background: linear-gradient(120deg, #49c6d9, #1e3c72);
+    background: linear-gradient(135deg, #49c6d9 0%, #1e3c72 100%);
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -38,17 +38,7 @@ body {
     background-color: #16376E;
     border-radius: 10px;
     transition: width 0.6s ease-out;
-    animation: loadProgress 1s ease-out forwards;
-}
-
-
-@keyframes loadProgress {
-    from {
-        width: 30%;
-    }
-    to {
-        width: 60%;
-    }
+    
 }
 
 
