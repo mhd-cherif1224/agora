@@ -11,6 +11,8 @@ class Utilisateur {
     private ?string $numTel          = null;  
     private ?string $niveau          = null;  
     private ?string $specialite      = null;  
+    private ?string $localisation;
+    private string $role;
     private string  $motDePass;
 
    
@@ -21,8 +23,10 @@ class Utilisateur {
         string  $email,
         string  $motDePass,
         string  $sexe,
+        string $role,
         ?string $niveau     = null,  
         ?string $specialite = null,  
+        ?string $localisation = null,
         ?string $numTel     = null
     ) {
         $this->nom             = $nom;
@@ -31,6 +35,8 @@ class Utilisateur {
         $this->sexe            = $sexe;
         $this->niveau          = $niveau;
         $this->specialite      = $specialite;
+        $this->localisation    = $localisation;
+        $this->role            = $role;
         $this->email           = $email;
         $this->motDePass       = $motDePass;
         $this->numTel          = $numTel;
@@ -44,6 +50,8 @@ class Utilisateur {
     public function getSexe(): string         { return $this->sexe; }
     public function getNiveau(): ?string      { return $this->niveau; }
     public function getSpecialite(): ?string  { return $this->specialite; }
+    public function getLocalisation() :?string {return $this->localisation;}
+    public function getRole(): string        { return $this->role; } 
     public function getEmail(): string        { return $this->email; }
     public function getNumTel(): ?string      { return $this->numTel; }
     public function getMotDePass(): string    { return $this->motDePass; }
@@ -89,6 +97,16 @@ class Utilisateur {
         return $this;
     }
 
+    public function setLocalisation(?string $localisation): self {
+        $this->localisation = $localisation;
+        return $this;
+    }
+
+    public function setRole(?string $role): self {
+        $this->role = $role;
+        return $this;
+    }
+
     // Hache le mot de passe avant de le stocker
     public function setMotDePass(string $motDePass): self {
         $this->motDePass = password_hash($motDePass, PASSWORD_BCRYPT);
@@ -110,6 +128,8 @@ class Utilisateur {
             $row['email'],
             $row['MotDePass'],        
             $row['sexe'],
+            $row['localisation'],
+            $row['role'],
             $row['niveau']     ?? null,
             $row['specialite'] ?? null,
             $row['NumTel']     ?? null  

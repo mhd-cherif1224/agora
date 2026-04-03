@@ -1,18 +1,16 @@
 <?php
-// Démarre la session pour accéder aux données du login
 session_start();
 
 // Si l'admin n'est pas connecté → retour au login
-if (!isset($_SESSION['admin_id'])) {
-    header('Location: login-admin.html');
+if (!isset($_SESSION['utilisateur_id'])) {
+    header('Location: login-user.html');
     exit();
 }
 
 // Récupère les données depuis la session PHP (côté serveur)
-$role   = $_SESSION['admin_role'];
-$email  = $_SESSION['admin_email'];
-$nom    = $_SESSION['admin_nom'];
-$prenom = $_SESSION['admin_prenom'];
+$email  = $_SESSION['utilisateur_email'];
+$nom    = $_SESSION['utilisateur_nom'];
+$prenom = $_SESSION['utilisateur_prenom'];
 ?>
 <!DOCTYPE html>
 <html>
@@ -20,14 +18,12 @@ $prenom = $_SESSION['admin_prenom'];
 <body>
 <script>
     // Écrit dans localStorage SEULEMENT après vérification PHP
-    // Comme ça le JS de ton binôme continue à fonctionner normalement
-    localStorage.setItem("role",   "<?= htmlspecialchars($role) ?>");
     localStorage.setItem("email",  "<?= htmlspecialchars($email) ?>");
     localStorage.setItem("nom",    "<?= htmlspecialchars($nom) ?>");
     localStorage.setItem("prenom", "<?= htmlspecialchars($prenom) ?>");
 
     // Redirige vers la page HTML — sans la modifier !
-    window.location.href = "home-page-admin.html";
+    window.location.href = "landing-page.html";
 </script>
 </body>
 </html>

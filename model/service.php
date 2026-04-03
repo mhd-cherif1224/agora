@@ -13,15 +13,16 @@
 
  public function __construct(
     string $titre,
+    ?string $description  =null,
     string $dateDePublication,
     string $status,
-    float $prix,
-    ?string $description  =null
+    float $prix
+    
  ){
     $this->titre    = $titre;
     $this->description  =$description;
-    $this->status = $status;
     $this->dateDePublication =$dateDePublication;
+    $this->status = $status; 
     $this->prix     = $prix;
  }
  
@@ -42,7 +43,7 @@
     return $this;
  }
 
- public function setDescription(?string $description): self {
+ public function setDescription(?string $description): ?self {
         $this->description = $description;
         return $this;
     }
@@ -64,12 +65,12 @@
 
 //créer l'objet service 
 public static function fromBDD(array $row) :self{
-    $service = new self(
+$service = new self(
     $row['titre'],
+    $row['description'] ?? null,
     $row['DateDePublication'],
     $row['status'],
-    $row['prix'],
-    $row['description'] ?? null
+    (float)$row['prix']
 );
     $service->setId((int)$row['ID']);
         return $service;

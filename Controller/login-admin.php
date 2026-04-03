@@ -37,6 +37,6 @@ $_SESSION['admin_prenom'] = $admin->getPrenom();
 $_SESSION['admin_role']   = $admin->getRole();
 
 // ✅ Redirige vers session-bridge.php au lieu de home-page-admin.html
-header('Location: ../view/html/session-bridge.php');
+header('Location: ../view/html/session-bridge-admin.php');
 exit();
 ?>

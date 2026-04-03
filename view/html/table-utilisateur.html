@@ -21,7 +21,7 @@
         </button>
 
         <button class="MyBtns">
-            <a href="../html/table-utilisateur.html">Table d'Utilisateurs</a>
+            <a href="../html/table-utilisateur.html"> <u>Table d'Utilisateurs</u> </a>
         </button>
 
         <button class="MyBtns">
@@ -55,6 +55,8 @@
                     <th>NumTel</th>
                     <th>Niveau</th>
                     <th>Spécialité</th>
+                    <th>localisation</th>
+                    <th>status</th>
                 </tr>
             </thead>
 
@@ -70,6 +72,8 @@
                     <td>0550000000</td>
                     <td>L3</td>
                     <td>Informatique</td>
+                    <td>univ de Bejaia</td>
+                    <td>proposeur</td>
                 </tr>
 
             </tbody>
@@ -159,6 +163,21 @@
                     </div>
 
                 </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Localisation</label>
+                        <input type="text" id="localisationInput">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Status<span class="mandatory-star">*</span></label>
+                        <select name="statut" id="statusInput" class="input-group">
+                            <option value="Proposeur">Proposeur</option>
+                            <option value="Chercheur">Chercheur</option>
+                        </select>
+                    </div>
+                
+                </div>
 
                 <div class="modal-buttons">
 
@@ -204,7 +223,9 @@
         </div>
 
         <div id="notification"></div>
-
+        <div id="toggleBtnContainer">
+            <button id="toggleBtn">🌙</button>
+        </div>
     </div>
 
     <script src="../js/table-utilisateur.js"></script>

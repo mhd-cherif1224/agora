@@ -14,7 +14,7 @@
         <nav class="admin-navbar">
 
             <button class="MyBtns">
-                <a href="../html/table-admin.html">Table d'Admins</a>
+                <a href="../html/table-admin.html"> <u>Table d'Admins</u> </a>
             </button>
 
             <button class="MyBtns">
@@ -130,20 +130,20 @@
                         <input type="text" id="telInputAdd">
                     </div>
                 </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Mot de passe<span class="mandatory-star">*</span></label>
+                        <input type="password" id="passWordAdd">
+                    </div>
 
-                <div class="input-group">
-                    <label>Mot de passe<span class="mandatory-star">*</span></label>
-                    <input type="password" id="passWordAdd">
+                    <div class="input-group">
+                        <label>Rôle<span class="mandatory-star">*</span></label>
+                        <select id="roleInputAdd">
+                            <option value="admin">Admin</option>
+                            <option value="super_admin">Super Admin</option>
+                        </select>
+                    </div>
                 </div>
-
-                <div class="input-group">
-                    <label>Rôle<span class="mandatory-star">*</span></label>
-                    <select id="roleInputAdd">
-                        <option value="admin">Admin</option>
-                        <option value="super_admin">Super Admin</option>
-                    </select>
-                </div>
-
                 <br>
 
                 <div class="modal-buttons">
@@ -260,9 +260,11 @@
         </div>
 
         <div id="notification"></div>
-
+        <div id="toggleBtnContainer">
+            <button id="toggleBtn">🌙</button>
+        </div>
     </div>
 
-    <script src="../js/table-admin.js"></script>
+    <script src="../js/table-admin.js"></>
 </body>
 </html>

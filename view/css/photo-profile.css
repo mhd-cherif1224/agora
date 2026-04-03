@@ -1,7 +1,7 @@
 body {
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
-    background: linear-gradient(120deg, #49c6d9, #1e3c72);
+    background: linear-gradient(135deg, #49c6d9 0%, #1e3c72 100%);
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -10,8 +10,9 @@ body {
 
 /* CONTAINER */
 .container {
-    width: 450px;
-    background: #f4f4f4;
+    width: 500px;
+    height: 415px;
+    background: white;
     padding: 30px;
     border-radius: 12px;
 }
@@ -31,17 +32,25 @@ body {
 }
 
 .progress-bar {
-    width: 100%;
+
+    width: 0; 
     height: 100%;
-    background: #16376E;
+    background-color: #16376E;
     border-radius: 10px;
+    transition: width 0.6s ease-out;
 }
 
-.back img{
-    margin-top: 4px;
-    width: 30px;
-    height: 25px;
+.back-icon {
+    font-size: 18px;
+    color: black;
+    margin-top: 5px;
+    margin-right: 25px;
     cursor: pointer;
+    transition: 0.3s;
+}
+
+.back-icon:hover {
+    transform: translateX(-2px);
 }
 
 /* TEXT */
@@ -56,27 +65,50 @@ p {
 }
 
 /* BANNER */
+
 .banner {
     margin-top: 20px;
-    height: 120px;
-    background: linear-gradient(to right, #777, #bbb);
+    height: 180px;
     border-radius: 10px;
     position: relative;
-    overflow: hidden;
+    box-shadow: 0px 3px 2px #1e3b72c5;
 }
 
-.banner img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.banner-top {
+    height: 40%;
+    background: #616161;
+    position: relative;
+    border-bottom: 1px solid #F3F3F3;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
 }
+
+.banner-bottom {
+    height: 60%;
+    background: linear-gradient(120deg, #4A4A4A, #F3F3F3);
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.camera-banner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.camera-banner i {
+    color: white;
+    font-size: 38px;
+}
+
 
 .camera {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 24px;
+    font-size: 38px;
     cursor: pointer;
 }
 
@@ -84,57 +116,120 @@ p {
 .profile-container {
     display: flex;
     justify-content: center;
+    align-items: center;
     margin-top: -40px;
 }
 
+
 .profile {
-    width: 80px;
-    height: 80px;
+    width: 115px;
+    height: 115px;
     background: #ccc;
     border-radius: 50%;
-    border: 3px solid white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
+    border: 1px solid white;
+    position: absolute; 
+    bottom: 12px;      /* descend sous le banner */
+    left: -8px;         /* à gauche */
+    overflow: hidden;   
 }
 
-.profile img {
+#profilePreview{
     width: 100%;
     height: 100%;
-    border-radius: 50%;
     object-fit: cover;
+    display: block;
 }
 
 .profile label {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    cursor: pointer;
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
 }
+
+.profile-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* centre parfait */
+    
+    color: white;
+    font-size: 38px;
+}
+
 
 /* BUTTONS */
 .buttons {
     display: flex;
     justify-content: space-between;
-    margin-top: 30px;
+    margin-top: 60px;
+    
+}
+button {
+    padding: 10px 25px;
+    border: none;
+    border-radius: 25px;
+    letter-spacing: 1px;
+    color: white;
+
+    cursor: pointer;
+
+    background: linear-gradient(270deg, #4BBFCC, #16376E, #4BBFCC);
+    background-size: 300% 300%;
+
+    animation: moveGradient 4s ease infinite;
+}
+
+@keyframes moveGradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 button:hover {
+    opacity: 0.9;
+}
+
+.finish:hover {
     transform: translateY(-5px);
 }
+
 .skip {
     background: transparent;
     color: #16376E;
     border: 2px solid #16376E;
     padding: 5px 30px;
     border-radius: 20px;
+    
+    font-size: 15px;
+    cursor: pointer;
+    margin-right: 10px;
+    margin-left: 20px; 
 }
 
-.finish {
-    background: linear-gradient(to right, #49c6d9, #1e3c72);
-    border: none;
-    padding: 7px 30px;
-    color: white;
-    border-radius: 20px;
+.skip:hover {
+    background-color: #16376E;
+    color: white;          
+    transform: translateY(-5px);
+}
+
+
+/* ===== NOTIFICATION ===== */
+
+#notification{
+    position:fixed;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%);
+    background:black;
+    color:white;
+    padding:10px 20px;
+    border-radius:10px;
+    display:none;
 }

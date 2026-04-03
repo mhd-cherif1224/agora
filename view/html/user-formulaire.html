@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="../css/user-formulaire.css">
     <title>Signup Step 2</title>
 </head>
@@ -13,7 +14,7 @@
 
         <!-- HEADER -->
         <div class="top">
-            <span class="back"><img src="../images/fleche.png" alt="fleche" id="back"></span>
+            <i class="fa-solid fa-chevron-left back-icon" id="back"></i>
             <div class="progress">
                 <div class="progress-bar"></div>
             </div>
@@ -54,6 +55,8 @@
                         <input type="text" placeholder="MM" id="mois">
                         <input type="text" placeholder="AAAA" id="annee">
                     </div>
+
+                    <p id="date-error" class="error-message"></p>
                 </div>
             </div>
 

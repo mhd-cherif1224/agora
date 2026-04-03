@@ -30,13 +30,17 @@ document.addEventListener("click", function(e){
 
 
 /* ==============================
-MODAL MODIFIER
+MODAL MODIFIER - VERSION CORRIGÉE
 ============================== */
 
 const modal = document.getElementById("modal");
 const modifierBtn = document.getElementById("modifierBtn");
 const cancelBtn = document.getElementById("cancelAdd");
 const closeModal = document.querySelector(".close");
+
+cancelBtn.onclick = () => { modal.style.display = "none"; showNotification("Modification annulé"); };
+closeModal.onclick = () => { modal.style.display = "none"; showNotification("Modification annulé"); };
+
 
 modifierBtn.onclick = function(){
 
@@ -45,32 +49,41 @@ modifierBtn.onclick = function(){
         return;
     }
 
-    // Convert DD/MM/YYYY → YYYY-MM-DD for the date input
-    let rawDate = selectedRow.cells[3].innerText;
-    let parts = rawDate.split("/");
-    let formattedDate = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : rawDate;
+    // Récupération sécurisée de la date (gère "undefined", null, ou chaîne vide)
+    let rawDate = selectedRow.cells[3].innerText.trim();
 
-    document.getElementById("nomInput").value        = selectedRow.cells[1].innerText;
-    document.getElementById("prenomInput").value     = selectedRow.cells[2].innerText;
-    document.getElementById("dateInput").value       = formattedDate;
-    document.getElementById("sexeInput").value       = selectedRow.cells[4].innerText;
-    document.getElementById("emailInput").value      = selectedRow.cells[5].innerText;
-    document.getElementById("telInput").value        = selectedRow.cells[6].innerText;
-    document.getElementById("niveauInput").value     = selectedRow.cells[7].innerText;
-    document.getElementById("specialiteInput").value = selectedRow.cells[8].innerText;
+
+    let formattedDate = "";
+
+    if (rawDate && rawDate !== "undefined" && rawDate !== "Non définie") {
+        // Cas 1 : Format DD/MM/YYYY (comme affiché dans le tableau)
+        if (rawDate.includes("/")) {
+            let parts = rawDate.split("/");
+            if (parts.length === 3) {
+                formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+        } 
+        // Cas 2 : Format YYYY-MM-DD (déjà bon)
+        else if (rawDate.includes("-")) {
+            formattedDate = rawDate;
+        }
+    }
+
+    // Remplissage du formulaire
+    document.getElementById("nomInput").value        = selectedRow.cells[1].innerText || "";
+    document.getElementById("prenomInput").value     = selectedRow.cells[2].innerText || "";
+    document.getElementById("dateInput").value       = formattedDate;   // ← Plus jamais "undefined"
+    document.getElementById("sexeInput").value       = selectedRow.cells[4].innerText || "";
+    document.getElementById("emailInput").value      = selectedRow.cells[5].innerText || "";
+    document.getElementById("telInput").value        = selectedRow.cells[6].innerText || "";
+    document.getElementById("niveauInput").value     = selectedRow.cells[7].innerText || "";
+    document.getElementById("specialiteInput").value = selectedRow.cells[8].innerText || "";
+    document.getElementById("localisationInput").value      = selectedRow.cells[9].innerText || "";
+    document.getElementById("statusInput").value     = selectedRow.cells[10].innerText || "";
+
 
     modal.style.display = "block";
-
 };
-
-cancelBtn.onclick = () => {
-    modal.style.display = "none";
-    showNotification("Modification annulée");
-};
-
-closeModal.onclick = cancelBtn.onclick;
-
-
 /* ==============================
 MODIFIER UTILISATEUR — AVEC PHP
 ============================== */
@@ -85,6 +98,8 @@ document.getElementById("confirmAdd").onclick = function(){
     let tel        = document.getElementById("telInput").value.trim();
     let niveau     = document.getElementById("niveauInput").value.trim();
     let specialite = document.getElementById("specialiteInput").value.trim();
+    let localisation      = document.getElementById("localisationInput").value.trim();
+    let status     = document.getElementById("statusInput").value;
 
     // Vérification des champs obligatoires
     if(nom == "" || prenom == "" || email == "" || dateVal == "" || sexe == ""){
@@ -109,7 +124,10 @@ document.getElementById("confirmAdd").onclick = function(){
             email     : email,
             tel       : tel,
             niveau    : niveau,
-            specialite: specialite
+            specialite: specialite,
+            localisation : localisation,
+            status : status
+
         })
     })
     .then(res => res.json())
@@ -117,21 +135,25 @@ document.getElementById("confirmAdd").onclick = function(){
         if(data.success){
 
             // Convert YYYY-MM-DD → DD/MM/YYYY
-            let parts = dateVal.split("-");
-            let formattedDate = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateVal;
+            // let parts = dateVal.split("-");
+            // let formattedDate = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateVal;
 
+
+            
             // Met à jour la ligne dans le tableau HTML
             selectedRow.cells[1].innerText = nom;
             selectedRow.cells[2].innerText = prenom;
-            selectedRow.cells[3].innerText = formattedDate;
+            selectedRow.cells[3].innerText = dateVal.split("-").reverse().join("/");
             selectedRow.cells[4].innerText = (sexe === "M") ? "Masculin" : "Féminin";
             selectedRow.cells[5].innerText = email;
             selectedRow.cells[6].innerText = tel;
             selectedRow.cells[7].innerText = niveau;
             selectedRow.cells[8].innerText = specialite;
+            selectedRow.cells[9].innerText = localisation;
+            selectedRow.cells[10].innerText = (status === "Chercheur") ? "Chercheur" : "Proposeur";
 
             modal.style.display = "none";
-            showNotification("Utilisateur modifié avec succès ✅");
+            showNotification("Utilisateur modifié avec succès");
 
         } else {
             showNotification("Erreur : " + data.message);
@@ -184,7 +206,7 @@ document.getElementById("confirmYes").onclick = function(){
             selectedRow.remove();
             selectedRow = null;
             confirmModal.style.display = "none";
-            showNotification("Utilisateur supprimé avec succès ✅");
+            showNotification("Utilisateur supprimé avec succès");
         } else {
             showNotification("Erreur : " + data.message);
         }
@@ -205,6 +227,8 @@ document.getElementById("confirmNo").onclick = function(){
     confirmModal.style.display = "none";
     showNotification("Suppression annulée");
 };
+
+
 
 window.onclick = function(event){
     if(event.target === modal){
@@ -271,12 +295,14 @@ window.onload = function(){
                     <td>${user.ID}</td>
                     <td>${user.nom}</td>
                     <td>${user.prenom}</td>
-                    <td>${user.DtaeDeNaissance}</td>
+                    <td>${user.DateDeNaissance}</td>
                     <td>${user.sexe}</td>
                     <td>${user.email}</td>
                     <td>${user.NumTel ?? ''}</td>
                     <td>${user.niveau ?? ''}</td>
                     <td>${user.specialite ?? ''}</td>
+                    <td>${user.localisation ?? ''}</td>
+                    <td>${user.status ?? ''}</td>
                 `;
             });
         }
@@ -284,3 +310,66 @@ window.onload = function(){
     .catch(err => console.error("Erreur chargement utilisateurs:", err));
 
 };
+
+// theme.js
+
+(function () {
+  const STORAGE_KEY = 'theme';
+
+  // Apply saved theme immediately (prevents flicker)
+  function applyThemeEarly() {
+    const savedTheme = localStorage.getItem(STORAGE_KEY);
+
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark-theme');
+    } else {
+      document.documentElement.classList.remove('dark-theme');
+    }
+  }
+
+  // Apply theme after DOM is ready (sync body + button)
+  function applyTheme() {
+    const savedTheme = localStorage.getItem(STORAGE_KEY);
+    const isDark = savedTheme === 'dark';
+
+    document.body.classList.toggle('dark-theme', isDark);
+
+    const toggleBtn = document.getElementById('toggleBtn');
+    if (toggleBtn) {
+      toggleBtn.textContent = isDark ? '☀️' : '🌙';
+    }
+  }
+
+  // Toggle handler
+  function initToggle() {
+    const toggleBtn = document.getElementById('toggleBtn');
+
+    if (!toggleBtn) {
+      console.warn('toggleBtn not found in the DOM.');
+      return;
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      const isDark = document.body.classList.toggle('dark-theme');
+
+      // Sync html element too (important if you style from root)
+      document.documentElement.classList.toggle('dark-theme', isDark);
+
+      // Save preference
+      localStorage.setItem(STORAGE_KEY, isDark ? 'dark' : 'light');
+
+      // Update button icon
+      toggleBtn.textContent = isDark ? '☀️' : '🌙';
+    });
+  }
+
+  // Run early (before DOMContentLoaded)
+  applyThemeEarly();
+
+  // Run after DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    applyTheme();
+    initToggle();
+  });
+
+})();
