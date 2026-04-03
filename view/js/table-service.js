@@ -35,9 +35,9 @@ document.addEventListener("click", function(e){
 // ==============================
 // MODAL
 // ==============================
-
+deleteBtn
 const modal = document.getElementById("modal");
-const cancelBtn = document.getElementById("cancelAdd");
+const cancelBtn = document.getElementById("deleteBtn");
 const closeModal = document.querySelector(".closeConfirm");
 
 cancelBtn.onclick = () => {
