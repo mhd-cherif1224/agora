@@ -104,16 +104,13 @@ document.getElementById("cropConfirm").addEventListener("click", function () {
         // Applique sur la preview ronde
         document.getElementById("profilePreview").src = croppedDataUrl;
 
-    }else if (cropTarget === "banner") {
-        const banner = document.querySelector(".banner");
-        banner.style.backgroundImage    = `url('${croppedDataUrl}')`;
-        banner.style.backgroundSize     = "cover";
-        banner.style.backgroundPosition = "center";
-        banner.style.backgroundRepeat   = "no-repeat";
-
-        // Rend banner-top et banner-bottom transparents pour laisser voir l'image
-        document.querySelector(".banner-top").style.background    = "transparent";
-        document.querySelector(".banner-bottom").style.background = "transparent";
+    } else if (cropTarget === "banner") {
+        // Applique sur le banner-top
+        const bannerTop = document.querySelector(".banner-top");
+        bannerTop.style.backgroundImage    = `url('${croppedDataUrl}')`;
+        bannerTop.style.backgroundSize     = "cover";
+        bannerTop.style.backgroundPosition = "center";
+        bannerTop.style.backgroundRepeat   = "no-repeat";
     }
 
     closeCropper();
