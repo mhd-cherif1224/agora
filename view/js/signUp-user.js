@@ -40,12 +40,13 @@
 // });
 
 const form = document.querySelector("form");
+const inputs = form.querySelectorAll("input");
+const signUpControllerUrl = "../../Controller/signup-user.php";
 
-form.addEventListener("submit", function(e) {
+form.addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    const inputs = form.querySelectorAll("input");
-    const email = inputs[0].value;
+    const email = inputs[0].value.trim();
     const password = inputs[1].value;
     const confirm = inputs[2].value;
 
@@ -59,6 +60,25 @@ form.addEventListener("submit", function(e) {
         return;
     }
 
-    console.log("Signup OK :", email);
-    window.location.href = "../html/user-choice.html";
+    try {
+        const response = await fetch(`${signUpControllerUrl}?action=register`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email, password })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert(`Utilisateur enregistré et email envoyé à ${result.email}`);
+            window.location.href = "../html/user-choice.html";
+        } else {
+            alert(`Erreur 1:  ${result.message}`);
+        }
+    } catch (error) {
+        alert("Erreur lors de l'inscription: " + error.message);
+
+    }
 });
