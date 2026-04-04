@@ -100,6 +100,7 @@ p {
 .camera-banner i {
     color: white;
     font-size: 38px;
+    cursor: pointer;
 }
 
 
@@ -152,7 +153,7 @@ p {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%); /* centre parfait */
-    
+    cursor: pointer;
     color: white;
     font-size: 38px;
 }
@@ -232,4 +233,79 @@ button:hover {
     padding:10px 20px;
     border-radius:10px;
     display:none;
+}
+
+
+/* CROP MODAL STYLES - isolated here to avoid conflicts */
+#cropModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.82);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+    backdrop-filter: blur(4px);
+}
+
+#cropModal.active {
+    display: flex;
+}
+
+#cropBox {
+    background: #1a1a1a;
+    padding: 12px;
+    border-radius: 14px;
+    max-width: 92vw;
+    max-height: 70vh;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+#cropImage {
+    display: block;
+    max-width: 100%;
+    max-height: 60vh;
+}
+
+#cropButtons {
+    display: flex;
+    gap: 14px;
+}
+
+#cropCancel {
+    padding: 10px 28px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-radius: 25px;
+    background: transparent;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    animation: none;
+    transition: background 0.2s;
+}
+
+#cropCancel:hover {
+    background: rgba(255,255,255,0.15);
+}
+
+#cropConfirm {
+    padding: 10px 28px;
+    border: none;
+    border-radius: 25px;
+    background: linear-gradient(270deg, #4BBFCC, #16376E, #4BBFCC);
+    background-size: 300% 300%;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    animation: moveGradient 4s ease infinite;
+}
+
+#cropConfirm:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
 }

@@ -1,18 +1,16 @@
-<!-- INTERFACE 3 : Upload photo -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css"/>
     <title>Signup Step 3</title>
     <link rel="stylesheet" href="../css/photo-profile.css">
 </head>
 <body>
 
     <div class="container">
-
-        <div id="notification"></div>
 
         <!-- HEADER -->
         <div class="top">
@@ -25,29 +23,9 @@
         <h1>Vous êtes presque là !</h1>
         <p>Ajoutez une photo de profil et un banner</p>
 
-        <!-- BANNER -->
-        <!-- <div class="banner">
-            <input type="file" id="bannerInput" hidden>
-            <label for="bannerInput" class="camera">
-                <i class="fa-solid fa-camera"></i>
-            </label>
-        </div> -->
-
-        <!-- PROFILE -->
-        <!-- <div class="profile-container">
-            <div class="profile">
-                <input type="file" id="profileInput" hidden>
-                <label for="profileInput">
-                    <img src="../images/person.png" alt="person" id="profilePreview">
-                    <i class="fa-solid fa-camera"></i>
-                </label>
-            </div>
-        </div> -->
-
-
         <div class="banner">
             <div class="banner-top">
-                <input type="file" id="bannerInput" hidden>
+                <input type="file" id="bannerInput" hidden accept="image/png, image/jpeg, image/jpg, image/gif">
                 <label for="bannerInput" class="camera-banner">
                     <i class="fa-solid fa-camera"></i>
                 </label>
@@ -56,7 +34,7 @@
 
             <!-- PROFILE dedans -->
             <div class="profile">
-                <input type="file" id="profileInput" hidden>
+                <input type="file" id="profileInput" hidden accept="image/png, image/jpeg, image/jpg, image/gif">
                 <label for="profileInput">
                     <img src="../images/person.png" id="profilePreview">
                     <i class="fa-solid fa-camera profile-icon"></i>
@@ -70,9 +48,32 @@
             <button class="finish">Terminez</button>
         </div>
 
-        
     </div>
 
+    <!-- NOTIFICATION -->
+    <div id="notification"></div>
+
+    <!-- CROP MODAL -->
+    <div id="cropModal">
+        <div id="cropBox">
+            <img id="cropImage">
+        </div>
+        <div id="cropButtons">
+            <button id="cropCancel">
+                <i class="fa-solid fa-xmark"></i> Annuler
+            </button>
+            <button id="cropConfirm">
+                <i class="fa-solid fa-check"></i> Confirmer
+            </button>
+        </div>
+    </div>
+
+    <style>
+        
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
     <script src="../js/photo-profile.js"></script>
+
 </body>
 </html>
