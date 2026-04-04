@@ -92,8 +92,8 @@ document.getElementById("confirmAdd").onclick = function(){
     let tel        = document.getElementById("telInput").value.trim();
     let niveau     = document.getElementById("niveauInput").value.trim();
     let specialite = document.getElementById("specialiteInput").value.trim();
-    let local      = document.getElementById("localisationInput").value.trim();
-    let statut     = document.getElementById("statusInput").value;
+    let localisation     = document.getElementById("localisationInput").value.trim();
+    let status    = document.getElementById("statusInput").value;
 
     // Vérification des champs obligatoires
     if(nom == "" || prenom == "" || email == "" || dateVal == "" || sexe == ""){
