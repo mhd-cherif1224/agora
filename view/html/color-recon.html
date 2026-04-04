@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Color Scanner</title>
+</head>
+<body>
+<div class="card">
+  <h1>Image Color Scanner</h1>
+  <div id="drop-zone" onclick="document.getElementById('file-input').click()">
+    <input type="file" id="file-input" accept="image/*">
+    <div class="icon">🖼</div>
+    <p class="dz-title">Click to upload an image</p>
+    <p class="dz-sub">or drag and drop — JPG, PNG, WebP, GIF</p>
+  </div>
+
+  <div id="results">
+    <img id="preview" />
+    <p style="font-size:13px;color:#888;margin-bottom:6px;">Dominant color</p>
+    <div class="dominant">
+      <div class="dom-dot" id="dom-dot"></div>
+      <span class="dom-hex" id="dom-hex">#000000</span>
+      <span class="dom-rgb" id="dom-rgb"></span>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Total pixels</div><div class="stat-val" id="s-pixels">—</div></div>
+      <div class="stat"><div class="stat-label">Unique colors</div><div class="stat-val" id="s-colors">—</div></div>
+      <div class="stat"><div class="stat-label">Dominant %</div><div class="stat-val" id="s-pct">—</div></div>
+    </div>
+    <p class="section-label">Top 10 colors (quantized)</p>
+    <div id="swatches"></div>
+  </div>
+
+  <canvas id="canvas"></canvas>
+</div>
+
+<script>
+  const fileInput = document.getElementById('file-input');
+  const dropZone = document.getElementById('drop-zone');
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+
+  function toHex(r, g, b) {
+    return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
+  }
+
+  function quantize(r, g, b, bits = 4) {
+    const step = 256 >> bits;
+    return [Math.round(r/step)*step, Math.round(g/step)*step, Math.round(b/step)*step];
+  }
+
+  function analyzeImage(img) {
+    const MAX = 200;
+    let w = img.width, h = img.height;
+    if (w > MAX || h > MAX) {
+      const scale = MAX / Math.max(w, h);
+      w = Math.round(w * scale); h = Math.round(h * scale);
+    }
+    canvas.width = w; canvas.height = h;
+    ctx.drawImage(img, 0, 0, w, h);
+    const data = ctx.getImageData(0, 0, w, h).data;
+
+    const counts = {};
+    let total = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i+3] < 128) continue;
+      const [r,g,b] = quantize(data[i], data[i+1], data[i+2]);
+      const key = `${r},${g},${b}`;
+      counts[key] = (counts[key] || 0) + 1;
+      total++;
+    }
+
+    const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]);
+    const top = sorted.slice(0, 10);
+
+    document.getElementById('s-pixels').textContent = total.toLocaleString();
+    document.getElementById('s-colors').textContent = sorted.length.toLocaleString();
+
+    const [dr,dg,db] = top[0][0].split(',').map(Number);
+    const domPct = ((top[0][1]/total)*100).toFixed(1);
+    const domHex = toHex(dr,dg,db).toUpperCase();
+
+    document.getElementById('dom-dot').style.background = domHex;
+    document.getElementById('dom-hex').textContent = domHex;
+    document.getElementById('dom-rgb').textContent = `rgb(${dr}, ${dg}, ${db})`;
+    document.getElementById('s-pct').textContent = domPct + '%';
+
+    const swatchesEl = document.getElementById('swatches');
+    swatchesEl.innerHTML = '';
+    top.forEach(([key, count]) => {
+      const [r,g,b] = key.split(',').map(Number);
+      const pct = ((count/total)*100).toFixed(1);
+      const hex = toHex(r,g,b).toUpperCase();
+      const el = document.createElement('div');
+      el.className = 'swatch';
+      el.innerHTML = `
+        <div class="swatch-box" style="background:${hex}"></div>
+        <div style="flex:1;">
+          <div class="swatch-name">${hex}</div>
+          <div class="swatch-bar-bg"><div class="swatch-bar" style="width:${pct}%;background:${hex};"></div></div>
+        </div>
+        <div class="swatch-info">${pct}%<br>rgb(${r},${g},${b})</div>
+      `;
+      swatchesEl.appendChild(el);
+    });
+
+    document.getElementById('results').style.display = 'block';
+  }
+
+  function loadFile(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        document.getElementById('preview').src = e.target.result;
+        analyzeImage(img);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  fileInput.addEventListener('change', e => loadFile(e.target.files[0]));
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.background='#f0f0f0'; });
+  dropZone.addEventListener('dragleave', () => { dropZone.style.background='#fafafa'; });
+  dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.style.background='#fafafa'; loadFile(e.dataTransfer.files[0]); });
+</script>
+</body>
+</html>
