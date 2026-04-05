@@ -1,0 +1,84 @@
+<!-- INTERFACE 4 : Verification -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/user-verification.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <title>Vérification Email</title>
+</head>
+<body>
+    
+<div class="container">
+
+  <!-- ── PROGRESS HEADER ───────────────────── -->
+  <div class="top">
+    <i class="fa-solid fa-chevron-left back-icon" id="back" onclick="goBack()"></i>
+    <div class="progress">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+  </div>
+
+  <!-- ══════ VUE PRINCIPALE ══════ -->
+  <div class="main-view" id="main-view">
+
+    <h1>Vérifiez votre email</h1>
+    <p class="subtitle">Un code à 6 chiffres a été envoyé à</p>
+    <p class="email-label" id="email-display">—</p>
+
+    <!-- alertes -->
+    <div class="alert error"   id="alert-error"></div>
+    <div class="alert success" id="alert-success"></div>
+
+    <!-- OTP -->
+    <div class="otp-wrapper" id="otp-wrapper">
+      <input class="otp-input" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code"/>
+      <input class="otp-input" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]"/>
+      <input class="otp-input" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]"/>
+      <input class="otp-input" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]"/>
+      <input class="otp-input" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]"/>
+      <input class="otp-input" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]"/>
+    </div>
+
+    <!-- Timer + resend -->
+    <div class="timer-section">
+      <div class="timer-ring-wrap">
+        <svg class="timer-ring" width="48" height="48" viewBox="0 0 48 48">
+          <circle class="ring-track" cx="24" cy="24" r="18"/>
+          <circle class="ring-fill" id="ring-fill" cx="24" cy="24" r="18"/>
+        </svg>
+        <div class="ring-label" id="ring-label">60</div>
+      </div>
+      <div class="timer-text">
+        Code non reçu ?
+        <button class="resend-btn" id="resend-btn" onclick="handleResend()" disabled>
+          Renvoyer le code
+        </button>
+      </div>
+    </div>
+
+    <!-- Bouton vérifier -->
+    <div class="btn-container">
+      <button class="btn" id="verify-btn" onclick="handleVerify()">
+        <span class="btn-text">Vérifier</span>
+        <div class="spinner"></div>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ══════ VUE SUCCÈS ══════ -->
+  <div class="success-view" id="success-view">
+    <div class="success-circle"><i class="fa-solid fa-check"></i></div>
+    <h2>Email vérifié !</h2>
+    <p>Votre compte a été confirmé avec succès.<br/>Vous allez être redirigé…</p>
+  </div>
+
+</div>
+
+<div id="notification"></div>
+
+<script src="../js/user-verification.js"></script>
+</body>
+</html>

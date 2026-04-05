@@ -250,7 +250,7 @@ document.getElementById("back").addEventListener("click", () => {
 // PROGRESS BAR
 // ========================
 const progressBar = document.querySelector(".progress-bar");
-let step = localStorage.getItem("step") || 3;
+let step = localStorage.getItem("step") || 4;
 
 function animateProgress(from, to, duration = 600) {
     const style    = document.createElement("style");
@@ -274,9 +274,9 @@ function animateProgress(from, to, duration = 600) {
 
 if (progressBar) {
     if (step === "back") {
-        animateProgress("100%", "60%");
+        animateProgress("100%", "75%");
         localStorage.setItem("step", 2);
     } else {
-        animateProgress("60%", "98%");
+        animateProgress("75%", "98%");
     }
 }

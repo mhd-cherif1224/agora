@@ -1,7 +1,5 @@
 let selectedRole = null;
 const cards = document.querySelectorAll(".card");
-const progressBar = document.querySelector(".progress-bar");
-let step = localStorage.getItem("step") || 1;
 
 // Sélection du rôle
 cards.forEach(card => {
@@ -30,14 +28,21 @@ document.getElementById("back").addEventListener("click", () => {
 // ========================
 // PROGRESS BAR
 // ========================
+const progressBar = document.querySelector(".progress-bar");
+let step = localStorage.getItem("step") || 2;
+
 function animateProgress(from, to, duration = 600){
     const style = document.createElement('style');
     const animName = `loadProgress${Date.now()}`;
     style.innerHTML = `
-        @keyframes ${animName} { from { width: ${from}; } to { width: ${to}; } }
+        @keyframes ${animName} {
+            from { width: ${from}; }
+            to { width: ${to}; }
+        }
     `;
     document.head.appendChild(style);
     progressBar.style.animation = `${animName} ${duration}ms ease-out forwards`;
+
     setTimeout(() => {
         progressBar.style.width = to;
         progressBar.style.animation = '';
@@ -46,13 +51,14 @@ function animateProgress(from, to, duration = 600){
 }
 
 if(progressBar){
-    if(step == "back"){
-        animateProgress("60%", "30%");
-        localStorage.setItem("step", 1); // reset
+    if(step === "back"){
+        animateProgress("75%", "50%");
+        localStorage.setItem("step", 2);
     } else {
-        animateProgress("0%", "30%");
+        animateProgress("25%", "50%");
     }
 }
+
 
 // Notification
 function showNotification(message){
