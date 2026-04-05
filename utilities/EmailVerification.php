@@ -7,7 +7,7 @@ class EmailVerification {
             throw new InvalidArgumentException('Invalid email address');
         }
 
-        $apiKey = 're_KtfUFMcS_HJRC6SATALJc4hR287zeNDY1';
+        $apiKey = 're_ENAGbsSM_MSQyFzyortQv4Kfgsdo6Kvsp';
 
         $data = [
             "from"    => "onboarding@resend.dev",

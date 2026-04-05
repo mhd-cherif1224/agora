@@ -26,7 +26,7 @@ body {
 
 .progress {
     flex: 1;
-    height: 6px;
+    height: 10px;
     background: #4BBFCC;
     border-radius: 10px;
 }
@@ -41,7 +41,7 @@ body {
 }
 
 .back-icon {
-    font-size: 18px;
+    font-size: 20px;
     color: black;
     margin-top: 5px;
     margin-right: 25px;
@@ -75,7 +75,7 @@ p {
 }
 
 .banner-top {
-    height: 40%;
+    height: 60%;
     background: #616161;
     position: relative;
     border-bottom: 1px solid #F3F3F3;
@@ -123,13 +123,13 @@ p {
 
 
 .profile {
-    width: 115px;
-    height: 115px;
+    width: 150px;
+    height: 150px;
     background: #ccc;
     border-radius: 50%;
     border: 1px solid white;
     position: absolute; 
-    bottom: 12px;      /* descend sous le banner */
+    bottom: -15px;      /* descend sous le banner */
     left: -8px;         /* à gauche */
     overflow: hidden;   
 }

@@ -68,7 +68,7 @@ function getDominantColors(source, topN = 2) {
         });
 }
 
-function adaptColor(hex, amount = 50) {
+function adaptColor(hex, amount = 80) {
     let r = parseInt(hex.slice(1, 3), 16);
     let g = parseInt(hex.slice(3, 5), 16);
     let b = parseInt(hex.slice(5, 7), 16);
@@ -222,7 +222,7 @@ document.getElementById("profileInput").addEventListener("change", function () {
 document.getElementById("bannerInput").addEventListener("change", function () {
     const file = this.files[0];
     if (!file) return;
-    openCropper(file, "banner", 16 / 9);
+    openCropper(file, "banner",  125/27);
 });
 
 // ========================
