@@ -1,3 +1,5 @@
+
+
 <!-- INTERFACE 4 : Verification -->
 <!DOCTYPE html>
 <html lang="en">
@@ -9,17 +11,16 @@
     <title>Vérification Email</title>
 </head>
 <body>
-    
+
 <div class="container">
 
   <!-- ── PROGRESS HEADER ───────────────────── -->
   <div class="top">
-    <i class="fa-solid fa-chevron-left back-icon" id="back" onclick="goBack()"></i>
-    <div class="progress">
-      <div class="progress-bar" id="progress-bar"></div>
-    </div>
+      <i class="fa-solid fa-chevron-left back-icon" id="back"></i>
+      <div class="progress">
+        <div class="progress-bar"></div>
+      </div>
   </div>
-
   <!-- ══════ VUE PRINCIPALE ══════ -->
   <div class="main-view" id="main-view">
 
@@ -68,13 +69,28 @@
 
   </div>
 
-  <!-- ══════ VUE SUCCÈS ══════ -->
-  <div class="success-view" id="success-view">
-    <div class="success-circle"><i class="fa-solid fa-check"></i></div>
-    <h2>Email vérifié !</h2>
-    <p>Votre compte a été confirmé avec succès.<br/>Vous allez être redirigé…</p>
-  </div>
+</div>
 
+<!-- ══════ MODAL SUCCÈS — EN DEHORS DU CONTAINER ══════ -->
+<div id="success-view" class="modal">
+  <div class="modal-content">
+
+    <!-- Header avec titre + bouton fermer -->
+    <div class="modal-header">
+      <p>Vérification Email</p>
+      <span class="close" id="modal-close">&times;</span>
+    </div>
+
+    <!-- Corps du modal -->
+    <div class="modal-body">
+      <div class="success-circle">
+        <i class="fa-solid fa-check"></i>
+      </div>
+      <h2>Email vérifié !</h2>
+      <p>Votre compte a été confirmé avec succès.<br/>Vous allez être redirigé…</p>
+    </div>
+
+  </div>
 </div>
 
 <div id="notification"></div>
