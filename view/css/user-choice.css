@@ -1,7 +1,7 @@
 body {
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
-    background: linear-gradient(139deg, rgba(75, 191, 204, 1) 0%, rgb(22, 55, 110) 100%);
+    background: linear-gradient(135deg, #49c6d9 0%, #1e3c72 100%);
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -12,7 +12,7 @@ body {
 .container {
     width: 500px;
     height: 415px;
-    background: #f4f4f4;
+    background: white;
     padding: 30px;
     border-radius: 12px;
     text-align: center;
@@ -25,11 +25,17 @@ body {
     gap: 10px;
 }
 
-.back img{
-    margin-top: 4px;
-    width: 30px;
-    height: 25px;
+.back-icon {
+    font-size: 18px;
+    color: black;
+    margin-top: 5px;
+    margin-right: 25px;
     cursor: pointer;
+    transition: 0.3s;
+}
+
+.back-icon:hover {
+    transform: translateX(-2px);
 }
 
 .progress {
@@ -40,11 +46,15 @@ body {
 }
 
 .progress-bar {
-    width: 30%;
+
+    width: 0; 
     height: 100%;
     background-color: #16376E;
     border-radius: 10px;
+    transition: width 0.6s ease-out;
 }
+
+
 
 /* TEXT */
 h1 {
@@ -76,12 +86,15 @@ p {
 }
 
 .card:hover {
-    transform: translateY(-5px);
+    transform: scale(0.95); /* zoom out */
 }
 
+
 .card.active {
-    border: 2px solid #1e3c72;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border: none; 
+    background-color: #d8f3ff; 
+    transform: scale(0.95); 
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.1); /* effet intérieur */
 }
 
 .icon img{
@@ -97,16 +110,34 @@ p {
 }
 
 button {
-    background: linear-gradient(to right, #49c6d9, #1e3c72);
-    border: none;
     padding: 10px 25px;
+    border: none;
+    border-radius: 25px;
+    letter-spacing: 1px;
     color: white;
-    border-radius: 20px;
+
     cursor: pointer;
+
+    background: linear-gradient(270deg, #4BBFCC, #16376E, #4BBFCC);
+    background-size: 300% 300%;
+
+    animation: moveGradient 4s ease infinite;
+}
+
+@keyframes moveGradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 button:hover {
-    transform: translateY(-5px);
+    opacity: 0.9;
 }
 
 /* OR */

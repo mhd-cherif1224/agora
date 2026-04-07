@@ -27,6 +27,37 @@ document.addEventListener("click", function(e){
 // ==============================
 // SUPPRESSION SERVICE
 // ==============================
+<<<<<<< HEAD
+deleteBtn
+const modal = document.getElementById("modal");
+const cancelBtn = document.getElementById("deleteBtn");
+const closeModal = document.querySelector(".closeConfirm");
+
+cancelBtn.onclick = () => {
+    confirmModal.style.display = "none";
+    showNotification("Annulé");
+};
+
+closeModal.onclick = cancelBtn.onclick;
+
+
+
+// ==============================
+// AJOUTER SERVICE — commenté par ton binôme, on ne touche pas
+// ==============================
+
+// document.getElementById("confirmAdd").onclick = function(){
+//     ...
+// };
+
+
+
+// ==============================
+// SUPPRESSION SERVICE — AVEC PHP
+// ==============================
+
+=======
+>>>>>>> 4fbd4dd4a8c652f5e51ac046928254d2251629f8
 const confirmModal = document.getElementById("confirmModal");
 const deleteBtn    = document.getElementById("deleteBtn");
 
@@ -125,3 +156,70 @@ window.onload = function(){
         showNotification("Erreur serveur");
     });
 };
+
+// dark theme 
+
+
+
+// theme.js
+
+(function () {
+  const STORAGE_KEY = 'theme';
+
+  // Apply saved theme immediately (prevents flicker)
+  function applyThemeEarly() {
+    const savedTheme = localStorage.getItem(STORAGE_KEY);
+
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark-theme');
+    } else {
+      document.documentElement.classList.remove('dark-theme');
+    }
+  }
+
+  // Apply theme after DOM is ready (sync body + button)
+  function applyTheme() {
+    const savedTheme = localStorage.getItem(STORAGE_KEY);
+    const isDark = savedTheme === 'dark';
+
+    document.body.classList.toggle('dark-theme', isDark);
+
+    const toggleBtn = document.getElementById('toggleBtn');
+    if (toggleBtn) {
+      toggleBtn.textContent = isDark ? '☀️' : '🌙';
+    }
+  }
+
+  // Toggle handler
+  function initToggle() {
+    const toggleBtn = document.getElementById('toggleBtn');
+
+    if (!toggleBtn) {
+      console.warn('toggleBtn not found in the DOM.');
+      return;
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      const isDark = document.body.classList.toggle('dark-theme');
+
+      // Sync html element too (important if you style from root)
+      document.documentElement.classList.toggle('dark-theme', isDark);
+
+      // Save preference
+      localStorage.setItem(STORAGE_KEY, isDark ? 'dark' : 'light');
+
+      // Update button icon
+      toggleBtn.textContent = isDark ? '☀️' : '🌙';
+    });
+  }
+
+  // Run early (before DOMContentLoaded)
+  applyThemeEarly();
+
+  // Run after DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    applyTheme();
+    initToggle();
+  });
+
+})();

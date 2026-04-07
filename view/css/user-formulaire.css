@@ -1,7 +1,7 @@
 body {
     margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    background: linear-gradient(120deg, #49c6d9, #1e3c72);
+    font-family:Arial, Helvetica, sans-serif;
+    background: linear-gradient(135deg, #49c6d9 0%, #1e3c72 100%);
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -12,7 +12,7 @@ body {
 .container {
     width: 500px;
     height: 415px;
-    background: #f4f4f4;
+    background: white;
     padding: 30px;
     border-radius: 12px;
 }
@@ -32,18 +32,29 @@ body {
 }
 
 .progress-bar {
-    width: 60%;
+
+    width: 0; /* départ */
     height: 100%;
-    background: #16376E;
+    background-color: #16376E;
     border-radius: 10px;
+    transition: width 0.6s ease-out;
+    
 }
 
-.back img{
-    margin-top: 4px;
-    width: 30px;
-    height: 25px;
+
+.back-icon {
+    font-size: 18px;
+    color: black;
+    margin-top: 5px;
+    margin-right: 25px;
     cursor: pointer;
+    transition: 0.3s;
 }
+
+.back-icon:hover {
+    transform: translateX(-2px);
+}
+
 
 /* TEXT */
 h1 {
@@ -58,7 +69,7 @@ p {
 
 /* FORM */
 .form {
-    margin-top: 20px;
+    margin-top: 18px;
 }
 
 .row {
@@ -73,6 +84,7 @@ p {
 
 label {
     font-size: 16px;
+    font-weight: 600;
 }
 
 label span {
@@ -88,6 +100,8 @@ input{
     border: 2px solid #1e3c72;
     outline: none;
     margin-top: 5px;
+    box-shadow: 0px 2px 2px #1e3b72c5;
+    transition: 0.3s;
 }
 
 select {
@@ -99,7 +113,17 @@ select {
     border: 2px solid #1e3c72;
     outline: none;
     margin-top: 5px;
+    box-shadow: 0px 2px 2px #1e3b72c5;
+    transition: 0.3s;
 }
+
+
+input:focus, select:focus {
+    box-shadow: 0 0 8px #1e3b7299;
+    border-color: #1e3b72;
+}
+
+
 /* DATE */
 .date {
     display: flex;
@@ -116,25 +140,44 @@ select {
     justify-content: flex-end; /* aligne à droite */
     margin-top: 20px;
 }
-
 button {
-    background: linear-gradient(to right, #49c6d9, #1e3c72);
-    border: none;
     padding: 10px 25px;
+    border: none;
+    border-radius: 25px;
+    letter-spacing: 1px;
     color: white;
-    border-radius: 20px;
+
     cursor: pointer;
+
+    background: linear-gradient(270deg, #4BBFCC, #16376E, #4BBFCC);
+    background-size: 300% 300%;
+
+    animation: moveGradient 4s ease infinite;
+}
+
+@keyframes moveGradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 button:hover {
-    transform: translateY(-5px);
+    opacity: 0.9;
 }
-
 /* ERREURS FORMULAIRE */
 
 input.error, select.error {
+    box-shadow: 0px 2px 2px #f2f6fc;
+    transition: 0.3s;
     border: 2px solid red;
 }
+
 
 .error-message {
     color: red;

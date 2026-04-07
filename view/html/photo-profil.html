@@ -1,9 +1,10 @@
-<!-- INTERFACE 3 : Upload photo -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css"/>
     <title>Signup Step 3</title>
     <link rel="stylesheet" href="../css/photo-profile.css">
 </head>
@@ -13,7 +14,7 @@
 
         <!-- HEADER -->
         <div class="top">
-            <span class="back"><img src="../images/fleche.png" alt="fleche" id="back"></span>
+            <i class="fa-solid fa-chevron-left back-icon" id="back"></i>
             <div class="progress">
                 <div class="progress-bar"></div>
             </div>
@@ -22,17 +23,23 @@
         <h1>Vous êtes presque là !</h1>
         <p>Ajoutez une photo de profil et un banner</p>
 
-        <!-- BANNER -->
         <div class="banner">
-            <input type="file" id="bannerInput" hidden>
-            <label for="bannerInput" class="camera">📷</label>
-        </div>
+            
+            <div class="banner-top">
+                <input type="file" id="bannerInput" hidden accept="image/png, image/jpeg, image/jpg, image/gif">
+                <label for="bannerInput" class="camera-banner">
+                    <i class="fa-solid fa-camera"></i>
+                </label>
+            </div>
+            <div class="banner-bottom"></div>
 
-        <!-- PROFILE -->
-        <div class="profile-container">
+            <!-- PROFILE dedans -->
             <div class="profile">
-                <input type="file" id="profileInput" hidden>
-                <label for="profileInput">📷</label>
+                <input type="file" id="profileInput" hidden accept="image/png, image/jpeg, image/jpg, image/gif">
+                <label for="profileInput">
+                    <img src="../images/person.png" id="profilePreview">
+                    <i class="fa-solid fa-camera profile-icon"></i>
+                </label>
             </div>
         </div>
 
@@ -44,6 +51,30 @@
 
     </div>
 
+    <!-- NOTIFICATION -->
+    <div id="notification"></div>
+
+    <!-- CROP MODAL -->
+    <div id="cropModal">
+        <div id="cropBox">
+            <img id="cropImage">
+        </div>
+        <div id="cropButtons">
+            <button id="cropCancel">
+                <i class="fa-solid fa-xmark"></i> Annuler
+            </button>
+            <button id="cropConfirm">
+                <i class="fa-solid fa-check"></i> Confirmer
+            </button>
+        </div>
+    </div>
+
+    <style>
+        
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
     <script src="../js/photo-profile.js"></script>
+
 </body>
 </html>
