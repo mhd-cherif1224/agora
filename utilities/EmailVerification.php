@@ -7,10 +7,18 @@ class EmailVerification {
             throw new InvalidArgumentException('Invalid email address');
         }
 
-        $apiKey = 're_hAZzMtvc_9n6VFdNVW8VWHmJqmeCexcx8';
+
+        // Chargement de la clé depuis .env
+        $apiKey   = $_ENV['RESEND_API_KEY'] ?? null;
+        $fromEmail = $_ENV['FROM_EMAIL']    ?? 'onboarding@resend.dev';
+        $fromName  = $_ENV['FROM_NAME']     ?? 'Plateforme universitaire';
+        
+        if (!$apiKey) {
+            throw new Exception('Clé API manquante dans le fichier .env');
+        }
 
         $data = [
-            "from"    => "onboarding@resend.dev",
+            "from"    => $fromName . ' <' . $fromEmail . '>',
             
             "to"      => [$email],
             "subject" => "Verify your email",
@@ -28,6 +36,7 @@ class EmailVerification {
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // For testing, disable SSL verification
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -38,7 +47,7 @@ class EmailVerification {
 
         curl_close($ch);
 
-        if ($httpCode !== 200) {
+        if ($httpCode !== 200 && $httpCode !== 201) {
             throw new Exception('Email sending failed: ' . $response);
         }
 

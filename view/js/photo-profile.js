@@ -2,10 +2,12 @@
 // VARIABLES GLOBALES
 // ========================
 let cropperInstance = null;
-let cropTarget = null; // "profile" ou "banner"
+let cropTarget = null;
 
-const cropModal  = document.getElementById("cropModal");
-const cropImage  = document.getElementById("cropImage");
+const cropModal = document.getElementById("cropModal");
+const cropImage = document.getElementById("cropImage");
+
+console.log("script loaded");
 
 // ========================
 // NOTIFICATIONS
@@ -15,6 +17,89 @@ function showNotification(message) {
     notif.innerText = message;
     notif.style.display = "block";
     setTimeout(() => { notif.style.display = "none"; }, 4000);
+}
+
+// ========================
+// DOMINANT COLORS
+// ========================
+function getDominantColors(source, topN = 2) {
+    let canvas, ctx;
+
+    if (source instanceof HTMLCanvasElement) {
+        canvas = source;
+        ctx = canvas.getContext('2d');
+    } else {
+        canvas = document.createElement('canvas');
+        ctx = canvas.getContext('2d');
+        const MAX = 200;
+        let w = source.naturalWidth || source.width;
+        let h = source.naturalHeight || source.height;
+        if (w > MAX || h > MAX) {
+            const scale = MAX / Math.max(w, h);
+            w = Math.round(w * scale);
+            h = Math.round(h * scale);
+        }
+        canvas.width = w;
+        canvas.height = h;
+        ctx.drawImage(source, 0, 0, w, h);
+    }
+
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    const counts = {};
+
+    for (let i = 0; i < data.length; i += 4) {
+        if (data[i + 3] < 128) continue;
+        const r = Math.round(data[i]     / 16) * 16;
+        const g = Math.round(data[i + 1] / 16) * 16;
+        const b = Math.round(data[i + 2] / 16) * 16;
+        const key = `${r},${g},${b}`;
+        counts[key] = (counts[key] || 0) + 1;
+    }
+
+    return Object.entries(counts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, topN)
+        .map(([key]) => {
+            const [r, g, b] = key.split(',').map(Number);
+            return {
+                rgb: `rgb(${r}, ${g}, ${b})`,
+                hex: '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('')
+            };
+        });
+}
+
+function adaptColor(hex, amount = 80) {
+    let r = parseInt(hex.slice(1, 3), 16);
+    let g = parseInt(hex.slice(3, 5), 16);
+    let b = parseInt(hex.slice(5, 7), 16);
+
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+
+    if (brightness > 128) {
+        r = Math.max(0,   r - amount);
+        g = Math.max(0,   g - amount);
+        b = Math.max(0,   b - amount);
+    } else {
+        r = Math.min(255, r + amount);
+        g = Math.min(255, g + amount);
+        b = Math.min(255, b + amount);
+    }
+
+    return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+
+function changeBannerColor(color1, color2) {
+    const brightness = (hex) => {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return (r * 299 + g * 587 + b * 114) / 1000;
+    };
+
+    const dark  = brightness(color1) < brightness(color2) ? color1 : color2;
+    const light = brightness(color1) < brightness(color2) ? color2 : color1;
+
+    document.querySelector(".banner-bottom").style.background = `linear-gradient(to right, ${dark}, ${light})`;
 }
 
 // ========================
@@ -31,29 +116,23 @@ function openCropper(file, target, aspectRatio) {
 
     const reader = new FileReader();
     reader.onload = function (e) {
-
-        // Reset l'ancien cropper proprement
         if (cropperInstance) {
             cropperInstance.destroy();
             cropperInstance = null;
         }
 
-        // Met l'image dans la modale
         cropImage.src = e.target.result;
-
-        // Ouvre la modale
         cropModal.classList.add("active");
 
-        // Attend que l'image soit chargée dans le DOM avant d'initialiser Cropper
         cropImage.onload = function () {
             cropperInstance = new Cropper(cropImage, {
-                aspectRatio:        aspectRatio,  // 1 = carré, 16/9 = banner
-                viewMode:           1,            // image ne sort pas du canvas
-                movable:            true,
-                zoomable:           true,
-                scalable:           false,
-                cropBoxResizable:   true,
-                background:         false,
+                aspectRatio:      aspectRatio,
+                viewMode:         1,
+                movable:          true,
+                zoomable:         true,
+                scalable:         false,
+                cropBoxResizable: true,
+                background:       false,
             });
         };
     };
@@ -72,7 +151,6 @@ function closeCropper() {
         cropperInstance = null;
     }
 
-    // Reset les inputs pour pouvoir re-sélectionner le même fichier
     document.getElementById("profileInput").value = "";
     document.getElementById("bannerInput").value  = "";
 }
@@ -101,19 +179,20 @@ document.getElementById("cropConfirm").addEventListener("click", function () {
     const croppedDataUrl = canvas.toDataURL("image/jpeg", 0.92);
 
     if (cropTarget === "profile") {
-        // Applique sur la preview ronde
         document.getElementById("profilePreview").src = croppedDataUrl;
 
-    }else if (cropTarget === "banner") {
-        const banner = document.querySelector(".banner");
-        banner.style.backgroundImage    = `url('${croppedDataUrl}')`;
-        banner.style.backgroundSize     = "cover";
-        banner.style.backgroundPosition = "center";
-        banner.style.backgroundRepeat   = "no-repeat";
+        
 
-        // Rend banner-top et banner-bottom transparents pour laisser voir l'image
-        document.querySelector(".banner-top").style.background    = "transparent";
-        document.querySelector(".banner-bottom").style.background = "transparent";
+    } else if (cropTarget === "banner") {
+        const bannerTop = document.querySelector(".banner-top");
+        bannerTop.style.backgroundImage    = `url('${croppedDataUrl}')`;
+        bannerTop.style.backgroundSize     = "cover";
+        bannerTop.style.backgroundPosition = "center";
+        bannerTop.style.backgroundRepeat   = "no-repeat";
+
+        const colors = getDominantColors(canvas, 2);
+        console.log('Banner color 1:', colors[0].hex, '→', adaptColor(colors[0].hex));
+        changeBannerColor(colors[0].hex, adaptColor(colors[0].hex));
     }
 
     closeCropper();
@@ -124,13 +203,12 @@ document.getElementById("cropConfirm").addEventListener("click", function () {
 // ========================
 document.getElementById("cropCancel").addEventListener("click", closeCropper);
 
-// Ferme aussi si on clique sur le fond sombre
 cropModal.addEventListener("click", function (e) {
     if (e.target === cropModal) closeCropper();
 });
 
 // ========================
-// PROFILE INPUT → ouvre cropper carré
+// PROFILE INPUT
 // ========================
 document.getElementById("profileInput").addEventListener("change", function () {
     const file = this.files[0];
@@ -139,12 +217,12 @@ document.getElementById("profileInput").addEventListener("change", function () {
 });
 
 // ========================
-// BANNER INPUT → ouvre cropper 16:9
+// BANNER INPUT
 // ========================
 document.getElementById("bannerInput").addEventListener("change", function () {
     const file = this.files[0];
     if (!file) return;
-    openCropper(file, "banner", 16 / 9);
+    openCropper(file, "banner",  125/27);
 });
 
 // ========================
@@ -172,7 +250,7 @@ document.getElementById("back").addEventListener("click", () => {
 // PROGRESS BAR
 // ========================
 const progressBar = document.querySelector(".progress-bar");
-let step = localStorage.getItem("step") || 3;
+let step = localStorage.getItem("step") || 4;
 
 function animateProgress(from, to, duration = 600) {
     const style    = document.createElement("style");
@@ -196,9 +274,9 @@ function animateProgress(from, to, duration = 600) {
 
 if (progressBar) {
     if (step === "back") {
-        animateProgress("100%", "60%");
+        animateProgress("100%", "75%");
         localStorage.setItem("step", 2);
     } else {
-        animateProgress("60%", "98%");
+        animateProgress("75%", "98%");
     }
 }

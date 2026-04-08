@@ -73,7 +73,7 @@ form.addEventListener("submit", async function (e) {
 
         if (result.success) {
             alert(`Utilisateur enregistré et email envoyé à ${result.email}`);
-            window.location.href = "../html/user-choice.html";
+            window.location.href = "../html/user-verification.html";
         } else {
             alert(`Erreur 1:  ${result.message}`);
         }
