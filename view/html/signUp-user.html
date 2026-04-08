@@ -13,6 +13,10 @@
 
     <div class="container">
 
+        <!-- NOTIFICATION -->
+        <div id="notification"></div>
+
+        <!-- LEFT -->
         <div class="left">
 
             <div class="logo"></div>
@@ -29,21 +33,20 @@
 
                     <div class="input-group">
                         <i class="fa-solid fa-lock icon-left"></i>
-                        <input type="password" placeholder="Entrez votre mot de passe" required>
-                        <i class="fa-solid fa-eye-slash icon-right" id="togglePassword"></i>
+                        <input type="password" placeholder="Entrez votre mot de passe" id="password1" required>
+                        <i class="fa-solid fa-eye-slash icon-right" id="togglePassword1"></i>
                     </div>
 
                     <div class="input-group">
                         <i class="fa-solid fa-lock icon-left"></i>
-                        <input type="password" placeholder="Confirmez votre mot de passe" required>
-                        <i class="fa-solid fa-eye-slash icon-right" id="togglePassword"></i>
+                        <input type="password" placeholder="Confirmez votre mot de passe" id="password2" required>
+                        <i class="fa-solid fa-eye-slash icon-right" id="togglePassword2"></i>
                     </div>
 
                     <div class="options">
                         <label>
                             <input type="checkbox"> remember me
                         </label>
-                        <a href="#">forgot password?</a>
                     </div>
 
                     <button type="submit" class="btn">S'inscrire</button>
@@ -57,9 +60,13 @@
             </footer>
         </div>
 
+        <!-- RIGHT -->
         <div class="right">
             <h2>Gérez tous vos services</h2>
             <span>en un seul endroit.</span>
+            <div class="picture-container">
+                <img src="../images/USER3.png" alt="User-picture">
+            </div>
         </div>
 
     </div>
