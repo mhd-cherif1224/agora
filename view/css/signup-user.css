@@ -6,24 +6,30 @@
 
 body {
     font-family: Arial, sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 900px;
 }
 
 .container {
-    width: 100%;
+    width: 70%;
+    min-width: 800px; 
     height: 100vh;
+    border: 1px solid #16376E;
     display: flex;
     text-align: center;
 }
-
 /* LEFT */
 .left {
-    width: 40%;
+    width: 45%;
     height: 100vh;
     background: white;
     padding: 50px;
     display: flex;
     flex-direction: column;
-    /* justify-content: center; */
+    justify-content: center;
 }
 
 .logo {
@@ -34,7 +40,7 @@ body {
 }
 
 .left h1 {
-    font-size: 58px;
+    font-size: 50px;
     color: #16376E;
 }
 
@@ -51,10 +57,10 @@ body {
 }
 
 .input-group input {
-    width: 100%;
-    padding: 12px 45px; /* espace pour icônes */
+    width: 85%;
+    padding: 12px 40px; /* espace pour icônes */
     border-radius: 15px;
-    border: 2px solid #16376E;
+    border: 1px solid #16376E;
     outline: none;
 }
 
@@ -67,7 +73,7 @@ body {
 /* ICON LEFT */
 .icon-left {
     position: absolute;
-    left: 15px;
+    left: 37px;
     top: 50%;
     transform: translateY(-50%);
     color: #1e1e1e;
@@ -76,7 +82,7 @@ body {
 /* ICON RIGHT */
 .icon-right {
     position: absolute;
-    right: 15px;
+    right: 35px;
     top: 50%;
     transform: translateY(-50%);
     color: #16376E;
@@ -88,12 +94,20 @@ body {
 .options {
     display: flex;
     justify-content: space-between;
-    font-size: 16px;
+    font-size: 12px;
     margin-bottom: 20px;
+    width: 100%;
+    
 }
 
-.options a{
+.options label {
     color: #16376E;
+    margin-left: 32px;
+}
+
+.options input[type="checkbox"] {
+    accent-color: #16376E;
+    cursor: pointer;
 }
 
 form{
@@ -104,13 +118,13 @@ form{
 
 /* BUTTON */
 button {
-    width: 100%;
-    padding: 12px;
+    width: 85%;
+    padding: 6px 4px;
     border: none;
     border-radius: 25px;
     letter-spacing: 1px;
     color: white;
-    font-size: 18px;
+    font-size: 16px;
     cursor: pointer;
 
     background: linear-gradient(270deg, #4BBFCC, #16376E, #4BBFCC);
@@ -153,65 +167,65 @@ footer {
 }
 
 /* RIGHT */
-/* .right {
-    width: 60%;
-    background: linear-gradient(to right, #4BBFCC, #16376E);
-    color: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 80px;
-} */
-/* 
-.right h2 {
-    font-size: 36px;
-}
-
-.right span {
-    color: #16376E;
-    font-size: 32px;
-    font-weight: 600;
-    opacity: 0.8;
-}
-
-.picture-container img{
-    height: 500px;
-} */
-
 .right {
     width: 60%;
-    background: linear-gradient(to right, #4BBFCC, #16376E);
+    background: linear-gradient(to bottom, #4BBFCC, #16376E);
     color: white;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    padding: 80px;
-
+    justify-content: flex-start;
+    padding: 35px;
     position: relative; 
     overflow: hidden;   
 }
 
+.right h2 {
+    font-size: 38px;
+    align-self: self-start;
+    
+}
 
-/* .picture-container img:first-child {
-    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
-} */
+.right span {
+    background: linear-gradient(to bottom, #3ba7b3, #0d3070);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    align-self: self-start;
+    margin-top: 10px;
+}
+
 .picture-container {
     position: absolute;
     bottom: 0;
     right: 40px;
+    overflow: hidden; 
 }
 
-.picture-container img:first-child {
-    height: 520px;
+.picture-container img{
+    height: 750px;
     width: auto;
-    transform: translateY(20px);
+    transform: translateY(150px);
+    position: relative;
+    left: 150px;
     filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+    max-height: 750px;  
 }
 
-.picture-container img:last-child {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 250px;
-    opacity: 0.2;
+/* ===== NOTIFICATION ===== */
+
+#notification{
+    position:fixed;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%);
+    background:black;
+    color:white;
+    padding:10px 20px;
+    border-radius:10px;
+    display:none;
+    display:none;
+    z-index: 1000;
 }

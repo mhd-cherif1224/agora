@@ -41,31 +41,43 @@ body{
 
 
 /* ================= INPUT FIELDS ================= */
-.inputs{
-    display:flex;
-    flex-direction:column;
-    gap:15px;          
-    margin-top:40px;
+.input-group {
+    position: relative;
+    margin-bottom: 15px;
 }
 
-
-input{
-    width:100%;
-    padding:12px;
-
-    border:1px solid #898989;
-    border-radius:30px;
-
-    font-size:14px;
+.input-group input {
+    width: 100%;
+    padding: 12px 40px; /* espace pour icônes */
+    border-radius: 15px;
+    border: 1px solid #16376E;
+    outline: none;
 }
 
-
-.inputs input:focus{
-    outline:none;
-    border-color:#0a66c2; /* bleu au focus */
+/* FOCUS EFFECT */
+.input-group input:focus {
+    border-color: #16376E;
+    box-shadow: 0 0 5px rgba(22, 54, 110, 0.6);
 }
 
+/* ================= ICON LEFT ================= */
+.icon-left {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #1e1e1e;
+}
 
+/* ================= ICON RIGHT ================= */
+.icon-right {
+    position: absolute;
+    right: 35px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #16376E;
+    cursor: pointer;
+}
 /* ================= OPTIONS ================= */
 .options{
     display:flex;
@@ -74,6 +86,11 @@ input{
     margin-top:10px;
 }
 
+.options input[type="checkbox"] {
+    accent-color: #16376E;
+    cursor: pointer;
+    width:auto;
+}
 
 .remember{
     display:flex;
@@ -91,12 +108,6 @@ label{
 #checkbox{
     margin-left:5px;
 }
-
-
-input[type="checkbox"]{
-    width:auto;
-}
-
 
 .remember label{
     color:#16376E;
@@ -148,19 +159,7 @@ button:hover{
 }
 
 
-/* ================= PASSWORD INPUT ================= */
-.password-container{
-    position:relative;
-    width:100%;
-} 
-
-
-.password-container input{
-    width:100%;
-    padding:12px;
-    padding-right:40px;
-}
-
+/* ================= PASSWORD ================= */
 
 #togglePassword{
     position:absolute;
@@ -171,4 +170,93 @@ button:hover{
 
     cursor:pointer;
     color:#555;
+}
+
+/* ===== NOTIFICATION ===== */
+
+#notification{
+    position:fixed;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%);
+    background:black;
+    color:white;
+    padding:10px 20px;
+    border-radius:10px;
+    display:none;
+    z-index: 1000;
+}
+
+/* ================= FORGOT PASSWORD MODAL ==================== */
+#forgot-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 999;
+}
+
+#forgot-box {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    width: 380px;
+    z-index: 1000;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+#forgot-box h3 {
+    color: #16376E;
+    font-size: 22px;
+    margin-bottom: 10px;
+}
+
+#forgot-box p {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+#forgot-box .input-group input {
+    width: 100%;
+    padding: 12px 40px;
+    border-radius: 15px;
+    border: 1px solid #16376E;
+    outline: none;
+}
+
+#forgot-box .input-group .icon-left {
+    left: 12px;
+}
+
+#forgot-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+#forgot-cancel {
+    width: 45%;
+    background: #e0e0e0;
+    color: #333;
+    animation: none;
+    border-radius: 25px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+#forgot-send {
+    width: 45%;
+    border-radius: 25px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+#forgot-cancel:hover {
+    opacity: 0.8;
 }
