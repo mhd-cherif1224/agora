@@ -27,7 +27,7 @@ function animateProgress(from, to, duration = 600) {
 if (progressBar) {
     if (step === "back") {
         animateProgress("100%", "75%");
-        localStorage.setItem("step", 2);
+        localStorage.setItem("step", 3);
     } else {
         animateProgress("50%", "75%");
     }

@@ -22,14 +22,15 @@ document.getElementById("continueBtn").addEventListener("click", () => {
 
 // Back
 document.getElementById("back").addEventListener("click", () => {
-    window.location.href = "signUp-user.html";
+    localStorage.setItem('step', 'back'); 
+    window.location.href = "user-verification.html";
 });
 
 // ========================
 // PROGRESS BAR
 // ========================
 const progressBar = document.querySelector(".progress-bar");
-let step = localStorage.getItem("step") || 2;
+let step = localStorage.getItem("step");
 
 function animateProgress(from, to, duration = 600){
     const style = document.createElement('style');
@@ -56,6 +57,7 @@ if(progressBar){
         localStorage.setItem("step", 2);
     } else {
         animateProgress("25%", "50%");
+        localStorage.setItem("step", 2);
     }
 }
 
