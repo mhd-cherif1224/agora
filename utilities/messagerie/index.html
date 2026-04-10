@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; }
+    #messages { height: 400px; overflow-y: auto; border: 1px solid #ccc;
+                padding: 1rem; margin-bottom: 1rem; border-radius: 8px; }
+    .msg { margin: 8px 0; }
+    .msg.mine { text-align: right; }
+    .msg span { display: inline-block; padding: 8px 12px;
+                border-radius: 16px; background: #eee; }
+    .msg.mine span { background: #0084ff; color: white; }
+    .seen { font-size: 11px; color: #999; }
+    #input-area { display: flex; gap: 8px; }
+    input { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; }
+    button { padding: 8px 16px; border-radius: 8px; background: #0084ff;
+             color: white; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="messages"></div>
+  <div id="input-area">
+    <input id="msg-input" placeholder="Type a message..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const MY_ID    = 1;  // Replace with real logged-in user ID
+    const OTHER_ID = 2;  // Replace with the person you're chatting with
+
+    const socket = io({ query: { userId: MY_ID } });
+
+    function renderMsg(msg) {
+      const div  = document.createElement('div');
+      div.className = 'msg' + (msg.id_expediter == MY_ID ? ' mine' : '');
+      div.dataset.id = msg.id;
+      div.innerHTML = `<span>${msg.content}</span>`;
+      if (msg.date_reception)
+        div.innerHTML += '<div class="seen">Seen</div>';
+      document.getElementById('messages').appendChild(div);
+    }
+
+    socket.on('history', (msgs) => msgs.forEach(renderMsg));
+
+    socket.on(`msg_${MY_ID}`, (msg) => {
+      renderMsg(msg);
+      if (msg.id_expediter !== MY_ID)
+        socket.emit('mark_seen', { messageId: msg.id, id_receptor: MY_ID });
+    });
+
+    socket.on(`seen_${MY_ID}`, ({ messageId }) => {
+      const el = document.querySelector(`[data-id="${messageId}"]`);
+      if (el && !el.querySelector('.seen'))
+        el.innerHTML += '<div class="seen">Seen</div>';
+    });
+
+    function sendMessage() {
+      const input = document.getElementById('msg-input');
+      if (!input.value.trim()) return;
+      socket.emit('send_message', {
+        id_expediter: MY_ID,
+        id_receptor:  OTHER_ID,
+        content:      input.value.trim(),
+      });
+      input.value = '';
+    }
+
+    document.getElementById('msg-input')
+      .addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
+  </script>
+</body>
+</html>
