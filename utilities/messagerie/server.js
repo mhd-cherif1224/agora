@@ -7,65 +7,90 @@ const app    = express();
 const server = http.createServer(app);
 const io     = new Server(server);
 
-app.use(express.static('public'));
+// ─── DB Connection Test ───────────────────────────────────────────────────────
+db.query('SELECT 1', (err) => {
+  if (err) console.error('❌ DB connection failed:', err.message);
+  else console.log('✅ DB connected');
+});
 
+// ─── Serve Files ──────────────────────────────────────────────────────────────
+app.use(express.static(__dirname));
+
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/index.html');
+});
+
+// ─── Track Online Users ───────────────────────────────────────────────────────
+const onlineUsers = new Map(); // userId → socket.id
+
+// ─── Socket.io ────────────────────────────────────────────────────────────────
 io.on('connection', (socket) => {
-  const { userId } = socket.handshake.query;
+  const userId = parseInt(socket.handshake.query.userId);
+  if (!userId) return socket.disconnect();
+
+  onlineUsers.set(userId, socket.id);
   console.log(`User ${userId} connected`);
 
-  // Send last 50 messages on connect
+  // ── 1. Send last 50 messages on connect ────────────────────────────────────
   db.query(
-    `SELECT * FROM messages
-     WHERE id_expediter = ? OR id_receptor = ?
-     ORDER BY date_sending DESC LIMIT 50`,
+    `SELECT * FROM message
+     WHERE ID_Expediteur = ? OR ID_Destinataire = ?
+     ORDER BY DateEnvoie DESC LIMIT 50`,
     [userId, userId],
     (err, rows) => {
-      if (!err) socket.emit('history', rows.reverse());
+      if (err) return console.error('❌ History error:', err.message);
+      socket.emit('history', rows.reverse());
     }
   );
 
-  // Handle new message
+  // ── 2. Handle sending a new message ────────────────────────────────────────
   socket.on('send_message', (data) => {
-    const { id_expediter, id_receptor, content } = data;
+    const { ID_Expediteur, ID_Destinataire, contenue } = data;
+    console.log(`📨 From ${ID_Expediteur} to ${ID_Destinataire}: ${contenue}`);
 
     db.query(
-      `INSERT INTO messages
-         (content, date_sending, date_reception, id_expediter, id_receptor)
+      `INSERT INTO message (contenue, DateEnvoie, lue, ID_Expediteur, ID_Destinataire)
        VALUES (?, NOW(), 0, ?, ?)`,
-      [content, id_expediter, id_receptor],
+      [contenue, ID_Expediteur, ID_Destinataire],
       (err, result) => {
-        if (err) return console.error(err);
+        if (err) return console.error('❌ Insert error:', err.message);
 
         const msg = {
-          id:           result.insertId,
-          content,
-          date_sending: new Date(),
-          date_reception: false,
-          id_expediter,
-          id_receptor,
+          ID:              result.insertId,  // lowercase 'd' — important!
+          contenue,
+          DateEnvoie:      new Date(),
+          DateReception:   null,             // not seen yet
+          lue:             0,                // not seen yet
+          ID_Expediteur,
+          ID_Destinataire,
         };
 
-        // Emit to sender and receiver only
-        io.emit(`msg_${id_receptor}`, msg);
-        io.emit(`msg_${id_expediter}`, msg);
+        // Send to sender and receiver
+        io.emit(`msg_${ID_Destinataire}`, msg);
+        io.emit(`msg_${ID_Expediteur}`, msg);
       }
     );
   });
 
-  // Mark message as seen
-  socket.on('mark_seen', ({ messageId, id_receptor }) => {
+  // ── 3. Mark message as seen ─────────────────────────────────────────────────
+  socket.on('mark_seen', ({ messageId, ID_Destinataire }) => {
     db.query(
-      `UPDATE messages SET date_reception = 1 WHERE id = ?`,
+      `UPDATE message SET lue = 1, DateReception = NOW() WHERE ID = ? AND lue = 0`,
       [messageId],
       (err) => {
-        if (!err) io.emit(`seen_${id_receptor}`, { messageId });
+        if (err) return console.error('❌ Mark seen error:', err.message);
+        console.log(`✅ Message ${messageId} marked as seen`);
+        io.emit(`seen_${ID_Destinataire}`, { messageId });
       }
     );
   });
 
+  // ── 4. Cleanup on disconnect ────────────────────────────────────────────────
   socket.on('disconnect', () => {
+    onlineUsers.delete(userId);
     console.log(`User ${userId} disconnected`);
   });
 });
 
+// ─── Start Server ─────────────────────────────────────────────────────────────
 server.listen(3000, () => console.log('Chat server on port 3000'));
