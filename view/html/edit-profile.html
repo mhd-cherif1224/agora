@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modifier Profil</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../css/edit-profile.css">
+</head>
+<body>
+  
+    <!-- NAV -->
+    <nav>
+    <div class="nav-logo">
+        <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+    </div>
+    <div class="nav-search">
+        <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="recherchez un service, un produit...">
+    </div>
+    <div class="nav-icons">
+        <button class="nav-icon-btn" title="Accueil">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+        </button>
+        <button class="nav-icon-btn" title="Messages">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        </button>
+        <button class="nav-icon-btn" title="Notifications">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span class="notif-dot"></span>
+        </button>
+        <div class="nav-avatar" id="navAvatar">M</div>
+        <button class="nav-menu-btn"><span></span><span></span><span></span></button>
+    </div>
+    </nav>
+
+    <!-- LAYOUT -->
+    <div class="layout">
+    <div>
+
+        <!-- ══ BANNER ══ -->
+        <div class="banner-card">
+            <div class="banner">
+
+                <!-- TOP — image de fond -->
+                <div class="banner-top" id="bannerTop">
+                    <input type="file" id="bannerInput" hidden accept="image/png,image/jpeg,image/jpg,image/gif">
+                    <label for="bannerInput" class="camera-banner">
+                        <i class="fa-solid fa-camera"></i>
+                    </label>
+                </div>
+
+                <!-- BOTTOM — gradient + infos utilisateur -->
+                <div class="banner-bottom" id="bannerBottom">
+                    <div class="banner-user-info">
+                        <div class="banner-name" id="displayName">
+                        Mehdi cherif
+                        <button class="cv-btn">+ Ajouter Votre CV</button>
+                        </div>
+                        <div class="banner-role" id="displayRole">Etudiant a l'univ d'abderrahmane mira</div>
+                        <div class="banner-location" id="displayLocation">
+                        <i class="fa-solid fa-location-dot"></i> Bejaia, Algeria
+                        </div>
+                        <button class="add-link-btn">
+                        <i class="fa-solid fa-plus" style="font-size:8px"></i> Ajouter un lien
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PROFILE CIRCLE — chevauche les deux moitiés -->
+                <div class="profile">
+                    <input type="file" id="profileInput" hidden accept="image/png,image/jpeg,image/jpg,image/gif">
+                    <label for="profileInput">
+                        <img src="../images/person.png" id="profilePreview">
+                        <div class="camera-container">
+                            <i class="fa-solid fa-camera profile-icon"></i>
+                        </div>
+                    </label>
+                </div>
+
+            </div>
+        </div><!-- /banner-card -->
+
+        <!-- ══ BELOW BANNER ══ -->
+        <div class="below-banner">
+
+        <!-- COLOR PICKER -->
+        <div class="color-section">
+            <h3>Choisissez La Couleur De Votre Profil</h3>
+            <div class="color-grid" id="colorGrid"></div>
+        </div>
+
+        <!-- FORM -->
+        <div class="form-section">
+            <h3>Changer Vos Informations</h3>
+            <div class="form-row">
+            <div class="form-group">
+                <label>Nom</label>
+                <input type="text" id="inputNom" placeholder="Mehdi" value="Mehdi">
+            </div>
+            <div class="form-group">
+                <label>Prenom</label>
+                <input type="text" id="inputPrenom" placeholder="cherif" value="cherif">
+            </div>
+            </div>
+            <div class="form-row full">
+            <div class="form-group">
+                <label>Role</label>
+                <input type="text" id="inputRole" value="Etudiant a l'univ d'abderrahmane mira">
+            </div>
+            </div>
+            <div class="form-row full">
+            <div class="form-group">
+                <label>Adresse</label>
+                <input type="text" id="inputAdresse" placeholder="Bejaia, Algeria" value="Bejaia, Algeria">
+            </div>
+            </div>
+            <div class="form-row">
+            <div class="form-group">
+                <label>Niveau</label>
+                <input type="text" id="inputNiveau" placeholder="L1" value="L1">
+            </div>
+            <div class="form-group">
+                <label>Specialite</label>
+                <input type="text" id="inputSpecialite" placeholder="Genie Logiciel" value="Genie Logiciel">
+            </div>
+            </div>
+        </div>
+
+        <button class="apply-btn" id="applyBtn">Appliquer</button>
+        </div>
+
+    </div><!-- /left col -->
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="suggest-card">
+        <h3>Connaissez - Vous ?</h3>
+        <div class="suggest-list">
+            <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#e8734a,#c9543a)">M</div>
+            <div class="suggest-info">
+                <div class="name">mehdi cherif</div>
+                <div class="role">etudiant a l'univ d'abderrahmane mira</div>
+            </div>
+            </div>
+            <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#5b8dee,#3a6de0)">N</div>
+            <div class="suggest-info">
+                <div class="name">na sfiaaaaaaa</div>
+                <div class="role">etudiante al'uni As Suema 7</div>
+            </div>
+            </div>
+            <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#4ecdc4,#2ab5ab)">C</div>
+            <div class="suggest-info">
+                <div class="name">chaima ouk</div>
+                <div class="role">etudiant a l'uni As Suema 7</div>
+            </div>
+            </div>
+            <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">Me</div>
+            <div class="suggest-info">
+                <div class="name">mekhmoukh</div>
+                <div class="role">agent de sécurité</div>
+            </div>
+            </div>
+        </div>
+        <a href="#" class="see-all">voir tous les suggestions →</a>
+        </div>
+        <p class="footer-note">© 2025 TIB Inc. All rights reserved.</p>
+    </div>
+    </div>
+
+    <!-- NOTIFICATION -->
+    <div id="notification"></div>
+
+    <!-- CROP MODAL -->
+    <div id="cropModal">
+    <div class="crop-box">
+        <h3>Recadrer l'image</h3>
+        <img id="cropImage" src="" alt="">
+        <div class="crop-actions">
+        <button id="cropCancel">Annuler</button>
+        <button id="cropConfirm">Confirmer</button>
+        </div>
+    </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+    <script src="../js/edit-profile.js"></script>
+
+</body>
+</html>
