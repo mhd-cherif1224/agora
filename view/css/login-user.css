@@ -1,24 +1,21 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
 body {
-    font-family: Arial, sans-serif;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-width: 900px;
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #555;
+  /* background: linear-gradient(135deg, #49c6d9 0%, #1e3c72 100%); tjiniyi la couleur nni */
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
+/* ── CONTAINER ─────────────────────────── */
 .container {
-    width: 70%;
-    min-width: 800px; 
-    height: 100vh;
-    border: 1px solid #16376E;
-    display: flex;
+    width: 500px;
+    height: 415px;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
     text-align: center;
 }
 
@@ -272,15 +269,15 @@ footer {
 }
 
 #forgot-box .input-group input {
-    width: 100%;
-    padding: 12px 40px;
+    width: 70%;
+    padding: 12px 30px;
     border-radius: 15px;
     border: 1px solid #16376E;
     outline: none;
 }
 
 #forgot-box .input-group .icon-left {
-    left: 12px;
+    left: 37px;
 }
 
 #forgot-actions {
