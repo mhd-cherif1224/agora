@@ -9,6 +9,7 @@ const io     = new Server(server);
 
 // ─── DB Connection Test ───────────────────────────────────────────────────────
 db.query('SELECT 1', (err) => {
+
   if (err) console.error('❌ DB connection failed:', err.message);
   else console.log('✅ DB connected');
 });
@@ -78,6 +79,7 @@ io.on('connection', (socket) => {
       `UPDATE message SET lue = 1, DateReception = NOW() WHERE ID = ? AND lue = 0`,
       [messageId],
       (err) => {
+
         if (err) return console.error('❌ Mark seen error:', err.message);
         console.log(`✅ Message ${messageId} marked as seen`);
         io.emit(`seen_${ID_Destinataire}`, { messageId });
