@@ -9,8 +9,9 @@ const io     = new Server(server);
 
 // ─── DB Connection Test ───────────────────────────────────────────────────────
 db.query('SELECT 1', (err) => {
-  if (err) console.error(':x: DB connection failed:', err.message);
-  else console.log(':white_check_mark: DB connected');
+
+  if (err) console.error('❌ DB connection failed:', err.message);
+  else console.log('✅ DB connected');
 });
 
 // ─── Serve Files ──────────────────────────────────────────────────────────────
@@ -38,7 +39,7 @@ io.on('connection', (socket) => {
      ORDER BY DateEnvoie DESC LIMIT 50`,
     [userId, userId],
     (err, rows) => {
-      if (err) return console.error(':x: History error:', err.message);
+      if (err) return console.error('❌ History error:', err.message);
       socket.emit('history', rows.reverse());
     }
   );
@@ -53,7 +54,7 @@ io.on('connection', (socket) => {
        VALUES (?, NOW(), 0, ?, ?)`,
       [contenue, ID_Expediteur, ID_Destinataire],
       (err, result) => {
-        if (err) return console.error(':x: Insert error:', err.message);
+        if (err) return console.error('❌ Insert error:', err.message);
 
         const msg = {
           ID:              result.insertId,  // lowercase 'd' — important!
@@ -78,7 +79,8 @@ io.on('connection', (socket) => {
       `UPDATE message SET lue = 1, DateReception = NOW() WHERE ID = ? AND lue = 0`,
       [messageId],
       (err) => {
-        if (err) return console.error(':x: Mark seen error:', err.message);
+
+        if (err) return console.error('❌ Mark seen error:', err.message);
         console.log(`✅ Message ${messageId} marked as seen`);
         io.emit(`seen_${ID_Destinataire}`, { messageId });
       }
