@@ -180,8 +180,10 @@ footer {
 }
 
 .right h2 {
-    font-size: 38px;
-    align-self: self-start;
+    font-size: 4rem;
+    text-align: start;
+    align-self: start;
+    z-index: 99;
     
 }
 
@@ -189,8 +191,8 @@ footer {
     background: linear-gradient(to bottom, #3ba7b3, #0d3070);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-
-    font-size: 26px;
+    z-index: 99;
+    font-size: 3rem;
     font-weight: 600;
     letter-spacing: 1px;
     align-self: self-start;
