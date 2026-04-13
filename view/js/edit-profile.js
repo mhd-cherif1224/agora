@@ -7,7 +7,7 @@ const cropModal     = document.getElementById("cropModal");
 const cropImage     = document.getElementById("cropImage");
 
 // ========================
-// NOTIFICATIONS
+// NOTIFICATIONS TOAST
 // ========================
 function showNotification(message) {
     const notif = document.getElementById("notification");
@@ -28,27 +28,24 @@ function getDominantColors(source, topN = 2) {
         const MAX = 200;
         let w = source.naturalWidth || source.width;
         let h = source.naturalHeight || source.height;
-        if (w > MAX || h > MAX) {
-            const s = MAX / Math.max(w, h);
-            w = Math.round(w * s); h = Math.round(h * s);
-        }
+        if (w > MAX || h > MAX) { const s = MAX / Math.max(w,h); w = Math.round(w*s); h = Math.round(h*s); }
         canvas.width = w; canvas.height = h;
         ctx.drawImage(source, 0, 0, w, h);
     }
     const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
     const counts = {};
     for (let i = 0; i < data.length; i += 4) {
-        if (data[i + 3] < 128) continue;
-        const r = Math.round(data[i]     / 16) * 16;
-        const g = Math.round(data[i + 1] / 16) * 16;
-        const b = Math.round(data[i + 2] / 16) * 16;
+        if (data[i+3] < 128) continue;
+        const r = Math.round(data[i]   /16)*16;
+        const g = Math.round(data[i+1] /16)*16;
+        const b = Math.round(data[i+2] /16)*16;
         const key = `${r},${g},${b}`;
         counts[key] = (counts[key] || 0) + 1;
     }
     return Object.entries(counts)
-        .sort((a, b) => b[1] - a[1]).slice(0, topN)
+        .sort((a,b) => b[1]-a[1]).slice(0,topN)
         .map(([key]) => {
-            const [r, g, b] = key.split(',').map(Number);
+            const [r,g,b] = key.split(',').map(Number);
             return { hex: '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('') };
         });
 }
@@ -57,7 +54,7 @@ function adaptColor(hex, amount = 80) {
     let r = parseInt(hex.slice(1,3),16);
     let g = parseInt(hex.slice(3,5),16);
     let b = parseInt(hex.slice(5,7),16);
-    const br = (r*299 + g*587 + b*114) / 1000;
+    const br = (r*299+g*587+b*114)/1000;
     if (br > 128) { r=Math.max(0,r-amount); g=Math.max(0,g-amount); b=Math.max(0,b-amount); }
     else          { r=Math.min(255,r+amount); g=Math.min(255,g+amount); b=Math.min(255,b+amount); }
     return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
@@ -81,7 +78,6 @@ function openCropper(file, target, aspectRatio) {
     cropTarget = target;
     const valid = ["image/jpeg","image/png","image/jpg","image/gif"];
     if (!valid.includes(file.type)) { showNotification("Format non supporté !"); return; }
-
     const reader = new FileReader();
     reader.onload = e => {
         if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
@@ -104,7 +100,7 @@ function closeCropper() {
     document.getElementById("bannerInput").value  = "";
 }
 
-// ── Confirmer ──
+// Confirmer crop
 document.getElementById("cropConfirm").addEventListener("click", () => {
     if (!cropperInstance) { showNotification("Erreur cropper."); return; }
     const canvas = cropperInstance.getCroppedCanvas({
@@ -116,7 +112,14 @@ document.getElementById("cropConfirm").addEventListener("click", () => {
     const url = canvas.toDataURL("image/jpeg", 0.92);
 
     if (cropTarget === "profile") {
+        // Update profile circle
         document.getElementById("profilePreview").src = url;
+        // Update nav avatar with same photo
+        const navImg    = document.getElementById("navAvatarImg");
+        const navLetter = document.getElementById("navAvatarLetter");
+        navImg.src = url;
+        navImg.style.display    = "block";
+        navLetter.style.display = "none";
     } else {
         const t = document.getElementById("bannerTop");
         t.style.backgroundImage    = `url('${url}')`;
@@ -132,7 +135,7 @@ document.getElementById("cropConfirm").addEventListener("click", () => {
 document.getElementById("cropCancel").addEventListener("click", closeCropper);
 cropModal.addEventListener("click", e => { if (e.target === cropModal) closeCropper(); });
 
-// ── File inputs ──
+// File inputs
 document.getElementById("profileInput").addEventListener("change", function() {
     if (this.files[0]) openCropper(this.files[0], "profile", 1);
 });
@@ -162,7 +165,6 @@ COLORS.forEach((c, i) => {
         if (activeSwatch) activeSwatch.classList.remove('active');
         sw.classList.add('active');
         activeSwatch = sw;
-        // change the banner-bottom gradient with chosen color
         const dark = adaptColor(c, 70);
         document.getElementById('bannerBottom').style.background =
             `linear-gradient(120deg, ${dark}, ${c})`;
@@ -182,22 +184,109 @@ function updatePreview() {
 
     document.getElementById('displayName').innerHTML =
         (full || 'Votre Nom') + ' <button class="cv-btn">+ Ajouter Votre CV</button>';
-    document.getElementById('displayRole').textContent = role    || 'Votre rôle';
-    document.getElementById('displayLocation').innerHTML =
+    document.getElementById('displayRole').textContent     = role    || 'Votre rôle';
+    document.getElementById('displayLocation').innerHTML  =
         `<i class="fa-solid fa-location-dot"></i> ${adresse || 'Votre adresse'}`;
 
-    document.getElementById('navAvatar').textContent =
-        ([nom[0], prenom[0]].filter(Boolean).join('').toUpperCase()[0]) || 'M';
+    // Update nav avatar letter only if no photo is set
+    const navImg = document.getElementById("navAvatarImg");
+    if (navImg.style.display === "none" || !navImg.src || navImg.src.endsWith("person.png")) {
+        document.getElementById("navAvatarLetter").textContent =
+            ([nom[0], prenom[0]].filter(Boolean).join('').toUpperCase()[0]) || 'M';
+    }
 }
 
 ['inputNom','inputPrenom','inputRole','inputAdresse'].forEach(id =>
     document.getElementById(id).addEventListener('input', updatePreview));
 
 // ========================
-// APPLY
+// APPLY BUTTON
 // ========================
 document.getElementById('applyBtn').addEventListener('click', () => {
     updatePreview();
     showNotification("✓  Profil mis à jour !");
 });
 
+
+// ========================
+// SEE ALL SUGGESTIONS
+// ========================
+const seeAllBtn       = document.getElementById('seeAllBtn');
+const listPreview     = document.getElementById('suggestListPreview');
+const listAll         = document.getElementById('suggestListAll');
+let showingAll        = false;
+
+seeAllBtn.addEventListener('click', e => {
+    e.preventDefault();
+    showingAll = !showingAll;
+    if (showingAll) {
+        listPreview.style.display = 'none';
+        listAll.style.display     = 'flex';
+        seeAllBtn.textContent     = '← réduire les suggestions';
+    } else {
+        listAll.style.display     = 'none';
+        listPreview.style.display = 'flex';
+        seeAllBtn.textContent     = 'voir tous les suggestions →';
+    }
+});
+
+// ========================
+// FAB — MESSAGE shortcut
+// ========================
+// document.getElementById('fabMsgBtn').addEventListener('click', () => {
+//     window.location.href = 'messagerie.html';
+// });
+
+// ========================
+// FAB — MESSAGE panel
+// ========================
+const chatPanel = document.getElementById('chatPanel');
+const chatPanelClose = document.getElementById('chatPanelClose');
+const chatInput  = document.getElementById('chatInput');
+const chatMessages = document.getElementById('chatMessages');
+
+document.getElementById('fabMsgBtn').addEventListener('click', () => {
+    chatPanel.classList.toggle('active');
+    if (chatPanel.classList.contains('active')) {
+        // scroll to bottom
+        setTimeout(() => { chatMessages.scrollTop = chatMessages.scrollHeight; }, 50);
+        chatInput.focus();
+    }
+});
+
+chatPanelClose.addEventListener('click', () => {
+    chatPanel.classList.remove('active');
+});
+
+// Send message
+document.getElementById('chatSendBtn').addEventListener('click', sendMessage);
+chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+
+function sendMessage() {
+    const txt = chatInput.value.trim();
+    if (!txt) return;
+    const now = new Date();
+    const time = now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0');
+    const msg = document.createElement('div');
+    msg.className = 'chat-msg sent';
+    msg.innerHTML = `<div class="msg-bubble">${txt}</div><div class="msg-time">${time}</div>`;
+    chatMessages.appendChild(msg);
+    chatInput.value = '';
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// ========================
+// FAB — HELP panel
+// ========================
+const helpOverlay = document.getElementById('helpOverlay');
+const helpClose   = document.getElementById('helpClose');
+
+document.getElementById('fabHelpBtn').addEventListener('click', () => {
+    helpOverlay.classList.add('active');
+});
+helpClose.addEventListener('click', () => {
+    helpOverlay.classList.remove('active');
+});
+helpOverlay.addEventListener('click', e => {
+    if (e.target === helpOverlay) helpOverlay.classList.remove('active');
+});
