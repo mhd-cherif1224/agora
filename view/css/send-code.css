@@ -15,7 +15,9 @@
     body {
       min-height: 100vh;
       background: var(--bg-grad);
-      display: flex; align-items: center; justify-content: center;
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
       font-family: 'DM Sans', Arial, sans-serif;
       color: var(--text);
     }
@@ -31,16 +33,22 @@
       animation: slideUp .5s cubic-bezier(.22,.68,0,1.2) both;
     }
     @keyframes slideUp {
-      from { opacity:0; transform:translateY(28px) scale(.97); }
-      to   { opacity:1; transform:translateY(0) scale(1); }
+      from { opacity:0; 
+        transform:translateY(28px) scale(.97); }
+      to   { opacity:1; 
+             transform:translateY(0) scale(1); }
     }
 
     /* ── Icon badge ── */
     .icon-wrap {
-      width: 60px; height: 60px; border-radius: 14px;
+      width: 60px; 
+      height: 60px; 
+      border-radius: 14px;
       background: linear-gradient(135deg, rgba(75,191,204,.2), rgba(22,55,110,.08));
       border: 2px solid var(--cyan);
-      display: flex; align-items: center; justify-content: center;
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
       margin-bottom: 24px;
       animation: glow 3s ease-in-out infinite;
     }
@@ -62,16 +70,22 @@
     }
 
     .subtitle {
-      font-size: .92rem; color: #555; line-height: 1.65;
+      font-size: .92rem; 
+      color: #555; 
+      line-height: 1.65;
       margin-bottom: 32px;
     }
 
     /* ── Field ── */
     .field { margin-bottom: 18px; }
     label {
-      display: block; font-size: .75rem; font-weight: 500;
-      letter-spacing: .07em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: 7px;
+      display: block; 
+      font-size: .75rem; 
+      font-weight: 500;
+      letter-spacing: .07em; 
+      text-transform: uppercase;
+      color: var(--muted); 
+      margin-bottom: 7px;
     }
 
     .input-wrap { 
@@ -92,8 +106,10 @@
       border: 2px solid #d0dce8;
       border-radius: var(--radius);
       color: var(--navy);
-      font-family: 'DM Sans', Arial, sans-serif; font-size: .95rem;
-      outline: none; background: #fff;
+      font-family: 'DM Sans', Arial, sans-serif; 
+      font-size: .95rem;
+      outline: none; 
+      background: #fff;
       transition: border-color .2s, box-shadow .2s;
     }
 
@@ -108,28 +124,44 @@
 
     /* ── Error ── */
     .error-msg {
-      display: none; align-items: center; gap: 6px;
-      font-size: .82rem; color: var(--error); margin-top: 7px;
+      display: none; 
+      align-items: center; 
+      gap: 6px;
+      font-size: .82rem; 
+      color: var(--error); 
+      margin-top: 7px;
     }
     .error-msg.visible { display: flex; }
 
     /* ── Button ── */
     .btn {
-      width: 100%; padding: 13px;
-      border: none; border-radius: 25px; cursor: pointer;
-      color: #fff; font-family: 'DM Sans', Arial, sans-serif;
-      font-size: .95rem; font-weight: 500; letter-spacing: 1px;
+      width: 100%; 
+      padding: 13px;
+      border: none; 
+      border-radius: 25px; 
+      cursor: pointer;
+      color: #fff; 
+      font-family: 'DM Sans', Arial, sans-serif;
+      font-size: .95rem; 
+      font-weight: 500; 
+      letter-spacing: 1px;
       background: linear-gradient(270deg, #4BBFCC, #16376E, #4BBFCC);
       background-size: 300% 300%;
       animation: moveGradient 4s ease infinite;
-      display: flex; align-items: center; justify-content: center; gap: 10px;
+      display: flex; align-items: center; 
+      justify-content: center; gap: 10px;
       margin-top: 8px;
       transition: opacity .2s, transform .15s;
       box-shadow: 0 4px 18px rgba(22,55,110,.28);
     }
     .btn:hover { opacity: .9; transform: translateY(-1px); }
     .btn:active { transform: translateY(0); }
-    .btn:disabled { opacity: .5; cursor: not-allowed; animation: none; background: #aaa; transform: none; }
+    .btn:disabled { 
+      opacity: .5; 
+      cursor: not-allowed; 
+      animation: none; 
+      background: #aaa; 
+      transform: none; }
     @keyframes moveGradient {
       0%   { background-position: 0% 50%; }
       50%  { background-position: 100% 50%; }
