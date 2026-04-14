@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,29 +30,46 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    const MY_ID    = 1;  // Replace with real logged-in user ID
-    const OTHER_ID = 2;  // Replace with the person you're chatting with
+    // Get user IDs from URL: ?userId=1&otherId=2
+    const params   = new URLSearchParams(window.location.search);
+    const MY_ID    = parseInt(params.get('userId'));
+    const OTHER_ID = parseInt(params.get('otherId'));
 
     const socket = io({ query: { userId: MY_ID } });
 
-    function renderMsg(msg) {
-      const div  = document.createElement('div');
-      div.className = 'msg' + (msg.id_expediter == MY_ID ? ' mine' : '');
-      div.dataset.id = msg.id;
-      div.innerHTML = `<span>${msg.content}</span>`;
-      if (msg.date_reception)
-        div.innerHTML += '<div class="seen">Seen</div>';
-      document.getElementById('messages').appendChild(div);
+    const messagesEl = document.getElementById('messages');
+
+    function scrollToBottom() {
+      messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
-    socket.on('history', (msgs) => msgs.forEach(renderMsg));
+    function renderMsg(msg) {
+      const div = document.createElement('div');
+      div.className = 'msg' + (msg.ID_Expediteur == MY_ID ? ' mine' : '');
+      div.dataset.id = msg.ID;
+      div.innerHTML = `<span>${msg.contenue}</span>`;
+      if (msg.lue)
+        div.innerHTML += '<div class="seen">Seen</div>';
+      messagesEl.appendChild(div);
+      scrollToBottom();
+    }
 
-    socket.on(`msg_${MY_ID}`, (msg) => {
-      renderMsg(msg);
-      if (msg.id_expediter !== MY_ID)
-        socket.emit('mark_seen', { messageId: msg.id, id_receptor: MY_ID });
+    // Load history on connect
+    socket.on('history', (msgs) => {
+      msgs.forEach(renderMsg);
+      scrollToBottom();
     });
 
+    // Receive new message
+    socket.on(`msg_${MY_ID}`, (msg) => {
+      renderMsg(msg);
+      // If message is from the other person, mark it as seen
+      if (msg.ID_Expediteur !== MY_ID) {
+        socket.emit('mark_seen', { messageId: msg.ID, ID_Destinataire: MY_ID });
+      }
+    });
+
+    // Show "Seen" when our message is seen by the other person
     socket.on(`seen_${MY_ID}`, ({ messageId }) => {
       const el = document.querySelector(`[data-id="${messageId}"]`);
       if (el && !el.querySelector('.seen'))
@@ -61,9 +80,9 @@
       const input = document.getElementById('msg-input');
       if (!input.value.trim()) return;
       socket.emit('send_message', {
-        id_expediter: MY_ID,
-        id_receptor:  OTHER_ID,
-        content:      input.value.trim(),
+        ID_Expediteur:   MY_ID,
+        ID_Destinataire: OTHER_ID,
+        contenue:        input.value.trim(),
       });
       input.value = '';
     }
@@ -73,3 +92,5 @@
   </script>
 </body>
 </html>
+index.html
+Displaying index.html.
