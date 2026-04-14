@@ -1,4 +1,4 @@
-const newPass    = document.getElementById('newPass');
+  const newPass    = document.getElementById('newPass');
   const confPass   = document.getElementById('confPass');
   const saveBtn    = document.getElementById('saveBtn');
   const matchError = document.getElementById('matchError');
