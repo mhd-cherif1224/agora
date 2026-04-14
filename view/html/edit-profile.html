@@ -69,53 +69,48 @@
                   <input type="file" id="cvInput" hidden accept=".pdf,.doc,.docx">
                   <label for="cvInput">+ Ajouter Votre CV</label>
                 </button>
+                <!-- Affichage du fichier -->
+                <span id="cvName"></span>
               </div>
               <div class="banner-role" id="displayRole">Etudiant a l'univ d'abderrahmane mira</div>
               <div class="banner-location" id="displayLocation">
                 <i class="fa-solid fa-location-dot"></i> Bejaia, Algeria
               </div>
-              <!-- <button class="add-link-btn" id="showLinkInput">
-                <i class="fa-solid fa-plus" style="font-size:8px"></i> 
-                Ajouter un lien
-              </button>
+              
+              <!-- Icône lien dans la bannière -->
+              <div class="links-widget">
 
-              <input type="url" id="linkInput" placeholder="https://exemple.com" style="display:none;"> -->
-              <!-- Remplacer depuis <button class="add-link-btn" id="openModal"> jusqu'à </div> (fin du linkModal) -->
+                <!-- Bouton icône avec badge -->
+                <button class="links-icon-btn" id="linksToggleBtn" title="Mes liens">
+                  <i class="fa-solid fa-link"></i>
+                  <span class="links-badge" id="linksBadge" style="display:none;">0</span>
+                </button>
 
-<!-- Icône lien dans la bannière -->
-<div class="links-widget">
+                <!-- Dropdown liste des liens -->
+                <div class="links-dropdown" id="linksDropdown">
+                  <div class="links-dropdown-header">
+                    <span>Mes liens</span>
+                    <button class="links-add-btn" id="openModal" title="Ajouter un lien">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                  </div>
+                  <div class="links-list" id="linksContainer">
+                    <!-- liens générés par JS -->
+                  </div>
+                  <p class="links-empty" id="linksEmpty">Aucun lien ajouté</p>
+                </div>
 
-  <!-- Bouton icône avec badge -->
-  <button class="links-icon-btn" id="linksToggleBtn" title="Mes liens">
-    <i class="fa-solid fa-link"></i>
-    <span class="links-badge" id="linksBadge" style="display:none;">0</span>
-  </button>
+              </div>
 
-  <!-- Dropdown liste des liens -->
-  <div class="links-dropdown" id="linksDropdown">
-    <div class="links-dropdown-header">
-      <span>Mes liens</span>
-      <button class="links-add-btn" id="openModal" title="Ajouter un lien">
-        <i class="fa-solid fa-plus"></i>
-      </button>
-    </div>
-    <div class="links-list" id="linksContainer">
-      <!-- liens générés par JS -->
-    </div>
-    <p class="links-empty" id="linksEmpty">Aucun lien ajouté</p>
-  </div>
-
-</div>
-
-<!-- MODAL AJOUTER UN LIEN -->
-<div id="linkModal" class="modal">
-  <div class="modal-content">
-    <button class="close-btn" id="closeModal">&times;</button>
-    <h2>Ajouter un lien</h2>
-    <input type="url" id="modalLinkInput" placeholder="https://exemple.com">
-    <button class="save-btn">Enregistrer</button>
-  </div>
-</div>
+              <!-- MODAL AJOUTER UN LIEN -->
+              <div id="linkModal" class="modal">
+                <div class="modal-content">
+                  <button class="close-btn" id="closeModal">&times;</button>
+                  <h2>Ajouter un lien</h2>
+                  <input type="url" id="modalLinkInput" placeholder="https://exemple.com">
+                  <button class="save-btn">Enregistrer</button>
+                </div>
+              </div>
             </div>
           </div>
 

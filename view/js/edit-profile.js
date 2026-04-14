@@ -292,7 +292,33 @@ helpOverlay.addEventListener('click', e => {
 });
 
 
+const cvInput = document.getElementById("cvInput");
+const cvName = document.getElementById("cvName");
 
+let fileURL = null;
+
+cvInput.addEventListener("change", function () {
+    if (this.files.length > 0) {
+        const file = this.files[0];
+
+        // créer un lien temporaire
+        fileURL = URL.createObjectURL(file);
+
+        // afficher le nom
+        cvName.textContent = "📄 " + file.name;
+
+        // rendre cliquable
+        cvName.style.cursor = "pointer";
+        cvName.style.textDecoration = "underline";
+    }
+});
+
+// ouvrir le fichier au clic
+cvName.addEventListener("click", function () {
+    if (fileURL) {
+        window.open(fileURL, "_blank");
+    }
+});
 
 
 // ========================

@@ -1018,3 +1018,10 @@ body.modal-open::before { display: none !important; }
   padding: 0;
 }
 .delete-btn:hover { background: #fee2e2; color: #dc2626; }
+
+#cvName {
+  margin-left: 10px;
+  font-size: 12px;
+  color: #161616;
+  opacity: 0.9;
+}
