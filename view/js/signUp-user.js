@@ -124,39 +124,8 @@ window.addEventListener("load", () => {
 });
 
 // ========================
-// FORGOT PASSWORD
+// Toggle password visibility
 // ========================
-document.getElementById("forgot-send").addEventListener("click", () => {
-    const forgotEmail = document.getElementById("forgot-email").value;
-
-    if (!forgotEmail || !forgotEmail.includes("@")) {
-        showNotification("Entrez un email valide.", "#c0392b");
-        modal.remove();
-        return;
-    }
-
-    // Appel réel au backend
-    fetch("../../Controller/forgot-password.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: "email=" + encodeURIComponent(forgotEmail)
-    })
-    .then(res => res.json())
-    .then(data => {
-        modal.remove();
-        if (data.success) {
-            showNotification("✔ Lien envoyé à " + forgotEmail, "#16376E");
-        } else {
-            showNotification("❌ " + data.message, "#c0392b");
-        }
-    })
-    .catch(() => {
-        modal.remove();
-        showNotification("❌ Erreur de connexion au serveur.", "#c0392b");
-    });
-});
-
-
 const toggle1 = document.getElementById("togglePassword1");
 const passwordInput1 = document.getElementById("password1");
 

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mot de passe oublié – Envoyer le code</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/send-code.css"/>
+</head>
+<body>
+<div class="card" id="card">
+
+  <!-- ── Form view ── -->
+  <div id="formView">
+    <div class="icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="4" width="20" height="16" rx="3"/>
+        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+      </svg>
+    </div>
+
+    <h1>Mot de passe<br/>oublié ?</h1>
+    <p class="subtitle">Saisissez votre adresse e-mail. Nous vous enverrons un code à 6 chiffres pour réinitialiser votre mot de passe.</p>
+
+    <div class="field">
+      <label for="email">Adresse e-mail</label>
+      <div class="input-wrap">
+        <input type="email" id="email" placeholder="exemple@domaine.com" autocomplete="email"/>
+        <span class="input-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="3"/>
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+          </svg>
+        </span>
+      </div>
+      <div class="error-msg" id="errorMsg">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span id="errorText">Veuillez entrer un e-mail valide.</span>
+      </div>
+    </div>
+
+    <button class="btn" id="sendBtn" onclick="handleSend()">
+      <div class="spinner"></div>
+      <span class="btn-label">ENVOYER LE CODE</span>
+    </button>
+
+    <hr class="divider"/>
+    <a href="login-user.html" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      Retour à la connexion
+    </a>
+  </div>
+
+  <!-- ── Success view ── -->
+  <div class="success-view" id="successView">
+    <div class="success-circle">✓</div>
+    <div class="success-title">Code envoyé !</div>
+    <div class="success-sub">
+      Un code à 6 chiffres a été envoyé à<br/>
+      <strong id="sentEmail" style="color:var(--navy)"></strong>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="redirect-hint">Redirection vers la vérification…</div>
+  </div>
+
+</div>
+<script src="../js/send-code.js"></script>
+</body>
+</html>
