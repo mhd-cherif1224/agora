@@ -120,6 +120,7 @@ form{
 button {
     width: 85%;
     padding: 6px 4px;
+    margin-top: 10px;
     border: none;
     border-radius: 25px;
     letter-spacing: 1px;
@@ -230,4 +231,107 @@ footer {
     display:none;
     display:none;
     z-index: 1000;
+}
+
+
+/* ── Fields ── */
+.field {
+    margin-bottom: 10px;
+}
+
+/* ── Strength bar ── */
+.strength-wrap {
+    margin-top: 6px;
+}
+
+.strength-bar {
+    height: 6px;
+    background: #dde6ef;
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.strength-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 99px;
+    transition: width .3s ease, background-color .3s;
+}
+
+.strength-label {
+    font-size: .78rem;
+    color: var(--muted);
+}
+
+/* ── Requirements ── */
+.reqs {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.req {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .8rem;
+    color: var(--muted);
+    transition: color .2s;
+}
+
+.req .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #d0dce8;
+    flex-shrink: 0;
+    transition: background .2s, transform .2s;
+}
+
+.req.ok {
+    color: var(--green);
+}
+
+.req.ok .dot {
+    background: var(--green);
+    transform: scale(1.25);
+}
+
+/* ── Error ── */
+.error-msg {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    font-size: .82rem;
+    color: var(--error);
+    margin-top: 7px;
+}
+
+.error-msg.visible {
+    display: flex;
+}
+
+/* ── Alert ── */
+.alert {
+    display: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: .85rem;
+    margin-bottom: 14px;
+}
+
+.alert.error {
+    background: #fde8e8;
+    color: var(--error);
+    border: 1px solid #f5c6c6;
+    display: block;
+}
+
+.alert.success {
+    background: #e8f8ef;
+    color: var(--green);
+    border: 1px solid #b7e4cb;
+    display: block;
 }

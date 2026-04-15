@@ -152,3 +152,43 @@ toggle2.addEventListener("click", () => {
     }
 });
 
+
+// ========================
+// STRENGTH BAR + REQUIREMENTS
+// ========================
+const strengthFill  = document.getElementById("strengthFill");
+const strengthLabel = document.getElementById("strengthLabel");
+
+const levels = [
+    { w: "0%",   bg: "",          txt: "" },
+    { w: "25%",  bg: "#e74c3c",   txt: "Très faible" },
+    { w: "50%",  bg: "#e67e22",   txt: "Faible" },
+    { w: "75%",  bg: "#f1c40f",   txt: "Moyen" },
+    { w: "100%", bg: "#1a7a46",   txt: "Fort" },
+];
+
+function checkStrength(pw) {
+    let s = 0;
+    if (pw.length >= 8)          s++;
+    if (/[A-Z]/.test(pw))        s++;
+    if (/[0-9]/.test(pw))        s++;
+    if (/[^A-Za-z0-9]/.test(pw)) s++;
+    const l = levels[s];
+    strengthFill.style.width      = l.w;
+    strengthFill.style.background = l.bg;
+    strengthLabel.textContent     = l.txt;
+    strengthLabel.style.color     = l.bg || "var(--muted)";
+}
+
+function setReq(id, ok) {
+    document.getElementById(id).classList.toggle("ok", ok);
+}
+
+passwordInput1.addEventListener("input", () => {
+    const v = passwordInput1.value;
+    checkStrength(v);
+    setReq("req-len", v.length >= 8);
+    setReq("req-up",  /[A-Z]/.test(v));
+    setReq("req-num", /[0-9]/.test(v));
+    setReq("req-sym", /[^A-Za-z0-9]/.test(v));
+});
