@@ -290,3 +290,170 @@ helpClose.addEventListener('click', () => {
 helpOverlay.addEventListener('click', e => {
     if (e.target === helpOverlay) helpOverlay.classList.remove('active');
 });
+
+
+const cvInput = document.getElementById("cvInput");
+const cvName = document.getElementById("cvName");
+
+let fileURL = null;
+
+cvInput.addEventListener("change", function () {
+    if (this.files.length > 0) {
+        const file = this.files[0];
+
+        // créer un lien temporaire
+        fileURL = URL.createObjectURL(file);
+
+        // afficher le nom
+        cvName.textContent = "📄 " + file.name;
+
+        // rendre cliquable
+        cvName.style.cursor = "pointer";
+        cvName.style.textDecoration = "underline";
+    }
+});
+
+// ouvrir le fichier au clic
+cvName.addEventListener("click", function () {
+    if (fileURL) {
+        window.open(fileURL, "_blank");
+    }
+});
+
+
+// ========================
+// LINKS WIDGET
+// Remplace tout le bloc depuis "const openBtn" jusqu'à "displayLinks();"
+// ========================
+
+const openBtn      = document.getElementById("openModal");
+const modal        = document.getElementById("linkModal");
+const closeBtn     = document.getElementById("closeModal");
+const saveBtn      = document.querySelector(".save-btn");
+const input        = document.getElementById("modalLinkInput");
+const container    = document.getElementById("linksContainer");
+const emptyMsg     = document.getElementById("linksEmpty");
+const badge        = document.getElementById("linksBadge");
+const toggleBtn    = document.getElementById("linksToggleBtn");
+const dropdown     = document.getElementById("linksDropdown");
+
+let links = JSON.parse(localStorage.getItem("links")) || [];
+
+// ── Toggle dropdown ──
+toggleBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  dropdown.classList.toggle("open");
+  toggleBtn.classList.toggle("active");
+});
+
+// Fermer dropdown en cliquant ailleurs
+document.addEventListener("click", (e) => {
+  if (!dropdown.contains(e.target) && e.target !== toggleBtn) {
+    dropdown.classList.remove("open");
+    toggleBtn.classList.remove("active");
+  }
+});
+
+// ── Afficher les liens ──
+function displayLinks() {
+  container.innerHTML = "";
+
+  links.forEach((link, index) => {
+    const div = document.createElement("div");
+    div.className = "link-item";
+
+    // Icône
+    const icon = document.createElement("div");
+    icon.className = "link-item-icon";
+    icon.innerHTML = '<i class="fa-solid fa-link"></i>';
+
+    // Lien — afficher le domaine seulement
+    const a = document.createElement("a");
+    try {
+      a.textContent = new URL(link).hostname.replace("www.", "");
+    } catch {
+      a.textContent = link;
+    }
+    a.href   = link;
+    a.title  = link;
+    a.target = "_blank";
+    a.addEventListener("click", (e) => e.stopPropagation());
+
+    // Bouton supprimer
+    const delBtn = document.createElement("button");
+    delBtn.innerHTML  = "&#x2715;";
+    delBtn.className  = "delete-btn";
+    delBtn.title      = "Supprimer";
+    delBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      links.splice(index, 1);
+      localStorage.setItem("links", JSON.stringify(links));
+      displayLinks();
+    });
+
+    div.appendChild(icon);
+    div.appendChild(a);
+    div.appendChild(delBtn);
+    container.appendChild(div);
+  });
+
+  // Vide ou pas
+  emptyMsg.style.display = links.length === 0 ? "block" : "none";
+
+  // Badge
+  if (links.length > 0) {
+    badge.textContent    = links.length;
+    badge.style.display  = "flex";
+  } else {
+    badge.style.display  = "none";
+  }
+}
+
+// ── Ouvrir modal ──
+openBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  dropdown.classList.remove("open");
+  toggleBtn.classList.remove("active");
+  modal.style.display = "flex";
+  document.body.classList.add("modal-open");
+  setTimeout(() => input.focus(), 50);
+});
+
+// ── Fermer modal ──
+closeBtn.addEventListener("click", () => {
+  modal.style.display = "none";
+  document.body.classList.remove("modal-open");
+  input.value = "";
+});
+
+window.addEventListener("click", (e) => {
+  if (e.target === modal) {
+    modal.style.display = "none";
+    document.body.classList.remove("modal-open");
+    input.value = "";
+  }
+});
+
+// Touche Entrée pour valider
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") saveBtn.click();
+});
+
+// ── Enregistrer lien ──
+saveBtn.addEventListener("click", () => {
+  const link = input.value.trim();
+  if (!link)                    { showNotification("⚠️  Entrez un lien !"); return; }
+  if (!link.startsWith("http")) { showNotification("⚠️  Lien invalide !"); return; }
+
+  links.push(link);
+  localStorage.setItem("links", JSON.stringify(links));
+  input.value = "";
+  modal.style.display = "none";
+  document.body.classList.remove("modal-open");
+
+  displayLinks();
+  showNotification("✓  Lien ajouté !");
+});
+
+// ── Init ──
+displayLinks();
