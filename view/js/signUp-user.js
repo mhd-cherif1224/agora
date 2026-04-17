@@ -1,76 +1,37 @@
+/* ══════════════════════════════════════════
+   SIGNUP-USER.JS
+   Étape 1 : email + mot de passe
+   → appel signup-user.php → OTP envoyé
+══════════════════════════════════════════ */
 const form = document.querySelector("form");
+const signUpControllerUrl = "../../Controller/signup-user.php";
 
-// Validation mot de passe
+// ── Validation mot de passe ──
 function validatePassword(password) {
-    const rules = {
+    return {
         length:    password.length >= 8,
         uppercase: /[A-Z]/.test(password),
         number:    /[0-9]/.test(password),
-        underscore:/\_/.test(password),
+        special:   /[^A-Za-z0-9]/.test(password),
     };
-    return rules;
 }
 
-// Affiche les erreurs sous le champ password
-function showPasswordErrors(rules) {
-    // Supprimer l'ancien message s'il existe
-    const old = document.getElementById("password-hint");
-    if (old) old.remove();
-
-    const allValid = Object.values(rules).every(Boolean);
-    if (allValid) return;
-
-    const messages = [
-        { key: "length",    text: "Au moins 8 caractères" },
-        { key: "uppercase", text: "Au moins une lettre majuscule" },
-        { key: "number",    text: "Au moins un chiffre" },
-        { key: "underscore",text: "Au moins un underscore (_)" },
-    ];
-
-    const hint = document.createElement("ul");
-    hint.id = "password-hint";
-    hint.style.cssText = `
-        list-style: none;
-        font-size: 12px;
-        margin-top: 6px;
-        text-align: left;
-        margin-left: 8%;
-        padding: 0;
-    `;
-
-    messages.forEach(({ key, text }) => {
-        if (!rules[key]) {
-            const li = document.createElement("li");
-            li.textContent = "✗ " + text;
-            li.style.color = "#c0392b";
-            hint.appendChild(li);
-        }
-    });
-
-    const passwordGroup = form.querySelector("input[type='password']").closest(".input-group");
-    passwordGroup.insertAdjacentElement("afterend", hint);
-}
-
-
-// ========================
-// NOTIFICATIONS
-// ========================
+// ── Notifications ──
 function showNotification(message) {
     const notif = document.getElementById("notification");
-    notif.innerText = message;
-    notif.style.display = "block";
+    notif.innerText      = message;
+    notif.style.display  = "block";
     setTimeout(() => { notif.style.display = "none"; }, 4000);
 }
 
-const inputs = form.querySelectorAll("input");
-const signUpControllerUrl = "../../Controller/signup-user.php";
-
+// ── Soumission du formulaire ──
 form.addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    const email = inputs[0].value.trim();
+    const inputs   = form.querySelectorAll("input");
+    const email    = inputs[0].value.trim();
     const password = inputs[1].value;
-    const confirm = inputs[2].value;
+    const confirm  = inputs[2].value;
 
     if (!email || !password || !confirm) {
         showNotification("Tous les champs sont obligatoires");
@@ -82,113 +43,121 @@ form.addEventListener("submit", async function (e) {
         return;
     }
 
+    const rules = validatePassword(password);
+    if (!Object.values(rules).every(Boolean)) {
+        showNotification("Le mot de passe ne respecte pas les règles de sécurité.");
+        return;
+    }
+
     try {
-        const response = await fetch(`${signUpControllerUrl}?action=register`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+        const response = await fetch(signUpControllerUrl, {
+            method:      "POST",
+            credentials: "include",              // IMPORTANT : partage le cookie de session
+            headers:     { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password })
         });
 
         const result = await response.json();
 
         if (result.success) {
-            showNotification(`Utilisateur enregistré et email envoyé à ${result.email}`);
-            localStorage.setItem('pendingEmail', email);
- 
+            // Stocker l'email pour l'afficher sur la page OTP
+            localStorage.setItem("pendingEmail", result.email);
+            localStorage.removeItem("step");     // reset progress bar
             window.location.href = "../html/user-verification.html";
         } else {
-            showNotification(`Erreur 1:  ${result.message}`);
+            showNotification("Erreur : " + result.message);
         }
     } catch (error) {
-        showNotification("Erreur lors de l'inscription: " + error.message);
+        showNotification("Erreur réseau : " + error.message);
     }
-
-    
 });
 
-// ========================
-// REMEMBER ME
-// ========================
-const emailInput   = form.querySelector("input[type='email']");
+// ── Remember me ──
+const emailInput    = form.querySelector("input[type='email']");
+// BUG CORRIGÉ : l'HTML n'avait pas id="check" sur la checkbox
+// Assurez-vous que votre HTML a : <input type="checkbox" id="check">
 const rememberCheck = document.getElementById("check");
 
-// Au chargement : si email sauvegardé, on le remet
 window.addEventListener("load", () => {
     const savedEmail = localStorage.getItem("rememberedEmail");
-    if (savedEmail) {
+    if (savedEmail && emailInput) {
         emailInput.value = savedEmail;
-        rememberCheck.checked = true;
+        if (rememberCheck) rememberCheck.checked = true;
     }
 });
 
-// ========================
-// Toggle password visibility
-// ========================
-const toggle1 = document.getElementById("togglePassword1");
+if (rememberCheck) {
+    rememberCheck.addEventListener("change", () => {
+        if (rememberCheck.checked) {
+            localStorage.setItem("rememberedEmail", emailInput.value.trim());
+        } else {
+            localStorage.removeItem("rememberedEmail");
+        }
+    });
+}
+
+// ── Toggle visibilité mot de passe ──
+const toggle1       = document.getElementById("togglePassword1");
 const passwordInput1 = document.getElementById("password1");
+if (toggle1 && passwordInput1) {
+    toggle1.addEventListener("click", () => {
+        const isHidden = passwordInput1.type === "password";
+        passwordInput1.type = isHidden ? "text" : "password";
+        toggle1.classList.replace(
+            isHidden ? "fa-eye-slash" : "fa-eye",
+            isHidden ? "fa-eye"       : "fa-eye-slash"
+        );
+    });
+}
 
-toggle1.addEventListener("click", () => {
-    if (passwordInput1.type === "password") {
-        passwordInput1.type = "text";
-        toggle1.classList.replace("fa-eye-slash", "fa-eye");
-    } else {
-        passwordInput1.type = "password";
-        toggle1.classList.replace("fa-eye", "fa-eye-slash");
-    }
-});
-
-const toggle2 = document.getElementById("togglePassword2");
+const toggle2        = document.getElementById("togglePassword2");
 const passwordInput2 = document.getElementById("password2");
+if (toggle2 && passwordInput2) {
+    toggle2.addEventListener("click", () => {
+        const isHidden = passwordInput2.type === "password";
+        passwordInput2.type = isHidden ? "text" : "password";
+        toggle2.classList.replace(
+            isHidden ? "fa-eye-slash" : "fa-eye",
+            isHidden ? "fa-eye"       : "fa-eye-slash"
+        );
+    });
+}
 
-toggle2.addEventListener("click", () => {
-    if (passwordInput2.type === "password") {
-        passwordInput2.type = "text";
-        toggle2.classList.replace("fa-eye-slash", "fa-eye");
-    } else {
-        passwordInput2.type = "password";
-        toggle2.classList.replace("fa-eye", "fa-eye-slash");
-    }
-});
-
-
-// ========================
-// STRENGTH BAR + REQUIREMENTS
-// ========================
+// ── Barre de force du mot de passe ──
 const strengthFill  = document.getElementById("strengthFill");
 const strengthLabel = document.getElementById("strengthLabel");
 
 const levels = [
-    { w: "0%",   bg: "",          txt: "" },
-    { w: "25%",  bg: "#e74c3c",   txt: "Très faible" },
-    { w: "50%",  bg: "#e67e22",   txt: "Faible" },
-    { w: "75%",  bg: "#f1c40f",   txt: "Moyen" },
-    { w: "100%", bg: "#1a7a46",   txt: "Fort" },
+    { w: "0%",    bg: "",          txt: ""          },
+    { w: "25%",   bg: "#e74c3c",   txt: "Très faible" },
+    { w: "50%",   bg: "#e67e22",   txt: "Faible"     },
+    { w: "75%",   bg: "#f1c40f",   txt: "Moyen"      },
+    { w: "100%",  bg: "#1a7a46",   txt: "Fort"       },
 ];
 
 function checkStrength(pw) {
-    let s = 0;
-    if (pw.length >= 8)          s++;
-    if (/[A-Z]/.test(pw))        s++;
-    if (/[0-9]/.test(pw))        s++;
-    if (/[^A-Za-z0-9]/.test(pw)) s++;
-    const l = levels[s];
-    strengthFill.style.width      = l.w;
-    strengthFill.style.background = l.bg;
-    strengthLabel.textContent     = l.txt;
-    strengthLabel.style.color     = l.bg || "var(--muted)";
+    let score = 0;
+    if (pw.length >= 8)          score++;
+    if (/[A-Z]/.test(pw))        score++;
+    if (/[0-9]/.test(pw))        score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    const l = levels[score];
+    if (strengthFill)  { strengthFill.style.width = l.w; strengthFill.style.background = l.bg; }
+    if (strengthLabel) { strengthLabel.textContent = l.txt; strengthLabel.style.color = l.bg || "var(--muted)"; }
 }
 
 function setReq(id, ok) {
-    document.getElementById(id).classList.toggle("ok", ok);
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle("ok", ok);
 }
 
-passwordInput1.addEventListener("input", () => {
-    const v = passwordInput1.value;
-    checkStrength(v);
-    setReq("req-len", v.length >= 8);
-    setReq("req-up",  /[A-Z]/.test(v));
-    setReq("req-num", /[0-9]/.test(v));
-    setReq("req-sym", /[^A-Za-z0-9]/.test(v));
-});
+if (passwordInput1) {
+    passwordInput1.addEventListener("input", () => {
+        const v = passwordInput1.value;
+        checkStrength(v);
+        setReq("req-len", v.length >= 8);
+        setReq("req-up",  /[A-Z]/.test(v));
+        setReq("req-num", /[0-9]/.test(v));
+        setReq("req-sym", /[^A-Za-z0-9]/.test(v));
+    });
+}

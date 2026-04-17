@@ -1,13 +1,11 @@
 <?php
+/* ══════════════════════════════════════════
+   SAVESTEP.PHP
+   Sauvegarde les étapes intermédiaires
+   du formulaire d'inscription en session.
+══════════════════════════════════════════ */
 ob_start();
 require_once __DIR__ . '/session-config.php';
-
-header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Headers: Content-Type');
-header('Access-Control-Allow-Methods: POST, OPTIONS');
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
 
 $raw    = file_get_contents('php://input');
 $body   = json_decode($raw, true);
@@ -15,11 +13,16 @@ $action = $body['action'] ?? '';
 
 switch ($action) {
 
+    // ── Étape 1 : choix du rôle ──────────────────────────────
     case 'save_role':
+        // BUG CORRIGÉ : on lit 'role' (pas 'status')
         $role = trim($body['role'] ?? '');
-        if (!in_array($role, ['Chercheur', 'Proposeur'])) {
+
+        // BUG CORRIGÉ : valeurs en majuscule pour correspondre à l'enum BDD
+        $role = ucfirst(strtolower($role));
+            if (!in_array($role, ['Chercheur', 'Proposeur'])) {
             ob_end_clean();
-            echo json_encode(['success' => false, 'message' => 'Rôle invalide.']);
+            echo json_encode(['success' => false, 'message' => 'Rôle invalide : ' . $role]);
             exit;
         }
         $_SESSION['signup_role'] = $role;
@@ -27,6 +30,7 @@ switch ($action) {
         echo json_encode(['success' => true]);
         break;
 
+    // ── Étape 2 : formulaire nom/prénom/sexe/date ────────────
     case 'save_formulaire':
         $nom           = trim($body['nom']            ?? '');
         $prenom        = trim($body['prenom']         ?? '');
@@ -39,6 +43,13 @@ switch ($action) {
             exit;
         }
 
+        // BUG CORRIGÉ : accepte M/F (déjà converti côté JS)
+        if (!in_array($sexe, ['M', 'F'])) {
+            ob_end_clean();
+            echo json_encode(['success' => false, 'message' => 'Sexe invalide.']);
+            exit;
+        }
+
         $_SESSION['signup_nom']            = $nom;
         $_SESSION['signup_prenom']         = $prenom;
         $_SESSION['signup_sexe']           = $sexe;
@@ -48,7 +59,7 @@ switch ($action) {
         echo json_encode(['success' => true]);
         break;
 
-    // ── DEBUG : voir l'état de la session ──
+    // ── DEBUG : état de la session ───────────────────────────
     case 'debug':
         ob_end_clean();
         echo json_encode(['session' => $_SESSION]);
@@ -56,7 +67,7 @@ switch ($action) {
 
     default:
         ob_end_clean();
-        echo json_encode(['success' => false, 'message' => 'Action inconnue.']);
+        echo json_encode(['success' => false, 'message' => 'Action inconnue : ' . $action]);
         break;
 }
 ?>
