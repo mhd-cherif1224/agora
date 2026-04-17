@@ -27,8 +27,7 @@ document.addEventListener("click", function(e){
 // ==============================
 // SUPPRESSION SERVICE
 // ==============================
-<<<<<<< HEAD
-deleteBtn
+
 const modal = document.getElementById("modal");
 const cancelBtn = document.getElementById("deleteBtn");
 const closeModal = document.querySelector(".closeConfirm");
@@ -56,8 +55,6 @@ closeModal.onclick = cancelBtn.onclick;
 // SUPPRESSION SERVICE — AVEC PHP
 // ==============================
 
-=======
->>>>>>> 4fbd4dd4a8c652f5e51ac046928254d2251629f8
 const confirmModal = document.getElementById("confirmModal");
 const deleteBtn    = document.getElementById("deleteBtn");
 
