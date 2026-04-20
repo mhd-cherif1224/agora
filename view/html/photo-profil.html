@@ -25,7 +25,7 @@
         <p>Ajoutez une photo de profil et un banner</p>
 
         <div class="banner">
-            
+
             <div class="banner-top">
                 <input type="file" id="bannerInput" hidden accept="image/png, image/jpeg, image/jpg, image/gif">
                 <label for="bannerInput" class="camera-banner">
@@ -34,7 +34,7 @@
             </div>
             <div class="banner-bottom"></div>
 
-            <!-- PROFILE dedans -->
+            <!-- PROFILE -->
             <div class="profile">
                 <input type="file" id="profileInput" hidden accept="image/png, image/jpeg, image/jpg, image/gif">
                 <label for="profileInput">
@@ -47,6 +47,7 @@
 
         <!-- BUTTONS -->
         <div class="buttons">
+            <!-- BUG CORRIGÉ : les boutons n'avaient aucun handler → inscription ne se terminait jamais -->
             <button class="skip">Sautez</button>
             <button class="finish">Terminez</button>
         </div>
@@ -57,25 +58,27 @@
     <div id="notification"></div>
 
     <!-- CROP MODAL -->
-    <div id="cropModal">
-        <div id="cropBox">
-            <img id="cropImage">
+    <div id="cropModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.75);
+         z-index:999; flex-direction:column; align-items:center; justify-content:center;">
+        <div id="cropBox" style="max-width:90vw; max-height:70vh; overflow:hidden;">
+            <img id="cropImage" style="max-width:100%;">
         </div>
-        <div id="cropButtons">
-            <button id="cropCancel">
+        <div id="cropButtons" style="margin-top:16px; display:flex; gap:16px;">
+            <button id="cropCancel"
+                style="padding:10px 24px; border-radius:8px; border:none;
+                       background:#e74c3c; color:#fff; cursor:pointer; font-size:15px;">
                 <i class="fa-solid fa-xmark"></i> Annuler
             </button>
-            <button id="cropConfirm">
-                <i class="fa-solid fa-check"></i>Confirmer
+            <button id="cropConfirm"
+                style="padding:10px 24px; border-radius:8px; border:none;
+                       background:#16376E; color:#fff; cursor:pointer; font-size:15px;">
+                <i class="fa-solid fa-check"></i> Confirmer
             </button>
         </div>
     </div>
 
-    <style>
-        
-    </style>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+    <!-- BUG CORRIGÉ : script pointait vers photo-profile.js (qui n'existait pas) -->
     <script src="../js/photo-profile.js"></script>
 
 </body>

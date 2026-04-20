@@ -1,31 +1,55 @@
+
+/* ══════════════════════════════════════════
+   USER-CHOICE.JS
+   Étape : choix du rôle (Chercheur / Proposeur)
+══════════════════════════════════════════ */
 const SAVE_STEP_URL = "../../Controller/savestep.php";
 
 let selectedRole = null;
 const cards = document.querySelectorAll(".card");
 
-// Sélection du rôle
+// ── Sélection d'une carte ──
 cards.forEach(card => {
     card.addEventListener("click", () => {
         cards.forEach(c => c.classList.remove("active"));
         card.classList.add("active");
-        selectedRole = card.dataset.role;
+
+        const raw = card.dataset.role || "";
+        // Capitalisation : "chercheur" → "Chercheur", "proposeur" → "Proposeur"
+        selectedRole = raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
     });
 });
 
-// Continue
+// ── Bouton Continuer ──
 document.getElementById("continueBtn").addEventListener("click", async () => {
     if (!selectedRole) {
         showNotification("Choisissez un rôle !");
         return;
     }
 
+    // Vérification locale avant d'envoyer
+    if (selectedRole !== "Chercheur" && selectedRole !== "Proposeur") {
+        showNotification("Rôle invalide côté JS : " + selectedRole);
+        return;
+    }
+
     try {
         const response = await fetch(SAVE_STEP_URL, {
-            method:  "POST",
-            headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify({ action: "save_role", role: selectedRole })
+            method:      "POST",
+            credentials: "include",
+            headers:     { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "save_role", role: selectedRole })
         });
-        const result = await response.json();
+
+        // Vérifier que la réponse est bien du JSON
+        const text = await response.text();
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (e) {
+            showNotification("Réponse serveur invalide : " + text.substring(0, 100));
+            return;
+        }
 
         if (result.success) {
             window.location.href = "user-formulaire.html";
@@ -37,20 +61,17 @@ document.getElementById("continueBtn").addEventListener("click", async () => {
     }
 });
 
-// Back
+// ── Bouton Retour ──
 document.getElementById("back").addEventListener("click", () => {
-    localStorage.setItem('step', 'back');
+    localStorage.setItem("step", "back");
     window.location.href = "user-verification.html";
 });
 
-// ========================
-// PROGRESS BAR
-// ========================
+// ── Barre de progression ──
 const progressBar = document.querySelector(".progress-bar");
-let step = localStorage.getItem("step");
 
 function animateProgress(from, to, duration = 600) {
-    const style    = document.createElement('style');
+    const style    = document.createElement("style");
     const animName = `loadProgress${Date.now()}`;
     style.innerHTML = `
         @keyframes ${animName} {
@@ -62,22 +83,22 @@ function animateProgress(from, to, duration = 600) {
     progressBar.style.animation = `${animName} ${duration}ms ease-out forwards`;
     setTimeout(() => {
         progressBar.style.width     = to;
-        progressBar.style.animation = '';
+        progressBar.style.animation = "";
         style.remove();
     }, duration);
 }
 
 if (progressBar) {
+    const step = localStorage.getItem("step");
     if (step === "back") {
         animateProgress("75%", "50%");
-        localStorage.setItem("step", 2);
     } else {
         animateProgress("25%", "50%");
-        localStorage.setItem("step", 2);
     }
+    localStorage.setItem("step", "2");
 }
 
-// Notification
+// ── Notification ──
 function showNotification(message) {
     const notif = document.getElementById("notification");
     notif.innerText = message;
