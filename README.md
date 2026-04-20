@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Mini-Projet
 
 ## Overview
@@ -33,3 +34,6 @@ Mini-Projet is a web application designed to facilitate service exchanges betwee
 - Verify file permissions for session handling and uploads if needed.
 - Customize database credentials before first use.
 
+=======
+# agora
+>>>>>>> 4d5a5480389d45240fe22d4105f4e3c5a7f0aa50
