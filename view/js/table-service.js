@@ -25,6 +25,7 @@ document.addEventListener("click", function(e){
 });
 
 // ==============================
+<<<<<<< HEAD
 // SUPPRESSION SERVICE
 // ==============================
 
@@ -55,8 +56,14 @@ closeModal.onclick = cancelBtn.onclick;
 // SUPPRESSION SERVICE — AVEC PHP
 // ==============================
 
+=======
+// SUPPRESSION SERVICE — AVEC PHP
+// ==============================
+>>>>>>> d8eceb2a5c2b5535a0818fec7858373909d6fe99
 const confirmModal = document.getElementById("confirmModal");
 const deleteBtn    = document.getElementById("deleteBtn");
+const cancelBtn    = document.getElementById("cancelBtn");
+const closeModal   = document.querySelector(".closeConfirm");
 
 deleteBtn.onclick = function(){
     if(!selectedRow){
@@ -65,6 +72,20 @@ deleteBtn.onclick = function(){
     }
     confirmModal.style.display = "block";
 };
+
+if(cancelBtn){
+    cancelBtn.onclick = () => {
+        confirmModal.style.display = "none";
+        showNotification("Annulé");
+    };
+}
+
+if(closeModal){
+    closeModal.onclick = () => {
+        confirmModal.style.display = "none";
+        showNotification("Suppression annulée");
+    };
+}
 
 document.getElementById("confirmYes").onclick = function(){
     let serviceId = selectedRow.cells[0].innerText;
@@ -87,7 +108,8 @@ document.getElementById("confirmYes").onclick = function(){
     })
     .catch(err => {
         console.error(err);
-        showNotification("Erreur serveur");
+        showNotification("Erreur de connexion au serveur");
+        console.error(err);
     });
 };
 
@@ -96,17 +118,13 @@ document.getElementById("confirmNo").onclick = function(){
     showNotification("Suppression annulée");
 };
 
-document.querySelector(".closeConfirm").onclick = function(){
-    confirmModal.style.display = "none";
-    showNotification("Suppression annulée");
-};
-
-window.onclick = function(event){
+window.addEventListener("click", function(event){
     if(event.target === confirmModal){
         confirmModal.style.display = "none";
         showNotification("Suppression annulée");
     }
-};
+});
+
 
 // ==============================
 // NOTIFICATION
@@ -121,7 +139,7 @@ function showNotification(message){
 // ==============================
 // CHARGEMENT DES DONNÉES
 // ==============================
-window.onload = function(){
+window.addEventListener("load", function(){
     fetch("../../Controller/service-actions.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -152,21 +170,16 @@ window.onload = function(){
         console.error(err);
         showNotification("Erreur serveur");
     });
-};
+});
 
-// dark theme 
-
-
-
-// theme.js
-
+// ==============================
+// DARK THEME
+// ==============================
 (function () {
   const STORAGE_KEY = 'theme';
 
-  // Apply saved theme immediately (prevents flicker)
   function applyThemeEarly() {
     const savedTheme = localStorage.getItem(STORAGE_KEY);
-
     if (savedTheme === 'dark') {
       document.documentElement.classList.add('dark-theme');
     } else {
@@ -174,7 +187,6 @@ window.onload = function(){
     }
   }
 
-  // Apply theme after DOM is ready (sync body + button)
   function applyTheme() {
     const savedTheme = localStorage.getItem(STORAGE_KEY);
     const isDark = savedTheme === 'dark';
@@ -187,7 +199,6 @@ window.onload = function(){
     }
   }
 
-  // Toggle handler
   function initToggle() {
     const toggleBtn = document.getElementById('toggleBtn');
 
@@ -198,22 +209,14 @@ window.onload = function(){
 
     toggleBtn.addEventListener('click', () => {
       const isDark = document.body.classList.toggle('dark-theme');
-
-      // Sync html element too (important if you style from root)
       document.documentElement.classList.toggle('dark-theme', isDark);
-
-      // Save preference
       localStorage.setItem(STORAGE_KEY, isDark ? 'dark' : 'light');
-
-      // Update button icon
       toggleBtn.textContent = isDark ? '☀️' : '🌙';
     });
   }
 
-  // Run early (before DOMContentLoaded)
   applyThemeEarly();
 
-  // Run after DOM is ready
   document.addEventListener('DOMContentLoaded', () => {
     applyTheme();
     initToggle();

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accueil — ConnectU</title>
+
+  <!-- Icons & Fonts -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/nav.css">
+  <link rel="stylesheet" href="css/feed.css">
+  <link rel="stylesheet" href="css/sidebar.css">
+  <link rel="stylesheet" href="css/chat.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ NAV ═══ -->
+<nav>
+  <div class="nav-logo">
+    <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+  </div>
+
+  <div class="nav-search">
+    <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" placeholder="recherchez un service, un produit...">
+  </div>
+
+  <div class="nav-icons">
+    <button class="nav-icon-btn active" title="Accueil">
+      <svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+    </button>
+
+    <button class="nav-icon-btn" id="navChat" title="Messages"  onclick="window.location.href='../messagerie/messagerie.html'" >
+      <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span class="notif-dot"></span>
+    </button>
+
+    <button class="nav-icon-btn" title="Notifications">
+      <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      <span class="notif-dot"></span>
+    </button>
+
+    <div class="nav-divider"></div>
+
+    <div class="nav-toggle" title="Mon profil">
+      <div class="nav-toggle-avatar">M</div>
+      <div class="nav-toggle-bar"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════ LAYOUT ═══ -->
+<div class="layout">
+
+  <!-- ════════════ MAIN COL ════════════ -->
+  <div class="main-col">
+
+    <!-- STORIES -->
+    
+    <!-- COMPOSER -->
+    <div class="composer-card">
+      <div class="composer-avatar">M</div>
+      <div class="composer-input">redigez un post, posez une question...</div>
+      <div class="composer-actions">
+        <button class="composer-btn" title="Photo"><i class="fa-regular fa-image"></i></button>
+        <button class="composer-btn" title="Calendrier"><i class="fa-regular fa-calendar"></i></button>
+        <button class="composer-btn" title="Sondage"><i class="fa-solid fa-chart-bar"></i></button>
+      </div>
+    </div>
+
+    <!-- SORT -->
+    <div class="sort-bar">
+      <span class="sort-label">classer par :</span>
+      <select class="sort-select">
+        <option value="recent">recent</option>
+        <option value="popular">populaire</option>
+        <option value="trending">tendance</option>
+      </select>
+      <i class="fa-solid fa-chevron-down" style="font-size:11px;color:var(--color-muted)"></i>
+    </div>
+
+    <!-- ═══ FEED ═══ -->
+    <div class="feed">
+
+      <!-- POST 1 · Tagged text post with image -->
+      <article class="post-card">
+        <div class="post-header">
+          <div class="post-avatar" style="background:linear-gradient(135deg,#e44,#f97316);">MC</div>
+          <div class="post-meta">
+            <div class="post-name">mehdi cherif</div>
+            <div class="post-role">etudiant a l univ d abderrahmane mira</div>
+            <div class="post-time-row">
+              <span class="post-time">25 min ago</span>
+              <span class="post-globe"><i class="fa-solid fa-earth-africa"></i></span>
+            </div>
+          </div>
+          <button class="post-more"><i class="fa-solid fa-ellipsis"></i></button>
+        </div>
+
+        <div class="post-title">Recherche développeur web freelance</div>
+
+        <div class="post-tags">
+          <span class="post-tag pink">HTML5</span>
+          <span class="post-tag blue">CSS3</span>
+          <span class="post-tag indigo">React.js</span>
+          <span class="post-tag green">Freelance</span>
+        </div>
+
+        <div class="post-body">
+          Je cherche un développeur web expérimenté pour rejoindre un projet e-commerce en pleine croissance.
+          La mission comprend la refonte de notre interface utilisateur et l'intégration d'une API REST...
+          <span class="see-more">voir plus</span>
+        </div>
+
+        <img class="post-image" src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80" alt="dev web">
+
+        <div class="post-likes"><span class="likes-icon"><i class="fa-solid fa-thumbs-up"></i></span> 47</div>
+        <div class="post-actions">
+          <button class="post-action-btn" data-action="like"><i class="fa-regular fa-thumbs-up"></i> J'aime</button>
+          <button class="post-action-btn"><i class="fa-regular fa-comment"></i> Commenter</button>
+          <button class="post-action-btn"><i class="fa-solid fa-share-nodes"></i> Partager</button>
+        </div>
+      </article>
+
+      <!-- POST 2 · Photo post (no tags) -->
+      <article class="post-card">
+        <div class="post-header">
+          <div class="post-avatar" style="background:linear-gradient(135deg,#e44,#f97316);">MC</div>
+          <div class="post-meta">
+            <div class="post-name">mehdi cherif</div>
+            <div class="post-role">etudiant a l univ d abderrahmane mira</div>
+            <div class="post-time-row">
+              <span class="post-time">il y a 12 min</span>
+              <span class="post-globe"><i class="fa-solid fa-earth-africa"></i></span>
+            </div>
+          </div>
+          <button class="post-more"><i class="fa-solid fa-ellipsis"></i></button>
+        </div>
+
+        <img class="post-image" src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800&q=80" alt="post image">
+
+        <div class="post-likes"><span class="likes-icon"><i class="fa-solid fa-thumbs-up"></i></span> 1 224</div>
+        <div class="post-actions">
+          <button class="post-action-btn liked" data-action="like"><i class="fa-solid fa-thumbs-up"></i> J'aime</button>
+          <button class="post-action-btn"><i class="fa-regular fa-comment"></i> Commenter</button>
+          <button class="post-action-btn"><i class="fa-solid fa-share-nodes"></i> Partager</button>
+        </div>
+      </article>
+
+      <!-- POST 3 · Offre de stage avec tags -->
+      <article class="post-card">
+        <div class="post-header">
+          <div class="post-avatar" style="background:linear-gradient(135deg,#059669,#34d399);">NS</div>
+          <div class="post-meta">
+            <div class="post-name">na sfiaaaaaaa</div>
+            <div class="post-role">etudiante a l univ de Guelma 2</div>
+            <div class="post-time-row">
+              <span class="post-time">1 h ago</span>
+              <span class="post-globe"><i class="fa-solid fa-earth-africa"></i></span>
+            </div>
+          </div>
+          <button class="post-more"><i class="fa-solid fa-ellipsis"></i></button>
+        </div>
+
+        <div class="post-title">Offre de stage — Développement Mobile</div>
+
+        <div class="post-tags">
+          <span class="post-tag purple">React Native</span>
+          <span class="post-tag orange">Stage</span>
+          <span class="post-tag green">Guelma</span>
+          <span class="post-tag blue">Mobile</span>
+        </div>
+
+        <div class="post-body">
+          Notre startup recherche un(e) stagiaire passionné(e) par le développement mobile pour une durée de 3 mois.
+          Vous travaillerez sur une application de mise en relation entre étudiants et entreprises...
+          <span class="see-more">voir plus</span>
+        </div>
+
+        <div class="post-likes"><span class="likes-icon"><i class="fa-solid fa-thumbs-up"></i></span> 12</div>
+        <div class="post-actions">
+          <button class="post-action-btn" data-action="like"><i class="fa-regular fa-thumbs-up"></i> J'aime</button>
+          <button class="post-action-btn"><i class="fa-regular fa-comment"></i> Commenter</button>
+          <button class="post-action-btn"><i class="fa-solid fa-share-nodes"></i> Partager</button>
+        </div>
+      </article>
+
+    </div><!-- /feed -->
+
+  </div><!-- /main-col -->
+
+  <!-- ════════════ SIDEBAR ════════════ -->
+  <aside class="sidebar">
+
+    <!-- SUGGESTIONS -->
+    <div class="suggest-card">
+      <h3>Connaissez - Vous ?</h3>
+      <div class="suggest-list">
+
+        <div class="suggest-item">
+          <div class="suggest-avatar" style="background:linear-gradient(135deg,#e44,#f97316);">MC</div>
+          <div class="suggest-info">
+            <div class="name">mehdi cherif</div>
+            <div class="role">etudiant a l univ d abderrahmane mira</div>
+          </div>
+         
+        </div>
+
+        <div class="suggest-item">
+          <div class="suggest-avatar" style="background:linear-gradient(135deg,#059669,#34d399);">NS</div>
+          <div class="suggest-info">
+            <div class="name">na sfiaaaaaaaaaa</div>
+            <div class="role">etudiante a l univ de Guelma 2</div>
+          </div>
+          
+        </div>
+
+        <div class="suggest-item">
+          <div class="suggest-avatar" style="background:linear-gradient(135deg,#7c3aed,#a855f7);">CO</div>
+          <div class="suggest-info">
+            <div class="name">chaima ouk</div>
+            <div class="role">prof a l univ de USTHB</div>
+          </div>
+          
+        </div>
+
+        <div class="suggest-item">
+          <div class="suggest-avatar" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa);">MK</div>
+          <div class="suggest-info">
+            <div class="name">mekhmoukh</div>
+            <div class="role">agent de securite</div>
+          </div>
+          
+        </div>
+
+      </div>
+      <a href="#" class="see-all-link">voir tous les suggestions →</a>
+    </div>
+
+    <!-- TRENDING -->
+    
+    <p class="footer-note">ConnectU © 2026 · Aide · Confidentialité</p>
+
+  </aside>
+
+</div><!-- /layout -->
+
+<!-- ═══════════════════════════════════════ FAB ═══ -->
+<div class="fab-bar">
+  <button class="fab-btn" id="fabChat" title="Messages">
+    <i class="fa-regular fa-comment-dots"></i>
+  </button>
+  <button class="fab-btn" title="Aide">
+    <i class="fa-regular fa-circle-question"></i>
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════ CHAT PANEL ═══ -->
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-panel-header">
+    <div class="chat-panel-user">
+      <div class="chat-panel-avatar" style="background:linear-gradient(135deg,#e44,#f97316);">MC</div>
+      <div>
+        <div class="chat-panel-name">mehdi cherif</div>
+        <div class="chat-panel-status"><span class="online-dot"></span> En ligne</div>
+      </div>
+    </div>
+    <button class="chat-panel-close" id="chatClose"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+
+  <div class="chat-messages" id="chatMessages">
+    <div class="chat-msg received">
+      <div class="msg-bubble">Salut ! Tu fais du dev web ?</div>
+      <span class="msg-time">10:24</span>
+    </div>
+    <div class="chat-msg sent">
+      <div class="msg-bubble">Oui, React + Node principalement 👋</div>
+      <span class="msg-time">10:25</span>
+    </div>
+    <div class="chat-msg received">
+      <div class="msg-bubble">Parfait, j'ai un projet freelance qui pourrait t'intéresser !</div>
+      <span class="msg-time">10:26</span>
+    </div>
+  </div>
+
+  <div class="chat-input-row">
+    <input type="text" id="chatInput" placeholder="Écrivez un message...">
+    <button class="chat-send-btn" id="chatSend"><i class="fa-solid fa-paper-plane"></i></button>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="js/feed.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/chat.js"></script>
+
+</body>
+</html>

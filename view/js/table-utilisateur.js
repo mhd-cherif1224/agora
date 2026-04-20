@@ -21,7 +21,9 @@ table.addEventListener("click", function(e){
 
 document.addEventListener("click", function(e){
 
-    if(selectedRow && !e.target.closest("#userTable tbody tr") && !e.target.closest(".buttons") && !e.target.closest(".modal-content")){
+    if(selectedRow && !e.target.closest("#userTable tbody tr") &&
+     !e.target.closest(".buttons") &&
+      !e.target.closest(".modal-content")){
         selectedRow.classList.remove("selected");
         selectedRow = null;
     }

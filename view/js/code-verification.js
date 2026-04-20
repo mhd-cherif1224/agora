@@ -12,6 +12,9 @@
   const timerTxt  = document.getElementById('timerTxt');
   const CIRC      = 113.1;
 
+  const VERIFY_URL = "../../Controller/verify-email.php";  // ← votre fichier existant
+  const RESEND_URL = "../../Controller/resend-code.php";
+
   // ── OTP input logic ──
   inputs.forEach((inp, i) => {
     inp.addEventListener('keydown', e => {
@@ -54,9 +57,11 @@
     });
   }
 
-  // ── Countdown (2 min) ──
+  // ── Countdown (1 min) ──
   let seconds = 60;
-  const countdown = setInterval(() => {
+  let timerInterval = setInterval(tick, 1000);
+
+  function tick() {
     seconds--;
     const m = Math.floor(seconds / 60);
     const s = String(seconds % 60).padStart(2, '0');
@@ -72,23 +77,56 @@
     ringLabel.classList.toggle('warning', isWarn);
 
     if (seconds <= 0) {
-      clearInterval(countdown);
+      clearInterval(timerInterval);
       resendBtn.classList.add('active');
       timerTxt.textContent = 'expiré';
       ringLabel.textContent = '0:00';
     }
-  }, 1000);
-
-  function resendCode() {
-    if (!resendBtn.classList.contains('active')) return;
-    showNotification('Code renvoyé !');
-    resendBtn.classList.remove('active');
-    resendBtn.textContent = 'Renvoyé ✓';
-    resendBtn.style.color = '#1a7a46';
   }
 
-  // ── Verify ──
-  function handleVerify() {
+  // ── Renvoyer le code ──
+  async function resendCode() {
+    if (!resendBtn.classList.contains('active')) return;
+
+    resendBtn.classList.remove('active');
+    resendBtn.textContent = 'Envoi…';
+
+    try {
+      const response = await fetch(RESEND_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        showNotification('Code renvoyé !');
+        resendBtn.textContent = 'Renvoyé ✓';
+        resendBtn.style.color = '#1a7a46';
+
+        // Relance le timer
+        seconds = 60;
+        clearInterval(timerInterval);
+        timerInterval = setInterval(tick, 1000);
+        setTimeout(() => {
+          resendBtn.textContent = 'Renvoyer le code';
+          resendBtn.style.color = '';
+        }, 3000);
+
+      } else {
+        showAlert(result.message || "Erreur lors du renvoi.", 'error');
+        resendBtn.classList.add('active');
+        resendBtn.textContent = 'Renvoyer le code';
+      }
+    } catch (err) {
+      showAlert("Erreur réseau : " + err.message, 'error');
+      resendBtn.classList.add('active');
+      resendBtn.textContent = 'Renvoyer le code';
+    }
+  }
+
+  // ── Vérifier le code ──
+  async function handleVerify() {
     const code = getCode();
     if (code.length < 6) {
       showAlert('Veuillez entrer les 6 chiffres du code.', 'error');
@@ -98,24 +136,34 @@
     verifyBtn.classList.add('loading');
     verifyBtn.disabled = true;
 
-    // ── Remplacer par votre vrai appel API ──
-    // Demo : code "123456" accepté
-    setTimeout(() => {
+    try {
+      const response = await fetch(VERIFY_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code })
+      });
+      const result = await response.json();
+
       verifyBtn.classList.remove('loading');
       verifyBtn.disabled = false;
 
-      if (code === '123456') {
+      if (result.success) {
         document.getElementById('successModal').classList.add('show');
         setTimeout(() => {
           window.location.href = 'edit-password.html?email=' + encodeURIComponent(email);
         }, 2200);
       } else {
-        showAlert('Code incorrect. Vérifiez votre e-mail et réessayez.', 'error');
+        showAlert(result.message || 'Code incorrect. Vérifiez votre e-mail et réessayez.', 'error');
         shakeInputs();
-        inputs.forEach(i => { i.value=''; i.classList.remove('filled'); });
+        inputs.forEach(i => { i.value = ''; i.classList.remove('filled'); });
         inputs[0].focus();
       }
-    }, 1600);
+
+    } catch (err) {
+      verifyBtn.classList.remove('loading');
+      verifyBtn.disabled = false;
+      showAlert("Erreur réseau : " + err.message, 'error');
+    }
   }
 
   function closeModal() {

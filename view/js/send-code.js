@@ -8,6 +8,8 @@ const emailInput   = document.getElementById('email');
   const progressFill = document.getElementById('progressFill');
   const card         = document.getElementById('card');
 
+  const RESEND_URL = "../../Controller/resend-code.php";
+
   function isValidEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()); }
 
   function showError(msg) {
@@ -25,7 +27,8 @@ const emailInput   = document.getElementById('email');
 
   emailInput.addEventListener('input', clearError);
 
-  function handleSend() {
+ 
+async function handleSend() {
     const val = emailInput.value.trim();
     if (!val)              { showError("L'adresse e-mail est requise."); return; }
     if (!isValidEmail(val)) { showError("Format d'e-mail invalide."); return; }
@@ -34,20 +37,41 @@ const emailInput   = document.getElementById('email');
     sendBtn.classList.add('loading');
     sendBtn.disabled = true;
 
-    // ── Remplacer par votre vrai appel API ──
-    setTimeout(() => {
-      sendBtn.classList.remove('loading');
-      sendBtn.disabled = false;
+     try {
+    const response = await fetch(RESEND_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: val })
+    });
 
+    const result = await response.json();
+
+    if (result.success) {
+      // Sauvegarde l'email pour la page de vérification
+      localStorage.setItem("pendingEmail", val);
+
+      // Affiche le succès + barre de progression
       sentEmail.textContent = val;
       formView.style.display = 'none';
       successView.classList.add('visible');
       requestAnimationFrame(() => { progressFill.style.width = '100%'; });
 
+      // Redirige vers la vérification après 3.2s
       setTimeout(() => {
         window.location.href = 'code-verification.html?email=' + encodeURIComponent(val);
       }, 3200);
-    }, 1800);
-  }
 
-  emailInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleSend(); });
+    } else {
+      showError(result.message || "Impossible d'envoyer le code.");
+      sendBtn.classList.remove('loading');
+      sendBtn.disabled = false;
+    }
+
+  } catch (err) {
+    showError("Erreur réseau : " + err.message);
+    sendBtn.classList.remove('loading');
+    sendBtn.disabled = false;
+  }
+}
+
+emailInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleSend(); });

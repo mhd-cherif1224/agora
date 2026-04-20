@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profil - na sfiaaaaaaaa</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="./css/profile.css">
+
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">
+      <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+    </div>
+    <div class="nav-search">
+      <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="recherchez un service, un produit...">
+    </div>
+    <div class="nav-icons">
+      <button class="nav-icon-btn" title="Accueil" onclick="window.location.href='../homepage/home-page.html'">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      </button>
+      <button class="nav-icon-btn has-notif" title="Messages">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        <span class="notif-dot"></span>
+      </button>
+      <button class="nav-icon-btn has-notif" title="Notifications">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span class="notif-dot"></span>
+      </button>
+      <div class="nav-avatar" title="Mon Profil" onclick="window.location.href='edit-profile.html'">
+        <span>M</span>
+      </div>
+      <button class="nav-menu-btn"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <!-- LAYOUT -->
+  <div class="layout">
+    <div class="main-col">
+
+      <!-- PROFILE CARD -->
+      <div class="profile-card">
+
+        <!-- BANNER TOP -->
+        <div class="banner-top" id="bannerTop">
+          <!-- Mario pixel art banner rendered via canvas in JS -->
+          <canvas id="pixelCanvas"></canvas>
+        </div>
+
+        <!-- BANNER BOTTOM -->
+        <div class="banner-bottom">
+          <!-- Profile picture -->
+          <div class="profile-avatar-wrap">
+            <div class="profile-avatar">
+              <div class="avatar-placeholder">
+                <i class="fa-solid fa-user"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-info">
+            <div class="profile-name-row">
+              <h1 class="profile-name">na sfiaaaaaaaa</h1>
+              <div class="profile-actions">
+                <button class="btn-message" id="openChatBtn">
+                  <i class="fa-regular fa-comment-dots"></i>
+                  envoyer un message
+                </button>
+                <button class="btn-more" id="moreBtn">
+                  <span></span><span></span><span></span>
+                </button>
+                <!-- Dropdown menu -->
+                <div class="more-dropdown" id="moreDropdown">
+                  <button class="dropdown-item"><i class="fa-solid fa-user-plus"></i> Suivre</button>
+                  <button class="dropdown-item"><i class="fa-solid fa-share-nodes"></i> Partager le profil</button>
+                  <button class="dropdown-item"><i class="fa-solid fa-flag"></i> Signaler</button>
+                </div>
+              </div>
+            </div>
+            <p class="profile-role">Etudiante a l univ de Guelma 2</p>
+            <p class="profile-location"><i class="fa-solid fa-location-dot"></i> Guelma, Algeria</p>
+
+            <div class="profile-links-row">
+              <button class="link-pill" id="linkBtn">
+                <i class="fa-solid fa-link"></i>
+                Consulter le lien
+              </button>
+              <button class="link-pill" id="cvBtn">
+                <i class="fa-solid fa-file-lines"></i>
+                Consulter le CV
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <button class="voir-plus-btn" id="voirPlusBtn">
+          voir plus <i class="fa-solid fa-chevron-down"></i>
+        </button>
+
+        <!-- EXPANDED SECTION -->
+        <div class="expanded-section" id="expandedSection">
+          <div class="expanded-grid">
+            <div class="expanded-item">
+              <div class="expanded-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+              <div>
+                <div class="expanded-label">Niveau</div>
+                <div class="expanded-value">L3</div>
+              </div>
+            </div>
+            <div class="expanded-item">
+              <div class="expanded-icon"><i class="fa-solid fa-code"></i></div>
+              <div>
+                <div class="expanded-label">Spécialité</div>
+                <div class="expanded-value">Génie Logiciel</div>
+              </div>
+            </div>
+            <div class="expanded-item">
+              <div class="expanded-icon"><i class="fa-solid fa-envelope"></i></div>
+              <div>
+                <div class="expanded-label">Email</div>
+                <div class="expanded-value">nasfia@univ-guelma.dz</div>
+              </div>
+            </div>
+            <div class="expanded-item">
+              <div class="expanded-icon"><i class="fa-solid fa-calendar"></i></div>
+              <div>
+                <div class="expanded-label">Membre depuis</div>
+                <div class="expanded-value">Janvier 2024</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PUBLICATIONS -->
+      <div class="publications-card">
+        <h2 class="pub-title">Les publications de na sfiaaaaaaaa</h2>
+        <div class="pub-divider"></div>
+
+        <!-- Post 1 -->
+        <div class="post" id="post1">
+          <div class="post-header">
+            <div class="post-avatar">
+              <div class="avatar-placeholder small"><i class="fa-solid fa-user"></i></div>
+            </div>
+            <div class="post-meta">
+              <div class="post-author">na sfiaaaaaaaa</div>
+              <div class="post-sub-row">
+                <span class="post-role">Etudiante a l univ de Guelma 2</span>
+                <span class="post-dot">·</span>
+                <span class="post-time">25 min ago</span>
+                <span class="post-dot">·</span>
+                <i class="fa-solid fa-globe post-globe"></i>
+              </div>
+            </div>
+            <button class="post-more"><span></span><span></span><span></span></button>
+          </div>
+          <div class="post-body">
+            <p class="post-text">
+              je vous propose mes services :<br>
+              1- je fais de <span class="see-more-text" id="seeMoreText1" style="display:none"> la conception et du développement d'applications web et mobiles. Je suis disponible pour des projets freelance ou des stages.</span>
+              <button class="see-more-btn" id="seeMoreBtn1">...voir plus</button>
+            </p>
+            <div class="post-image-wrap">
+              <div class="post-image-placeholder">
+                <div class="post-img-overlay">
+                  <i class="fa-solid fa-network-wired"></i>
+                  <span>Services Numériques</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="post-actions">
+            <button class="post-action-btn" id="likeBtn1">
+              <i class="fa-regular fa-heart"></i>
+              <span>J'aime</span>
+            </button>
+            <button class="post-action-btn">
+              <i class="fa-regular fa-comment"></i>
+              <span>Commenter</span>
+            </button>
+            <button class="post-action-btn">
+              <i class="fa-solid fa-share-nodes"></i>
+              <span>Partager</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Post 2 -->
+        <div class="post">
+          <div class="post-header">
+            <div class="post-avatar">
+              <div class="avatar-placeholder small"><i class="fa-solid fa-user"></i></div>
+            </div>
+            <div class="post-meta">
+              <div class="post-author">na sfiaaaaaaaa</div>
+              <div class="post-sub-row">
+                <span class="post-role">Etudiante a l univ de Guelma 2</span>
+                <span class="post-dot">·</span>
+                <span class="post-time">2 h ago</span>
+                <span class="post-dot">·</span>
+                <i class="fa-solid fa-globe post-globe"></i>
+              </div>
+            </div>
+            <button class="post-more"><span></span><span></span><span></span></button>
+          </div>
+          <div class="post-body">
+            <p class="post-text">Nouvelle session de révisions pour les examens de fin de semestre ! 📚 N'hésitez pas à me contacter pour du tutorat en programmation.</p>
+          </div>
+          <div class="post-actions">
+            <button class="post-action-btn" id="likeBtn2">
+              <i class="fa-regular fa-heart"></i>
+              <span>J'aime</span>
+            </button>
+            <button class="post-action-btn">
+              <i class="fa-regular fa-comment"></i>
+              <span>Commenter</span>
+            </button>
+            <button class="post-action-btn">
+              <i class="fa-solid fa-share-nodes"></i>
+              <span>Partager</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /main-col -->
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="suggest-card">
+        <h3 class="suggest-heading">Connaissez - Vous ?</h3>
+
+        <div class="suggest-list" id="suggestListPreview">
+          <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#f43f5e,#be123c)">
+              <img src="../../images/mehdi.jpg" alt="M" onerror="this.style.display='none';this.parentElement.textContent='M'">
+            </div>
+            <div class="suggest-info">
+              <div class="name">mehdi cherif</div>
+              <div class="role">etudiant a l univ d abderrahmane mira</div>
+            </div>
+          </div>
+          <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#5b8dee,#3a6de0)">N</div>
+            <div class="suggest-info">
+              <div class="name">na sfiaaaaaaaa</div>
+              <div class="role">etudiante a l univ de Guelma 2</div>
+            </div>
+          </div>
+          <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#10b981,#059669)">C</div>
+            <div class="suggest-info">
+              <div class="name">chaima ouk</div>
+              <div class="role">prof a l univ de USTHB</div>
+            </div>
+          </div>
+          <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#6366f1,#4338ca)">M</div>
+            <div class="suggest-info">
+              <div class="name">mekhmoukh</div>
+              <div class="role">agent de securite</div>
+            </div>
+          </div>
+        </div>
+
+        <a href="#" class="see-all" id="seeAllBtn"><u>voir tous les suggestions</u> →</a>
+      </div>
+
+      <p class="footer-note">© 2026 THE trio. All rights reserved.</p>
+    </div>
+  </div>
+
+  <!-- FLOATING ACTION BAR -->
+  <div class="fab-bar">
+    <button class="fab-btn" title="Messagerie" id="fabMsgBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+      </svg>
+    </button>
+    <button class="fab-btn" title="Aide" id="fabHelpBtn">
+      <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M12 17.5v.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M12 14c0-1.5 1.5-2 2.2-3.2a2.8 2.8 0 10-4.9-1.9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- CHAT PANEL -->
+  <div class="chat-panel" id="chatPanel">
+    <div class="chat-panel-header">
+      <div class="chat-panel-user">
+        <div class="suggest-avatar" style="background:linear-gradient(135deg,#5b8dee,#3a6de0);width:32px;height:32px;font-size:12px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">N</div>
+        <div>
+          <div class="chat-panel-name">Na Sfia</div>
+          <div class="chat-panel-status"><span class="online-dot"></span> En ligne</div>
+        </div>
+      </div>
+      <button class="chat-panel-close" id="chatPanelClose">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-msg received">
+        <div class="msg-bubble">Bonjour ! Je suis disponible pour discuter de mes services.</div>
+        <div class="msg-time">10:30</div>
+      </div>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="Écrire un message…">
+      <button class="chat-send-btn" id="chatSendBtn">
+        <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
+          <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M22 2L15 22 11 13 2 9l20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- NOTIFICATION TOAST -->
+  <div id="notification"></div>
+
+  <script src="./js/profile.js"></script>
+</body>
+</html>
