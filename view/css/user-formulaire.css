@@ -19,7 +19,6 @@ body {
     background: rgba(18,15,28,0.92);
     border: 1px solid rgba(255, 255, 255, 0.15);
     padding: 30px; border-radius: 14px; text-align: start;
-    box-shadow: 0 24px 60px rgba(0,0,0,0.50), 0 0 0 1px rgba(255,255,255,0.04) inset;
     backdrop-filter: blur(20px);
     position: relative; overflow: hidden;
     animation: slideUp .5s cubic-bezier(.22,.68,0,1.2) both;

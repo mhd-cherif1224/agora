@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # Mini-Projet
 
 ## Overview
