@@ -25,8 +25,41 @@ document.addEventListener("click", function(e){
 });
 
 // ==============================
+<<<<<<< HEAD
+// SUPPRESSION SERVICE
+// ==============================
+
+const modal = document.getElementById("modal");
+const cancelBtn = document.getElementById("deleteBtn");
+const closeModal = document.querySelector(".closeConfirm");
+
+cancelBtn.onclick = () => {
+    confirmModal.style.display = "none";
+    showNotification("Annulé");
+};
+
+closeModal.onclick = cancelBtn.onclick;
+
+
+
+// ==============================
+// AJOUTER SERVICE — commenté par ton binôme, on ne touche pas
+// ==============================
+
+// document.getElementById("confirmAdd").onclick = function(){
+//     ...
+// };
+
+
+
+// ==============================
 // SUPPRESSION SERVICE — AVEC PHP
 // ==============================
+
+=======
+// SUPPRESSION SERVICE — AVEC PHP
+// ==============================
+>>>>>>> d8eceb2a5c2b5535a0818fec7858373909d6fe99
 const confirmModal = document.getElementById("confirmModal");
 const deleteBtn    = document.getElementById("deleteBtn");
 const cancelBtn    = document.getElementById("cancelBtn");
