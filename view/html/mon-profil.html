@@ -18,8 +18,8 @@
       <input type="text" placeholder="recherchez un service, un produit...">
     </div>
     <div class="nav-icons">
-      <button class="nav-icon-btn" title="Accueil" onclick="window.location.href='landing-page.html'"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></button>
-      <button class="nav-icon-btn" title="Messages" onclick="window.location.href='messagerie.html'"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+      <button class="nav-icon-btn" title="Accueil" onclick="window.location.href='../UI/homepage/home-page.html'"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></button>
+      <button class="nav-icon-btn" title="Messages" onclick="window.location.href='../UI/messagerie/messagerie.html'"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
       <button class="nav-icon-btn" title="Notifications" onclick="window.location.href='notifications.html'"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span class="notif-dot"></span></button>
       <div class="nav-avatar" id="navAvatar" onclick="window.location.href='mon-profil.html'" title="Mon Profil">
         <img id="navAvatarImg" src="../images/person.png" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;">
@@ -79,11 +79,6 @@
 
       <div class="posts-section">
         <div class="posts-header"><h3>Vos Postes</h3></div>
-
-        <div class="new-post-box">
-          <div class="post-avatar-placeholder post-avatar-dyn" style="width:32px;height:32px;font-size:12px;flex-shrink:0;">M</div>
-          <div class="new-post-input">Quoi de neuf ? Partagez quelque chose…</div>
-        </div>
 
         <div class="post-card">
           <div class="post-top">
@@ -221,67 +216,6 @@
   <div id="cropModal">
     <div id="cropBox"><img id="cropImage" src="" alt=""></div>
     <div id="cropButtons"><button id="cropCancel">Annuler</button><button id="cropConfirm">Confirmer</button></div>
-  </div>
-
-  <!-- ══ MAKE A POST MODAL ══ -->
-  <div class="post-modal-overlay" id="postModalOverlay">
-    <div class="post-modal" id="postModal">
-      <div class="post-modal-header">
-        <div class="post-modal-avatar-placeholder" id="pmAvatar">M</div>
-        <div class="post-modal-user">
-          <div class="post-modal-name">mehdi cherif</div>
-          <div class="post-modal-role">Etudiant a l'univ d'abderrahmane mira</div>
-        </div>
-        <button class="post-modal-close" id="postModalClose"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="post-modal-body">
-        <textarea class="post-modal-textarea" id="postTextarea" placeholder="Quoi de neuf ? Partagez quelque chose…"></textarea>
-      </div>
-      <div class="location-chip" id="locationChip">
-        <i class="fa-solid fa-location-dot"></i>
-        <span id="locationText">Ma position</span>
-        <button class="location-chip-remove" id="locationRemove"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="category-chips" id="categoryChips"></div>
-      <div class="scheduled-chip" id="scheduledChip">
-        <i class="fa-regular fa-clock"></i>
-        <span id="scheduledText">Programmé</span>
-        <button class="scheduled-chip-remove" id="scheduledRemove"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="post-modal-preview" id="postPreview"></div>
-      <div class="post-modal-footer">
-        <input type="file" id="pmFileInput" hidden accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv">
-        <button class="post-tool-btn" id="pmFileBtn" title="Joindre un fichier"><i class="fa-solid fa-file-arrow-up"></i></button>
-        <input type="file" id="pmPhotoInput" hidden accept="image/jpeg,image/png,image/jpg,image/gif" multiple>
-        <button class="post-tool-btn" id="pmPhotoBtn" title="Ajouter une photo"><i class="fa-regular fa-image"></i></button>
-        <div style="position:relative;">
-          <button class="post-tool-btn" id="pmLocBtn" title="Ajouter une localisation"><i class="fa-solid fa-location-dot"></i></button>
-          <div class="loc-modal" id="locModal">
-            <input type="text" id="locInput" placeholder="Ex : Bejaia, Algeria">
-            <button class="loc-confirm-btn" id="locConfirm">Confirmer</button>
-          </div>
-        </div>
-        <div style="position:relative;">
-          <button class="post-tool-btn" id="pmCatBtn" title="Choisir une catégorie"><i class="fa-solid fa-plus"></i></button>
-          <div class="cat-dropdown" id="catDropdown"></div>
-        </div>
-        <div class="post-tool-sep"></div>
-        <div class="post-footer-push"></div>
-        <div style="position:relative;">
-          <button class="post-tool-btn" id="pmTimerBtn" title="Programmer la publication"><i class="fa-regular fa-clock"></i></button>
-          <div class="timer-modal" id="timerModal">
-            <div class="timer-modal-header">
-              <span class="timer-modal-title">Programmer un timer</span>
-              <button class="timer-modal-close" id="timerModalClose"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="timer-field"><label>Fixer la date</label><input type="date" id="timerDate"></div>
-            <div class="timer-field"><label>Fixer l'heure</label><input type="time" id="timerTime"></div>
-            <button class="timer-confirm-btn" id="timerConfirm">Confirmer</button>
-          </div>
-        </div>
-        <button class="post-publish-btn" id="postPublishBtn">publier</button>
-      </div>
-    </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
