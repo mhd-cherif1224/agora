@@ -381,13 +381,19 @@
 
 <!-- FAB -->
 <div class="fab-bar">
-  <button class="fab-btn" id="fabChat" title="Messages">
-    <i class="fa-regular fa-comment-dots"></i>
-  </button>
-  <button class="fab-btn" title="Aide">
-    <i class="fa-regular fa-circle-question"></i>
-  </button>
-</div>
+    <button class="fab-btn" title="Messagerie" id="fabMsgBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+      </svg>
+    </button>
+    <button class="fab-btn" title="Aide" id="fabHelpBtn">
+      <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M12 17.5v.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M12 14c0-1.5 1.5-2 2.2-3.2a2.8 2.8 0 10-4.9-1.9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
 
 <!-- CHAT PANEL -->
 <div class="chat-panel" id="chatPanel">

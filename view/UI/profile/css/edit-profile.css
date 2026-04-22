@@ -7,10 +7,7 @@
   padding: 0;
 }
 
-html {
-    font-size: 125%;
-    zoom: 1.2;
-}
+
 
 :root {
     /* ── Brand ── */
@@ -60,7 +57,7 @@ html {
     --color-notif-dot:              #4b48ec;
 
     /* ── Cards / surfaces ── */
-    --color-card-bg:                rgba(1, 23, 120, 0.92);
+    --color-card-bg:                rgba(13,13,28,0.92);
     --color-card-border:            rgba(72,72,236,0.15);
     
     --radius:                       14px;
@@ -278,17 +275,13 @@ nav {
   transition: box-shadow .2s;
 }
 .nav-avatar:hover { box-shadow: 0 0 0 3px var(--color-avatar-hover-ring); }
+.nav-divider { width: 1px; height: 22px; background: rgba(255,255,255,0.10); margin: 0 4px; }
 
 .nav-menu-btn {
-  width: 36px; height: 36px;
-  border: none; background: transparent; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  gap: 3px; flex-direction: column;
+  background: none; border: none; cursor: pointer;
+  display: flex; flex-direction: column; gap: 4px; padding: 4px;
 }
-.nav-menu-btn span {
-  display: block; width: 18px; height: 2px;
-  background: var(--color-text); border-radius: 2px;
-}
+.nav-menu-btn span { display: block; width: 18px; height: 2px; background: var(--color-muted); border-radius: 2px; }
 
 /* ── LAYOUT ── */
 .layout {
@@ -407,6 +400,7 @@ nav {
   border-top-left-radius: 35px;
   transform: translate(-50%,-50%);
   z-index: 2;
+  cursor : pointer;
 }
 .camera-container i { color: var(--color-camera-icon); font-size: 12px; transition: color .2s; }
 .camera-container:hover i { color: var(--color-camera-icon-hover); }

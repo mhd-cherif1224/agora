@@ -610,16 +610,16 @@ function showNotification(msg) {
 (function () {
 
   const CATEGORIES = [
-    { id: 'freelance', label: 'Freelance',    color: '#7c3aed', bg: '#f5f3ff' },
-    { id: 'html',      label: 'HTML/CSS',     color: '#d97706', bg: '#fef3e2' },
-    { id: 'react',     label: 'React.js',     color: '#059669', bg: '#ecfdf5' },
-    { id: 'js',        label: 'JavaScript',   color: '#ca8a04', bg: '#fefce8' },
-    { id: 'python',    label: 'Python',       color: '#16a34a', bg: '#f0fdf4' },
-    { id: 'design',    label: 'UI/UX',        color: '#9d174d', bg: '#fdf2f8' },
-    { id: 'mobile',    label: 'Mobile',       color: '#0891b2', bg: '#ecfeff' },
-    { id: 'data',      label: 'Data Science', color: '#2563eb', bg: '#eff6ff' },
-    { id: 'emploi',    label: 'Emploi',       color: '#c2410c', bg: '#fff7ed' },
-    { id: 'article',   label: 'Article',      color: '#6d28d9', bg: '#f5f3ff' },
+    { id: 'freelance', label: 'Freelance',    color: '#7c3aed', bg: 'transparent' },
+    { id: 'html',      label: 'HTML/CSS',     color: '#d97706', bg: 'transparent' },
+    { id: 'react',     label: 'React.js',     color: '#059669', bg: 'transparent' },
+    { id: 'js',        label: 'JavaScript',   color: '#ca8a04', bg: 'transparent' },
+    { id: 'python',    label: 'Python',       color: '#16a34a', bg: 'transparent' },
+    { id: 'design',    label: 'UI/UX',        color: '#9d174d', bg: 'transparent' },
+    { id: 'mobile',    label: 'Mobile',       color: '#0891b2', bg: 'transparent' },
+    { id: 'data',      label: 'Data Science', color: '#2563eb', bg: 'transparent' },
+    { id: 'emploi',    label: 'Emploi',       color: '#c2410c', bg: 'transparent' },
+    { id: 'article',   label: 'Article',      color: '#6d28d9', bg: 'transparent' },
   ];
 
   // Add pin badges to all existing cards
