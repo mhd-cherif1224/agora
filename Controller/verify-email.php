@@ -36,6 +36,7 @@ if ($_SESSION['otp_email'] !== $email) {
 }
 
 if ($_SESSION['otp_code'] === $code) {
+    $_SESSION['reset_email'] = $email;
     unset($_SESSION['otp_code'], $_SESSION['otp_email'], $_SESSION['otp_expires']);
     ob_end_clean();
     echo json_encode(['success' => true]);

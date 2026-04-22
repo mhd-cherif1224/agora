@@ -1,53 +1,63 @@
 <?php
-session_start();
-
+/* ══════════════════════════════════════════
+   LOGIN-USER.PHP
+   Authentification utilisateur via fetch JSON.
+   Retourne toujours du JSON (pas de redirect).
+══════════════════════════════════════════ */
+ob_start();
+require_once __DIR__ . '/session-config.php';
 require_once '../model/Database.php';
-require_once '../model/user.php';   // ← minuscule, comme votre fichier réel
+// BUG CORRIGÉ : suppression de user.php (fichier inexistant)
 
-header('Content-Type: application/json; charset=utf-8');
+// ── Lecture du body JSON ──
+$raw      = file_get_contents('php://input');
+$body     = json_decode($raw, true);
+$email    = isset($body['email'])    ? filter_var(trim($body['email']), FILTER_VALIDATE_EMAIL) : false;
+$password = isset($body['password']) ? trim($body['password']) : '';
 
-$email          = trim($_POST['email']    ?? '');
-$motDePassSaisi = trim($_POST['password'] ?? '');
-
-// ── Champs vides ──
-if (empty($email) || empty($motDePassSaisi)) {
+if (!$email) {
     ob_end_clean();
-    header('Location: ../view/html/login-user.html?error=champs_vides');
-    exit();
+    echo json_encode(['success' => false, 'message' => 'Email invalide.']);
+    exit;
+}
+if (empty($password)) {
+    ob_end_clean();
+    echo json_encode(['success' => false, 'message' => 'Mot de passe requis.']);
+    exit;
 }
 
-// ── Connexion BDD ──
-$pdo = Database::getConnection();
+try {
+    $pdo  = Database::getConnection();
+    $stmt = $pdo->prepare("SELECT * FROM utilisateur WHERE email = :email LIMIT 1");
+    $stmt->execute([':email' => $email]);
+    $row  = $stmt->fetch();
 
-$stmt = $pdo->prepare("SELECT * FROM utilisateur WHERE email = :email LIMIT 1");
-$stmt->execute([':email' => $email]);
-$row = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Message générique : ne pas révéler si l'email existe
+    if (!$row || !password_verify($password, $row['MotDePass'])) {
+        ob_end_clean();
+        echo json_encode(['success' => false, 'message' => 'Email ou mot de passe incorrect.']);
+        exit;
+    }
 
-// ── Utilisateur introuvable ──
-if (!$row) {
+    // ── Régénérer l'ID de session (protection fixation) ──
+    session_regenerate_id(true);
+
+    // ── Stocker en session ──
+    $_SESSION['utilisateur_id']     = $row['ID'];
+    $_SESSION['utilisateur_email']  = $row['email'];
+    $_SESSION['utilisateur_nom']    = $row['nom'];
+    $_SESSION['utilisateur_prenom'] = $row['prenom'];
+    $_SESSION['utilisateur_role']   = $row['status'];
+
     ob_end_clean();
-    header('Location: ../view/html/login-user.html?error=introuvable');
-    exit();
-}
+    echo json_encode([
+        'success' => true,
+        'role'    => $row['status'],   // 'Chercheur' ou 'Proposeur'
+        'prenom'  => $row['prenom'],
+    ]);
 
-// ── Construire l'objet Utilisateur depuis la BDD ──
-$utilisateur = Utilisateur::fromBDD($row);
-
-// ── Mauvais mot de passe ──
-if (!$utilisateur->verifierMotDePasse($motDePassSaisi)) {
+} catch (PDOException $e) {
     ob_end_clean();
-    header('Location: ../view/html/login-user.html?error=mot_de_passe');
-    exit();
+    echo json_encode(['success' => false, 'message' => 'Erreur BDD : ' . $e->getMessage()]);
 }
-
-// ── Succès : stocker la session ──
-$_SESSION['utilisateur_id']     = $utilisateur->getId();
-$_SESSION['utilisateur_email']  = $utilisateur->getEmail();
-$_SESSION['utilisateur_nom']    = $utilisateur->getNom();
-$_SESSION['utilisateur_prenom'] = $utilisateur->getPrenom();
-$_SESSION['utilisateur_role']   = $utilisateur->getRole();   // status (Chercheur/Proposeur)
-
-ob_end_clean();
-header('Location: ../view/html/landing-page.html');
-exit();
 ?>
