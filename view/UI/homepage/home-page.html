@@ -291,44 +291,96 @@
   </div><!-- /main-col -->
 
   <!-- ════════════ SIDEBAR ════════════ -->
-  <aside class="sidebar">
-    <div class="suggest-card">
-      <h3>Connaissez - Vous ?</h3>
-      <div class="suggest-list">
-        <div class="suggest-item">
-          <div class="suggest-avatar" style="background:linear-gradient(135deg,#e44,#f97316);">MC</div>
-          <div class="suggest-info">
-            <div class="name">mehdi cherif</div>
-            <div class="role">etudiant a l univ d abderrahmane mira</div>
+  <div class="sidebar">
+      <div class="suggest-card " id="suggestCard">
+        <h3>Connaissez - Vous ?</h3>
+        <!-- LIST PREVIEW (4 items) -->
+        <div class="suggest-list" id="suggestListPreview">
+          <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#e8734a,#c9543a)">M</div>
+            <div class="suggest-info">
+              <div class="name">Mehdi Cherif</div>
+              <div class="role">Etudiant — Univ. Abderrahmane Mira</div>
+            </div>
+          </div>
+          <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#5b8dee,#3a6de0)">N</div>
+            <div class="suggest-info">
+              <div class="name">Na Sfia</div>
+              <div class="role">Etudiante — Univ. As Suema 7</div>
+            </div>
+          </div>
+          <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#4ecdc4,#2ab5ab)">C</div>
+            <div class="suggest-info">
+              <div class="name">Chaima Ouk</div>
+              <div class="role">Etudiante — Univ. As Suema 7</div>
+            </div>
+          </div>
+          <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">Me</div>
+            <div class="suggest-info">
+              <div class="name">Mekhmoukh</div>
+              <div class="role">Agent de sécurité</div>
+            </div>
           </div>
         </div>
-        <div class="suggest-item">
-          <div class="suggest-avatar" style="background:linear-gradient(135deg,#059669,#34d399);">NS</div>
-          <div class="suggest-info">
-            <div class="name">na sfiaaaaaaaaaa</div>
-            <div class="role">etudiante a l univ de Guelma 2</div>
-          </div>
-        </div>
-        <div class="suggest-item">
-          <div class="suggest-avatar" style="background:linear-gradient(135deg,#7c3aed,#a855f7);">CO</div>
-          <div class="suggest-info">
-            <div class="name">chaima ouk</div>
-            <div class="role">prof a l univ de USTHB</div>
-          </div>
-        </div>
-        <div class="suggest-item">
-          <div class="suggest-avatar" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa);">MK</div>
-          <div class="suggest-info">
-            <div class="name">mekhmoukh</div>
-            <div class="role">agent de securite</div>
-          </div>
-        </div>
-      </div>
-      <a href="#" class="see-all-link">voir tous les suggestions →</a>
-    </div>
 
-    <p class="footer-note">ConnectU © 2026 · Aide · Confidentialité</p>
-  </aside>
+        <!-- ALL LIST (hidden by default) -->
+        <div class="suggest-list suggest-list-all" id="suggestListAll" style="display:none;">
+          <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#e8734a,#c9543a)">M</div>
+            <div class="suggest-info"><div class="name">Mehdi Cherif</div><div class="role">Etudiant — Univ. Abderrahmane Mira</div></div>
+          </div>
+          <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#5b8dee,#3a6de0)">N</div>
+            <div class="suggest-info"><div class="name">Na Sfia</div><div class="role">Etudiante — Univ. As Suema 7</div></div>
+          </div>
+          <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#4ecdc4,#2ab5ab)">C</div>
+            <div class="suggest-info"><div class="name">Chaima Ouk</div><div class="role">Etudiante — Univ. As Suema 7</div></div>
+          </div>
+          <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">Me</div>
+            <div class="suggest-info"><div class="name">Mekhmoukh</div><div class="role">Agent de sécurité</div></div>
+          </div>
+          <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706)">Y</div>
+            <div class="suggest-info"><div class="name">Yacine Boudali</div><div class="role">Développeur Web — Alger</div></div>
+          </div>
+          <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#10b981,#059669)">A</div>
+            <div class="suggest-info"><div class="name">Amira Hadj</div><div class="role">Designer UI/UX — Oran</div></div>
+          </div>
+          <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#f43f5e,#be123c)">K</div>
+            <div class="suggest-info"><div class="name">Karim Zerrouk</div><div class="role">Ingénieur Réseau — Constantine</div></div>
+          </div>
+          <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#6366f1,#4338ca)">S</div>
+            <div class="suggest-info"><div class="name">Sofiane Belaid</div><div class="role">Data Scientist — Sétif</div></div>
+          </div>
+          <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#14b8a6,#0d9488)">L</div>
+            <div class="suggest-info"><div class="name">Lynda Mansouri</div><div class="role">Comptable — Béjaïa</div></div>
+          </div>
+          <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#f97316,#ea580c)">R</div>
+            <div class="suggest-info"><div class="name">Rachid Touati</div><div class="role">Architecte — Tizi-Ouzou</div></div>
+          </div>
+          <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9)">H</div>
+            <div class="suggest-info"><div class="name">Houda Khelil</div><div class="role">Médecin généraliste — Blida</div></div>
+          </div>
+          <div class="suggest-item">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#0ea5e9,#0284c7)">I</div>
+            <div class="suggest-info"><div class="name">Imed Benmoussa</div><div class="role">Enseignant — Annaba</div></div>
+          </div>
+        </div>
+
+        <a href="#" class="see-all-link see-all" id="seeAllBtn"><u>voir tous les suggestions </u>→</a>
+      </div>
+
 
 </div><!-- /layout -->
 
