@@ -67,5 +67,5 @@ form.addEventListener("submit", function(e) {
     }
 
     console.log("Login envoyé :", email, password);
-    window.location.href = "../html/landing-page.html";
+    window.location.href = "../UI/homepage/home-page.html";
 });
