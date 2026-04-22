@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon Profil</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../css/mon-profil.css">
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg></div>
+    <div class="nav-search">
+      <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="recherchez un service, un produit...">
+    </div>
+    <div class="nav-icons">
+      <button class="nav-icon-btn" title="Accueil" onclick="window.location.href='../UI/homepage/home-page.html'"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></button>
+      <button class="nav-icon-btn" title="Messages" onclick="window.location.href='../UI/messagerie/messagerie.html'"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+      <button class="nav-icon-btn" title="Notifications" onclick="window.location.href='notifications.html'"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span class="notif-dot"></span></button>
+      <div class="nav-avatar" id="navAvatar" onclick="window.location.href='mon-profil.html'" title="Mon Profil">
+        <img id="navAvatarImg" src="../images/person.png" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;">
+        <span id="navAvatarLetter">M</span>
+      </div>
+      <button class="nav-menu-btn"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <div class="main-col">
+
+      <div class="banner-card">
+        <div class="banner">
+          <div class="banner-top" id="bannerTop">
+            <input type="file" id="bannerInput" hidden accept="image/png,image/jpeg,image/jpg,image/gif">
+            <label for="bannerInput" class="camera-banner"><i class="fa-solid fa-camera"></i></label>
+          </div>
+          <div class="banner-bottom" id="bannerBottom">
+            <div class="banner-user-info">
+              <div class="banner-name" id="displayName">
+                Mehdi cherif
+                <button class="cv-btn">
+                  <input type="file" id="cvInput" hidden accept=".pdf,.doc,.docx">
+                  <label for="cvInput">+ Ajouter Votre CV</label>
+                </button>
+                <span id="cvName"></span>
+              </div>
+              <div class="banner-role" id="displayRole">Etudiant a l'univ d'abderrahmane mira</div>
+              <div class="banner-location" id="displayLocation"><i class="fa-solid fa-location-dot"></i> Bejaia, Algeria</div>
+              <div class="links-widget">
+                <button class="links-icon-btn" id="linksToggleBtn" title="Mes liens">
+                  <i class="fa-solid fa-link"></i>
+                  <span class="links-badge" id="linksBadge" style="display:none;">0</span>
+                </button>
+                <div class="links-dropdown" id="linksDropdown">
+                  <div class="links-dropdown-header">
+                    <span>Mes liens</span>
+                    <button class="links-add-btn" id="openModal" title="Ajouter un lien"><i class="fa-solid fa-plus"></i></button>
+                  </div>
+                  <div class="links-list" id="linksContainer"></div>
+                  <p class="links-empty" id="linksEmpty">Aucun lien ajouté</p>
+                </div>
+              </div>
+            </div>
+            <a href="edit-profile.html" class="edit-profile-btn"><i class="fa-solid fa-pen"></i> Modifier votre profil</a>
+          </div>
+          <div class="profile">
+            <input type="file" id="profileInput" hidden accept="image/png,image/jpeg,image/jpg,image/gif">
+            <label for="profileInput">
+              <img src="../images/person.png" id="profilePreview">
+              <div class="camera-container"><i class="fa-solid fa-camera profile-icon"></i></div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="posts-section">
+        <div class="posts-header"><h3>Vos Postes</h3></div>
+
+        <div class="post-card">
+          <div class="post-top">
+            <div class="post-avatar-placeholder">M</div>
+            <div class="post-meta"><div class="post-author">mehdi cherif</div><div class="post-time">Il y a 35 minutes · <i class="fa-solid fa-earth-africa" style="font-size:9px;color:var(--muted)"></i></div></div>
+            <button class="post-menu-btn"><i class="fa-solid fa-ellipsis"></i></button>
+          </div>
+          <div class="post-title">Recherche développeur web freelance</div>
+          <div class="post-tags"><span class="post-tag tag-html">HTML5</span><span class="post-tag tag-css">CSS3</span><span class="post-tag tag-react">React.js</span><span class="post-tag tag-freelance">Freelance</span></div>
+          <div class="post-body">Je cherche un développeur web expérimenté pour rejoindre un projet e-commerce en pleine croissance. La mission comprend la refonte de notre interface utilisateur et l'intégration d'une API REST…</div>
+          <div class="post-footer">
+            <button class="post-action liked like-btn"><i class="fa-solid fa-heart"></i> 24</button>
+            <button class="post-action"><i class="fa-regular fa-comment"></i> 6</button>
+            <button class="post-action"><i class="fa-solid fa-arrow-up-from-bracket"></i> Partager</button>
+            <span class="post-action-sep"></span><span style="font-size:10px;color:var(--muted);">142 vues</span>
+          </div>
+        </div>
+
+        <div class="post-card">
+          <div class="post-top">
+            <div class="post-avatar-placeholder">M</div>
+            <div class="post-meta"><div class="post-author">mehdi cherif</div><div class="post-time">Hier à 14:20 · <i class="fa-solid fa-earth-africa" style="font-size:9px;color:var(--muted)"></i></div></div>
+            <button class="post-menu-btn"><i class="fa-solid fa-ellipsis"></i></button>
+          </div>
+          <div class="post-title">Nouveau projet : Refonte d'une app mobile</div>
+          <div class="post-tags"><span class="post-tag tag-design">UI/UX</span><span class="post-tag tag-mobile">Mobile</span><span class="post-tag tag-js">JavaScript</span></div>
+          <div class="post-img gradient-1"><span class="post-img-label">Header</span></div>
+          <div class="post-body">Voici un aperçu de la nouvelle interface que je conçois pour une startup locale. Retours bienvenus !</div>
+          <div class="post-footer">
+            <button class="post-action like-btn"><i class="fa-regular fa-heart"></i> 58</button>
+            <button class="post-action"><i class="fa-regular fa-comment"></i> 12</button>
+            <button class="post-action"><i class="fa-solid fa-arrow-up-from-bracket"></i> Partager</button>
+            <span class="post-action-sep"></span><span style="font-size:10px;color:var(--muted);">310 vues</span>
+          </div>
+        </div>
+
+        <div class="post-card">
+          <div class="post-top">
+            <div class="post-avatar-placeholder">M</div>
+            <div class="post-meta"><div class="post-author">mehdi cherif</div><div class="post-time">14 avr. · <i class="fa-solid fa-earth-africa" style="font-size:9px;color:var(--muted)"></i></div></div>
+            <button class="post-menu-btn"><i class="fa-solid fa-ellipsis"></i></button>
+          </div>
+          <div class="post-title">Algorithmes de tri — récap de la semaine</div>
+          <div class="post-tags"><span class="post-tag tag-python">Python</span></div>
+          <div class="post-img gradient-3"><span class="post-img-label">Change</span></div>
+          <div class="post-body">Cette semaine j'ai approfondi les algorithmes de tri (QuickSort, MergeSort, HeapSort). Partage de mes notes de cours pour ceux qui préparent les examens…</div>
+          <div class="post-footer">
+            <button class="post-action like-btn"><i class="fa-regular fa-heart"></i> 17</button>
+            <button class="post-action"><i class="fa-regular fa-comment"></i> 3</button>
+            <button class="post-action"><i class="fa-solid fa-arrow-up-from-bracket"></i> Partager</button>
+            <span class="post-action-sep"></span><span style="font-size:10px;color:var(--muted);">89 vues</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="suggest-card" id="suggestCard">
+        <h3>Connaissez - Vous ?</h3>
+        <div class="suggest-list" id="suggestListPreview">
+          <div class="suggest-item"><div class="suggest-avatar" style="background:linear-gradient(135deg,#e8734a,#c9543a)">M</div><div class="suggest-info"><div class="name">Mhb Nadia</div><div class="role">Etudiante — Univ. Abderrahmane Mira</div></div></div>
+          <div class="suggest-item"><div class="suggest-avatar" style="background:linear-gradient(135deg,#5b8dee,#3a6de0)">N</div><div class="suggest-info"><div class="name">Na Sfia</div><div class="role">Etudiante — Univ. As Suema 7</div></div></div>
+          <div class="suggest-item"><div class="suggest-avatar" style="background:linear-gradient(135deg,#4ecdc4,#2ab5ab)">C</div><div class="suggest-info"><div class="name">Chaima Ouk</div><div class="role">Etudiante — Univ. As Suema 7</div></div></div>
+          <div class="suggest-item"><div class="suggest-avatar" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">Me</div><div class="suggest-info"><div class="name">Mekhmoukh</div><div class="role">Agent de sécurité</div></div></div>
+        </div>
+        <div class="suggest-list" id="suggestListAll" style="display:none;margin-top:4px;">
+          <div class="suggest-item"><div class="suggest-avatar" style="background:linear-gradient(135deg,#e8734a,#c9543a)">M</div><div class="suggest-info"><div class="name">Mehdi Cherif</div><div class="role">Etudiant — Univ. Abderrahmane Mira</div></div></div>
+          <div class="suggest-item"><div class="suggest-avatar" style="background:linear-gradient(135deg,#5b8dee,#3a6de0)">N</div><div class="suggest-info"><div class="name">Na Sfia</div><div class="role">Etudiante — Univ. As Suema 7</div></div></div>
+          <div class="suggest-item"><div class="suggest-avatar" style="background:linear-gradient(135deg,#4ecdc4,#2ab5ab)">C</div><div class="suggest-info"><div class="name">Chaima Ouk</div><div class="role">Etudiante — Univ. As Suema 7</div></div></div>
+          <div class="suggest-item"><div class="suggest-avatar" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">Me</div><div class="suggest-info"><div class="name">Mekhmoukh</div><div class="role">Agent de sécurité</div></div></div>
+          <div class="suggest-item"><div class="suggest-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706)">Y</div><div class="suggest-info"><div class="name">Yacine Boudali</div><div class="role">Développeur Web — Alger</div></div></div>
+          <div class="suggest-item"><div class="suggest-avatar" style="background:linear-gradient(135deg,#10b981,#059669)">A</div><div class="suggest-info"><div class="name">Amira Hadj</div><div class="role">Designer UI/UX — Oran</div></div></div>
+          <div class="suggest-item"><div class="suggest-avatar" style="background:linear-gradient(135deg,#f43f5e,#be123c)">K</div><div class="suggest-info"><div class="name">Karim Zerrouk</div><div class="role">Ingénieur Réseau — Constantine</div></div></div>
+          <div class="suggest-item"><div class="suggest-avatar" style="background:linear-gradient(135deg,#6366f1,#4338ca)">S</div><div class="suggest-info"><div class="name">Sofiane Belaid</div><div class="role">Data Scientist — Sétif</div></div></div>
+        </div>
+        <a href="#" class="see-all" id="seeAllBtn">voir tous les suggestions →</a>
+      </div>
+      <p class="footer-note">© 2025 TIB Inc. All rights reserved.</p>
+      <div class="chat-panel" id="chatPanel">
+        <div class="chat-panel-header">
+          <div class="chat-panel-user">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#5b8dee,#3a6de0);width:32px;height:32px;font-size:12px;">N</div>
+            <div><div class="chat-panel-name">Na Sfia</div><div class="chat-panel-status"><span class="online-dot"></span> En ligne</div></div>
+          </div>
+          <button class="chat-panel-close" id="chatPanelClose"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-msg received"><div class="msg-bubble">Salut ! Tu as vu le projet rendu ?</div><div class="msg-time">10:42</div></div>
+          <div class="chat-msg sent"><div class="msg-bubble">Oui je l'ai soumis hier soir 😅</div><div class="msg-time">10:44</div></div>
+          <div class="chat-msg received"><div class="msg-bubble">Parfait, on se voit demain pour la présentation ?</div><div class="msg-time">10:45</div></div>
+          <div class="chat-msg sent"><div class="msg-bubble">Oui 9h à la fac 👍</div><div class="msg-time">10:46</div></div>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="chatInput" placeholder="Écrire un message…">
+          <button class="chat-send-btn" id="chatSendBtn">
+            <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M22 2L15 22 11 13 2 9l20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fab-bar">
+    <button class="fab-btn" title="Messagerie" id="fabMsgBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+    <button class="fab-btn" title="Aide" id="fabHelpBtn"><svg viewBox="0 0 24 24" fill="none" width="22" height="22"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M12 17.5v.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M12 14c0-1.5 1.5-2 2.2-3.2a2.8 2.8 0 10-4.9-1.9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
+
+  <div class="help-overlay" id="helpOverlay">
+    <div class="help-panel">
+      <button class="help-close" id="helpClose"><i class="fa-solid fa-xmark"></i></button>
+      <div class="help-header"><div class="help-icon"><i class="fa-solid fa-circle-question"></i></div><div><h2>Centre d'aide</h2><p>Comment pouvons-nous vous aider ?</p></div></div>
+      <div class="help-search"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Rechercher dans l'aide…"></div>
+      <div class="help-topics">
+        <div class="help-topic"><i class="fa-solid fa-user-pen"></i><div><strong>Modifier mon profil</strong><span>Photo, nom, rôle, adresse…</span></div><i class="fa-solid fa-chevron-right help-arrow"></i></div>
+        <div class="help-topic"><i class="fa-solid fa-lock"></i><div><strong>Confidentialité & sécurité</strong><span>Gérer vos paramètres de compte</span></div><i class="fa-solid fa-chevron-right help-arrow"></i></div>
+        <div class="help-topic"><i class="fa-solid fa-comment-dots"></i><div><strong>Messages & notifications</strong><span>Configurer vos alertes</span></div><i class="fa-solid fa-chevron-right help-arrow"></i></div>
+        <div class="help-topic"><i class="fa-solid fa-file-arrow-up"></i><div><strong>Ajouter un CV</strong><span>Formats acceptés, limites de taille</span></div><i class="fa-solid fa-chevron-right help-arrow"></i></div>
+        <div class="help-topic"><i class="fa-solid fa-headset"></i><div><strong>Contacter le support</strong><span>Parler à un conseiller</span></div><i class="fa-solid fa-chevron-right help-arrow"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="notification"></div>
+
+  <div id="linkModal" class="modal">
+    <div class="modal-content">
+      <button class="close-btn" id="closeModal">&times;</button>
+      <h2>Ajouter un lien</h2>
+      <input type="url" id="modalLinkInput" placeholder="https://exemple.com">
+      <button class="save-btn">Enregistrer</button>
+    </div>
+  </div>
+
+  <div id="cropModal">
+    <div id="cropBox"><img id="cropImage" src="" alt=""></div>
+    <div id="cropButtons"><button id="cropCancel">Annuler</button><button id="cropConfirm">Confirmer</button></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+  <script src="../js/mon-profile.js"></script>
+</body>
+</html>

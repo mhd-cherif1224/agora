@@ -58,13 +58,13 @@
   <!-- ════════════ MAIN COL ════════════ -->
   <div class="main-col">
 
-    <!-- COMPOSER -->
+    <!-- COMPOSER — clicking opens the make-a-post modal -->
     <div class="composer-card">
-      <div class="composer-avatar">M</div>
-      <div class="composer-input">redigez un post, posez une question...</div>
+      <div class="composer-avatar" id="composerAvatar">M</div>
+      <div class="composer-input" id="composerTrigger">redigez un post, posez une question...</div>
       <div class="composer-actions">
-        <button class="composer-btn" title="Photo"><i class="fa-regular fa-image"></i></button>
-        <button class="composer-btn" title="Calendrier"><i class="fa-regular fa-calendar"></i></button>
+        <button class="composer-btn" title="Photo" id="composerPhotoBtn"><i class="fa-regular fa-image"></i></button>
+        <button class="composer-btn" title="Calendrier" id="composerCalBtn"><i class="fa-regular fa-calendar"></i></button>
         <button class="composer-btn" title="Sondage"><i class="fa-solid fa-chart-bar"></i></button>
       </div>
     </div>
@@ -125,8 +125,6 @@
         <!-- ACTIONS -->
         <div class="post-actions">
           <button class="post-action-btn" data-action="rate"><i class="fa-regular fa-star"></i> Évaluer</button>
-          
-          
         </div>
 
         <!-- RATING PANEL (hidden by default) -->
@@ -195,8 +193,6 @@
 
         <div class="post-actions">
           <button class="post-action-btn" data-action="rate"><i class="fa-regular fa-star"></i> Évaluer</button>
-           
-         
         </div>
 
         <div class="rating-panel" hidden>
@@ -261,8 +257,6 @@
 
         <div class="post-actions">
           <button class="post-action-btn" data-action="rate"><i class="fa-regular fa-star"></i> Évaluer</button>
-           
-         
         </div>
 
         <div class="rating-panel" hidden>
@@ -426,10 +420,75 @@
   </div>
 </div>
 
+<!-- ══ MAKE A POST MODAL ══ -->
+<div class="post-modal-overlay" id="postModalOverlay">
+  <div class="post-modal" id="postModal">
+    <div class="post-modal-header">
+      <div class="post-modal-avatar-placeholder" id="pmAvatar">M</div>
+      <div class="post-modal-user">
+        <div class="post-modal-name">mehdi cherif</div>
+        <div class="post-modal-role">Etudiant a l'univ d'abderrahmane mira</div>
+      </div>
+      <button class="post-modal-close" id="postModalClose"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="post-modal-body">
+      <textarea class="post-modal-textarea" id="postTextarea" placeholder="Quoi de neuf ? Partagez quelque chose…"></textarea>
+    </div>
+    <div class="location-chip" id="locationChip">
+      <i class="fa-solid fa-location-dot"></i>
+      <span id="locationText">Ma position</span>
+      <button class="location-chip-remove" id="locationRemove"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="category-chips" id="categoryChips"></div>
+    <div class="scheduled-chip" id="scheduledChip">
+      <i class="fa-regular fa-clock"></i>
+      <span id="scheduledText">Programmé</span>
+      <button class="scheduled-chip-remove" id="scheduledRemove"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="post-modal-preview" id="postPreview"></div>
+    <div class="post-modal-footer">
+      <input type="file" id="pmPhotoInput" hidden accept="image/jpeg,image/png,image/jpg,image/gif" multiple>
+      <button class="post-tool-btn" id="pmPhotoBtn" title="Ajouter une photo"><i class="fa-regular fa-image"></i></button>
+      <div style="position:relative;">
+        <button class="post-tool-btn" id="pmLocBtn" title="Ajouter une localisation"><i class="fa-solid fa-location-dot"></i></button>
+        <div class="loc-modal" id="locModal">
+          <input type="text" id="locInput" placeholder="Ex : Bejaia, Algeria">
+          <button class="loc-confirm-btn" id="locConfirm">Confirmer</button>
+        </div>
+      </div>
+      <div style="position:relative;">
+        <button class="post-tool-btn" id="pmCatBtn" title="Choisir une catégorie"><i class="fa-solid fa-plus"></i></button>
+        <div class="cat-dropdown" id="catDropdown"></div>
+      </div>
+      <div class="post-tool-sep"></div>
+      <div class="post-footer-push"></div>
+      <div style="position:relative;">
+        <button class="post-tool-btn" id="pmTimerBtn" title="Programmer la publication"><i class="fa-regular fa-clock"></i></button>
+        <div class="timer-modal" id="timerModal">
+          <div class="timer-modal-header">
+            <span class="timer-modal-title">Programmer un timer</span>
+            <button class="timer-modal-close" id="timerModalClose"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="timer-field"><label>Fixer la date</label><input type="date" id="timerDate"></div>
+          <div class="timer-field"><label>Fixer l'heure</label><input type="time" id="timerTime"></div>
+          <button class="timer-confirm-btn" id="timerConfirm">Confirmer</button>
+        </div>
+      </div>
+      <button class="post-publish-btn" id="postPublishBtn">publier</button>
+    </div>
+  </div>
+</div>
+
+<!-- notification toast -->
+<div id="notification" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1714;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;padding:12px 24px;border-radius:30px;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:9999;align-items:center;gap:8px;"></div>
+
 <!-- Scripts -->
 <script src="js/feed.js"></script>
 <script src="js/sidebar.js"></script>
 <script src="js/chat.js"></script>
+<script src="js/post-modal.js"></script>
 
 </body>
 </html>
+
+
