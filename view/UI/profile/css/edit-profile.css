@@ -499,9 +499,8 @@ nav {
 .suggest-card::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
 
 .suggest-card h3 {
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700; font-size: 13px;
-  margin-bottom: 14px; color: var(--color-suggest-heading);
+  font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 12px;
+  margin-bottom: 14px; color: var(--color-muted); letter-spacing: .06em; text-transform: uppercase;
 }
 
 .suggest-list { display: flex; flex-direction: column; gap: 12px; }
