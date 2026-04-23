@@ -251,6 +251,31 @@
     <button class="chat-send-btn" id="chatSend"><i class="fa-solid fa-paper-plane"></i></button>
   </div>
 </div>
+<!-- ══ CHATBOT PANEL ══ -->
+<div class="chat-panel" id="chatbotPanel">
+  <div class="chat-panel-header">
+    <div class="chat-panel-user">
+      <div class="chat-panel-avatar" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa);">
+        <i class="fa-solid fa-robot"></i>
+      </div>
+      <div>
+        <div class="chat-panel-name">AGORA Assistant</div>
+        <div class="chat-panel-status"><span class="online-dot"></span> En ligne</div>
+      </div>
+    </div>
+    <button class="chat-panel-close" id="chatbotClose"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="chat-messages" id="chatbotMessages">
+    <div class="chat-msg received">
+      <div class="msg-bubble">Salut ! Je suis AGORA, votre assistant. Comment puis-je vous aider aujourd'hui ? 🫡</div>
+      <span class="msg-time">Maintenant</span>
+    </div>
+  </div>
+  <div class="chat-input-row">
+    <input type="text" id="chatbotInput" placeholder="Posez votre question...">
+    <button class="chat-send-btn" id="chatbotSend"><i class="fa-solid fa-paper-plane"></i></button>
+  </div>
+</div>
 
 <!-- Context menu -->
 <div class="ctx-menu" id="ctxMenu">

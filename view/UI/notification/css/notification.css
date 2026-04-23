@@ -10,8 +10,8 @@
   --color-purple:              #a855f7;
   --color-bg:                  #0d0d14;
   --color-input-bg:            rgba(255,255,255,0.05);
-  --color-border:              rgba(255,255,255,0.15);
-  --color-border-subtle:       rgba(255,255,255,0.08);
+  --color-border:             rgba(75,72,236,0.35);
+  --color-border-subtle:      rgba(75,72,236,0.15);
   --color-text:                #f1f0f5;
   --color-muted:               #8b8a99;
   --color-accent:              #4b48ec;

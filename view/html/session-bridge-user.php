@@ -8,6 +8,7 @@ if (!isset($_SESSION['utilisateur_id'])) {
 }
 
 // Récupère les données depuis la session PHP (côté serveur)
+$id     = $_SESSION['utilisateur_id'];
 $email  = $_SESSION['utilisateur_email'];
 $nom    = $_SESSION['utilisateur_nom'];
 $prenom = $_SESSION['utilisateur_prenom'];
@@ -18,6 +19,7 @@ $prenom = $_SESSION['utilisateur_prenom'];
 <body>
 <script>
     // Écrit dans localStorage SEULEMENT après vérification PHP
+    localStorage.setItem("utilisateur_id", "<?= htmlspecialchars($id) ?>");
     localStorage.setItem("email",  "<?= htmlspecialchars($email) ?>");
     localStorage.setItem("nom",    "<?= htmlspecialchars($nom) ?>");
     localStorage.setItem("prenom", "<?= htmlspecialchars($prenom) ?>");

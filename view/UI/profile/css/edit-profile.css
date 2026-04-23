@@ -31,8 +31,8 @@
                #0d0d14;
 
     /* ── Borders ── */
-    --color-border:                  rgba(255, 255, 255, 0.15);
-    --color-border-subtle:           rgba(255, 255, 255, 0.15);
+    --color-border:             rgba(75,72,236,0.35);
+    --color-border-subtle:      rgba(75,72,236,0.15);
 
     /* ── Text ── */
     --color-text:                   #f1f0f5;
