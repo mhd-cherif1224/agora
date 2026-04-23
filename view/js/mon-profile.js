@@ -120,7 +120,7 @@ seeAllBtn.addEventListener('click',e=>{
 document.addEventListener('DOMContentLoaded', () => {
 
   const panel      = document.getElementById('chatPanel');
-  const closeBtn   = document.getElementById('chatClose');
+  const closeBtn   = document.getElementById('chatPanelClose');
   const fabChatBtn = document.getElementById('fabMsgBtn');
   const navChatBtn = document.getElementById('navChat');
   const input      = document.getElementById('chatInput');
