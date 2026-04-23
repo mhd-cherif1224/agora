@@ -8,7 +8,7 @@
   const s = document.createElement('style');
   s.textContent = `
     /* ══ POST MODAL OVERLAY ══ */
-    .post-modal-overlay{display:none;position:fixed;inset:0;background:rgba(26,23,20,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:1200;justify-content:center;align-items:flex-start;padding-top:150px;}
+    .post-modal-overlay{display:none;position:fixed;inset:0;background:rgba(26,23,20,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:1200;justify-content:center;align-items:flex-start;padding-top:50px;}
     .post-modal-overlay.active{display:flex;}
     .post-modal{background:#fff;border:1px solid #e2ddd7;border-radius:18px;width:100%;max-width:520px;box-shadow:0 24px 64px rgba(0,0,0,.22);animation:postModalIn .28s cubic-bezier(.34,1.3,.64,1) both;
       display:flex;flex-direction:column;max-height:88vh;position:relative;}
