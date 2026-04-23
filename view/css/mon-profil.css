@@ -49,9 +49,21 @@
   --color-modal-overlay:       rgba(13,11,22,0.65);
   --color-modal-bg:            rgba(18,15,28,0.98);
   --color-modal-border:        rgba(75,72,236,0.25);
-  --color-links-icon-border:   rgba(255,255,255,0.45);
-  --color-links-icon-bg:       rgba(255,255,255,0.12);
-  --color-links-icon-bg-hover: rgba(255,255,255,0.24);
+  --color-links-icon-border:      rgba(255,255,255,0.45);
+    --color-links-icon-bg:          rgba(255,255,255,0.12);
+    --color-links-icon-bg-hover:    rgba(255,255,255,0.24);
+    --color-links-icon-active-a:    #4b48ec;
+    --color-links-icon-active-b:    #7299f4;
+    --color-links-badge-bg:         #4b48ec;
+    --color-links-badge-border:     rgba(255,255,255,0.70);
+    --color-links-dropdown-shadow:  rgba(0,0,0,0.30);
+    --color-links-add-a:            #4b48ec;
+    --color-links-add-b:            #7299f4;
+    --color-link-icon-a:            #4b48ec;
+    --color-link-icon-b:            #7299f4;
+    --color-link-text-hover:        #7299f4;
+    --color-delete-btn-hover-bg:    #fee2e2;
+    --color-delete-btn-hover:       #dc2626;
   --color-input-border:        rgba(72,132,236,0.3);
   --color-input-border-focus:  #4b48ec;
   --color-banner-bottom-a:        #4A4A4A;
@@ -81,16 +93,14 @@ nav {
 
 .nav-logo {
   width: 36px; height: 36px;
-  background: linear-gradient(135deg, var(--color-pink), var(--color-pink-light));
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: center; justify-content: start;
   flex-shrink: 0;
-  box-shadow: 0 0 14px var(--color-accent-glow);
+  
 }
 .nav-logo svg { width: 20px; height: 20px; fill: white; }
 
 .nav-search {
-  flex: 1; max-width: 340px; margin-left: 80px;
+  flex: 1; max-width: 340px; margin-left: 10%;
   display: flex; align-items: center;
   background: var(--color-input-bg);
   border: 1px solid var(--color-border);
@@ -213,12 +223,14 @@ nav {
   background: linear-gradient(120deg, var(--color-banner-bottom-a), var(--color-banner-bottom-b));
   position: relative; transition: background .5s;
   display: flex; align-items: end;
-  padding-left: 168px; gap: 95px;
+  justify-content: space-between;
+  padding-left: 168px; gap: 0px;
 }
 
 .banner-user-info {
   display: flex; flex-direction: column;
   justify-content: center; gap: 2px; min-width: 0;
+  align-content: space-between;
 }
 
 .banner-name {
@@ -330,8 +342,53 @@ nav {
   color: #fff; border-radius: 50%; cursor: pointer;
   display: flex; align-items: center; justify-content: center; font-size: 10px;
 }
-.links-list { display: flex; flex-direction: column; padding: 6px 0; }
+.links-list {
+  display: flex; flex-direction: column;
+  padding: 6px 0; max-height: 160px;
+  overflow-y: auto; scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+.links-list::-webkit-scrollbar { width: 3px; }
+.links-list::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+
 .links-empty { text-align: center; font-size: 11px; color: var(--color-muted); padding: 10px 14px 12px; }
+
+.link-item {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.15);
+  backdrop-filter: blur(4px);
+  padding: 4px 8px 4px 10px; border-radius: 20px; max-width: 100%;
+}
+
+.link-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 14px; transition: background .15s;
+}
+.link-item:hover { background: var(--color-input-bg); }
+
+.link-item-icon {
+  width: 24px; height: 24px; border-radius: 7px;
+  background: linear-gradient(135deg, var(--color-link-icon-a), var(--color-link-icon-b));
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 9px; color: #fff;
+}
+
+.link-item a {
+  flex: 1; min-width: 0; color: var(--color-text);
+  text-decoration: none; font-size: 12px; font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.link-item a:hover { color: var(--color-link-text-hover); }
+
+.delete-btn {
+  flex-shrink: 0; width: 18px; height: 18px;
+  background: transparent; color: var(--color-muted);
+  border: none; border-radius: 50%; cursor: pointer;
+  font-size: 10px; display: flex; align-items: center; justify-content: center;
+  transition: background .2s, color .2s; padding: 0;
+}
+.delete-btn:hover { background: var(--color-delete-btn-hover-bg); color: var(--color-delete-btn-hover); }
 
 /* ── POSTS SECTION ── */
 .posts-section { display: flex; flex-direction: column; gap: 16px; }
@@ -623,7 +680,7 @@ nav {
 
 /* ── CHAT PANEL ── */
 .chat-panel {
-  position: fixed; bottom: 80px; right: 20px; z-index: 500;
+  position: fixed; bottom: 0px; right: 72px; z-index: 500;
   width: 300px;
   background: var(--color-chat-bg);
   border: 1px solid var(--color-chat-border);

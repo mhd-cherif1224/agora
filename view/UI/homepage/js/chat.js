@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const panel      = document.getElementById('chatPanel');
   const closeBtn   = document.getElementById('chatClose');
-  const fabChatBtn = document.getElementById('fabChat');
+  const fabChatBtn = document.getElementById('fabMsgBtn');
   const navChatBtn = document.getElementById('navChat');
   const input      = document.getElementById('chatInput');
   const sendBtn    = document.getElementById('chatSend');
