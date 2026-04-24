@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 100%; }
+
+:root {
+  /* ── Brand ── */
+  --color-pink:               #4b48ec;
+  --color-pink-light:         #7299f4;
+  --color-purple:             #a855f7;
+
+  /* ── Surfaces ── */
+  --color-bg:                 #0d0d14;
+  --color-surface:            #0d0d14;
+  --color-input-bg:           rgba(255,255,255,0.05);
+
+  /* ── Borders ── */
+  --color-border:             rgba(75,72,236,0.35);
+  --color-border-subtle:      rgba(75,72,236,0.15);
+
+  /* ── Text ── */
+  --color-text:               #f1f0f5;
+  --color-muted:              #8b8a99;
+  --color-placeholder:        rgba(139,138,153,0.50);
+
+  /* ── Accent ── */
+  --color-accent:             #4b48ec;
+  --color-accent-hover:       #7299f4;
+  --color-accent-glow:        rgba(75,72,236,0.30);
+
+  /* ── Avatar ── */
+  --color-avatar-a:           #0700e0;
+  --color-avatar-b:           #7299f4;
+
+  /* ── Nav ── */
+  --color-nav-bg:             #0d0d14;
+  --color-nav-border:         rgba(75,72,236,0.35);
+  --color-nav-icon-bg:        rgba(255,255,255,0.05);
+  --color-nav-icon-bg-hover:  rgba(75,72,236,0.25);
+  --color-notif-dot:          #4b48ec;
+
+  /* ── Cards ── */
+  --color-card-bg:            rgba(13,13,28,0.92);
+  --color-card-border:        rgba(75,72,236,0.20);
+  --color-shadow:             0 2px 16px rgba(0,0,0,0.35);
+  --radius:                   14px;
+
+  /* ── FAB ── */
+  --color-fab-bg:             rgba(18,15,28,0.95);
+  --color-fab-border:         rgba(72,127,236,0.35);
+
+  /* ── Chat ── */
+  --color-chat-sent-bg:       #4b48ec;
+  --color-online-dot:         #22c55e;
+  --color-send-btn-bg:        #4b48ec;
+  --color-send-btn-hover:     #7299f4;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background:
+    radial-gradient(ellipse 80% 60% at 15% 50%, rgba(88,85,247,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 70% at 85% 20%, rgba(113,72,236,0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 50% at 50% 100%, rgba(116,72,236,0.10) 0%, transparent 50%),
+    #0d0d14;
+  color: var(--color-text);
+  min-height: 100vh;
+  font-size: 14px;
+}

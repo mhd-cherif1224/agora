@@ -9,6 +9,7 @@ if (!isset($_SESSION['admin_id'])) {
 }
 
 // Récupère les données depuis la session PHP (côté serveur)
+$id     = $_SESSION['admin_id'];
 $role   = $_SESSION['admin_role'];
 $email  = $_SESSION['admin_email'];
 $nom    = $_SESSION['admin_nom'];
@@ -20,7 +21,7 @@ $prenom = $_SESSION['admin_prenom'];
 <body>
 <script>
     // Écrit dans localStorage SEULEMENT après vérification PHP
- 
+    localStorage.setItem("admin_id", "<?= htmlspecialchars($id) ?>");
     localStorage.setItem("role",   "<?= htmlspecialchars($role) ?>");
     localStorage.setItem("email",  "<?= htmlspecialchars($email) ?>");
     localStorage.setItem("nom",    "<?= htmlspecialchars($nom) ?>");

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messagerie — AGORA</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/nav.css">
+  <link rel="stylesheet" href="css/messagerie.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════ NAV ═══ -->
+<nav>
+  <div class="nav-logo">
+    <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+  </div>
+
+  <div class="nav-search">
+    <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" placeholder="recherchez un service, un produit...">
+  </div>
+
+  <div class="nav-icons">
+    <button class="nav-icon-btn" title="Accueil" onclick="window.location.href='../homepage/home-page.html'">
+      <svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+    </button>
+
+    <button class="nav-icon-btn active" title="Messages">
+      <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span class="notif-dot"></span>
+    </button>
+
+    <button class="nav-icon-btn" title="Notifications"  onclick="window.location.href='../notification/notification.html'">
+      <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 8A6 6 0 006 
+        8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      <span class="notif-dot"></span>
+    </button>
+
+    <div class="nav-divider"></div>
+
+    <div class="nav-avatar" id="navAvatar" onclick="window.location.href='../../html/mon-profil.html'" title="Mon Profil">
+        <img id="navAvatarImg" src="../images/person.png" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;">
+        <span id="navAvatarLetter">M</span>
+      </div>
+      <button class="nav-menu-btn"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════ LAYOUT ═══ -->
+<div class="msg-layout">
+
+  <!-- ════════ LEFT — Conversation list ════════ -->
+  <div class="conv-panel">
+
+    <div class="conv-panel-header">
+      <div class="conv-panel-title">Messages</div>
+      <div class="conv-search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="convSearch" placeholder="cherchez">
+      </div>
+    </div>
+
+    <div class="conv-list" id="convList">
+      <!-- Populated by JS -->
+    </div>
+
+  </div><!-- /conv-panel -->
+
+  <!-- ════════ RIGHT — Active chat ════════ -->
+  <div class="chat-panel">
+
+    <!-- Chat header (hidden until a conv is selected) -->
+    <div class="chat-header" id="chatHeader">
+      <div class="chat-header-avatar" style="background:linear-gradient(135deg,#e44,#f97316);">MC</div>
+      <div class="chat-header-info">
+        <div class="chat-header-name">—</div>
+        <div class="chat-header-status"><span class="status-dot"></span> En ligne</div>
+      </div>
+      <div class="chat-header-actions">
+        <button class="chat-hdr-btn" title="Appel audio"><i class="fa-solid fa-phone"></i></button>
+        <button class="chat-hdr-btn" title="Appel vidéo"><i class="fa-solid fa-video"></i></button>
+        <button class="chat-hdr-btn" title="Plus"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="chat-empty" id="chatEmpty">
+      <div class="chat-empty-icon"><i class="fa-regular fa-comment-dots"></i></div>
+      <p>Sélectionnez une conversation</p>
+    </div>
+
+    <!-- Messages area (hidden until a conv is selected) -->
+    <div class="chat-messages" id="chatMessages" style="display:none;">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- Input bar -->
+    <div class="chat-input-bar" id="chatInputBar" style="display:none;">
+      <button class="input-side-btn" title="Emoji"><i class="fa-regular fa-face-smile"></i></button>
+      <button class="input-side-btn" title="Fichier"><i class="fa-solid fa-paperclip"></i></button>
+      <input type="text" id="msgInput" placeholder="Écrivez un message...">
+      <button class="send-btn" id="sendBtn" title="Envoyer">
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
+    </div>
+
+  </div><!-- /chat-panel -->
+
+</div><!-- /msg-layout -->
+
+<script src="js/messagerie.js"></script>
+</body>
+</html>

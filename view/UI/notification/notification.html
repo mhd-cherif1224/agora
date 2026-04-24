@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notifications — AGORA</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../notification/css/notification.css">
+
+</head>
+<body>
+
+<!-- ══════════ NAV ══════════ -->
+<nav>
+  <div class="nav-logo">
+    <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+  </div>
+
+  <div class="nav-search">
+    <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" placeholder="recherchez un service, un produit...">
+  </div>
+
+  <div class="nav-icons">
+    <button class="nav-icon-btn" title="Accueil" onclick="window.location.href='../homepage/home-page.html'">
+      <svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+    </button>
+
+    <button class="nav-icon-btn" id="navChat" title="Messages" onclick="window.location.href='../messagerie/messagerie.html'">
+      <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span class="notif-dot"></span>
+    </button>
+
+    <button class="nav-icon-btn active" title="Notifications">
+      <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      <span class="notif-dot"></span>
+    </button>
+
+    <div class="nav-divider"></div>
+
+    <div class="nav-avatar" id="navAvatar" onclick="window.location.href='../../html/mon-profil.html'" title="Mon Profil">
+        <img id="navAvatarImg" src="../images/person.png" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;">
+        <span id="navAvatarLetter">M</span>
+      </div>
+      <button class="nav-menu-btn"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+
+<!-- ══════════ LAYOUT ══════════ -->
+<div class="page-layout">
+
+  <!-- ══ MAIN COL ══ -->
+  <div class="main-col">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1 class="page-title">Notifications</h1>
+        <span class="unread-badge" id="unreadBadge">6</span>
+      </div>
+      <button class="mark-all-btn" id="markAllBtn">
+        <i class="fa-solid fa-check-double"></i> Tout marquer lu
+      </button>
+    </div>
+
+    <!-- Filter tabs -->
+    <div class="filter-tabs" id="filterTabs">
+      <button class="filter-tab active" data-filter="all">Tout</button>
+      <button class="filter-tab" data-filter="eval">Évaluations</button>
+      
+      <button class="filter-tab" data-filter="comment">Commentaires</button>
+      
+    </div>
+
+    <!-- ── Section: Aujourd'hui ── -->
+    <div class="section-label" data-section="today">Aujourd'hui</div>
+
+    <!-- NOTIF 1 — Evaluation ⭐ unread -->
+    <div class="notif-card unread" data-type="eval" data-id="1">
+      <div class="notif-inner">
+        <div class="notif-avatar-wrap">
+          <div class="notif-avatar" style="background:linear-gradient(135deg,#059669,#34d399);">NS</div>
+          <div class="notif-type-icon eval"><i class="fa-solid fa-star"></i></div>
+        </div>
+        <div class="notif-body">
+          <div class="notif-text">
+            <strong>Na Sfia</strong> a évalué votre post <span class="notif-highlight">« Recherche développeur web freelance »</span>
+          </div>
+          <div class="notif-stars">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
+            <span>4 / 5</span>
+          </div>
+          <div class="notif-preview">« Très bonne offre, profil sérieux et réactif ! »</div>
+          <div class="notif-time"><i class="fa-regular fa-clock"></i> Il y a 12 minutes</div>
+        </div>
+        <div class="notif-aside">
+          
+          <button class="notif-menu-btn" data-id="1"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+        </div>
+      </div>
+    </div>
+
+    
+
+    <!-- NOTIF 3 — Comment 💬 unread -->
+    <div class="notif-card unread" data-type="comment" data-id="3">
+      <div class="notif-inner">
+        <div class="notif-avatar-wrap">
+          <div class="notif-avatar" style="background:linear-gradient(135deg,#4ecdc4,#2ab5ab);">CO</div>
+          <div class="notif-type-icon comment"><i class="fa-solid fa-comment"></i></div>
+        </div>
+        <div class="notif-body">
+          <div class="notif-text">
+            <strong>Chaima Ouk</strong> a commenté votre post <span class="notif-highlight">« Refonte d'une app mobile »</span>
+          </div>
+          <div class="notif-preview">« J'adore le concept, tu as utilisé Figma pour le prototype ? »</div>
+          <div class="notif-time"><i class="fa-regular fa-clock"></i> Il y a 1 heure</div>
+         
+        </div>
+        <div class="notif-aside">
+          <button class="notif-menu-btn" data-id="3"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+        </div>
+      </div>
+    </div>
+
+    
+
+    <!-- ── Section: Cette semaine ── -->
+    <div class="section-label" data-section="week">Cette semaine</div>
+
+    <!-- NOTIF 5 — Evaluation ⭐ read -->
+    <div class="notif-card read" data-type="eval" data-id="5">
+      <div class="notif-inner">
+        <div class="notif-avatar-wrap">
+          <div class="notif-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706);">YB</div>
+          <div class="notif-type-icon eval"><i class="fa-solid fa-star"></i></div>
+        </div>
+        <div class="notif-body">
+          <div class="notif-text">
+            <strong>Yacine Boudali</strong> a évalué votre post <span class="notif-highlight">« Algorithmes de tri »</span>
+          </div>
+          <div class="notif-stars">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+            <span>5 / 5</span>
+          </div>
+          <div class="notif-time"><i class="fa-regular fa-clock"></i> Hier à 16:30</div>
+        </div>
+        <div class="notif-aside">
+          <button class="notif-menu-btn" data-id="5"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+        </div>
+      </div>
+    </div>
+
+    
+
+    <!-- Empty state (hidden by default) -->
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon"><i class="fa-regular fa-bell-slash"></i></div>
+      <p>Aucune notification dans cette catégorie</p>
+    </div>
+
+  </div><!-- /main-col -->
+
+  <!-- ══ SIDEBAR ══ -->
+  <div class="sidebar">
+
+    <!-- Summary stats -->
+    <div class="summary-card">
+      <h3>Vue d'ensemble</h3>
+      <div class="summary-grid">
+        <div class="summary-stat">
+          
+          <div class="stat-value" id="statEval">7</div>
+          <div class="stat-label">Évaluations</div>
+        </div>
+        
+        <div class="summary-stat">
+          
+          <div class="stat-value" id="statComment">3</div>
+          <div class="stat-label">Commentaires</div>
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- Activity sparkline -->
+    <div class="activity-card">
+      <h3>Activité (7 jours)</h3>
+      <div class="sparkline-wrap" id="sparkline"></div>
+      <div class="sparkline-labels">
+        <span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Auj.</span>
+      </div>
+    </div>
+
+    <!-- Notification settings -->
+    
+  </div><!-- /sidebar -->
+
+</div><!-- /page-layout -->
+
+<!-- FAB -->
+<!-- ══ FLOATING ACTION BAR (right side) ══ -->
+  <div class="fab-bar">
+    <button class="fab-btn" title="Messagerie" id="fabMsgBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+      </svg>
+    </button>
+    <button class="fab-btn" title="Aide" id="fabHelpBtn">
+      <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M12 17.5v.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M12 14c0-1.5 1.5-2 2.2-3.2a2.8 2.8 0 10-4.9-1.9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+<!-- CHAT PANEL -->
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-panel-header">
+    <div class="chat-panel-user">
+      <div class="chat-panel-avatar" style="background:linear-gradient(135deg,#e44,#f97316);">MC</div>
+      <div>
+        <div class="chat-panel-name">mehdi cherif</div>
+        <div class="chat-panel-status"><span class="online-dot"></span> En ligne</div>
+      </div>
+    </div>
+    <button class="chat-panel-close" id="chatClose"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="chat-messages" id="chatMessages">
+    <div class="chat-msg received">
+      <div class="msg-bubble">Salut ! Tu fais du dev web ?</div>
+      <span class="msg-time">10:24</span>
+    </div>
+    <div class="chat-msg sent">
+      <div class="msg-bubble">Oui, React + Node principalement 👋</div>
+      <span class="msg-time">10:25</span>
+    </div>
+    <div class="chat-msg received">
+      <div class="msg-bubble">Parfait, j'ai un projet freelance qui pourrait t'intéresser !</div>
+      <span class="msg-time">10:26</span>
+    </div>
+  </div>
+  <div class="chat-input-row">
+    <input type="text" id="chatInput" placeholder="Écrivez un message...">
+    <button class="chat-send-btn" id="chatSend"><i class="fa-solid fa-paper-plane"></i></button>
+  </div>
+</div>
+<!-- ══ CHATBOT PANEL ══ -->
+<div class="chat-panel" id="chatbotPanel">
+  <div class="chat-panel-header">
+    <div class="chat-panel-user">
+      <div class="chat-panel-avatar" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa);">
+        <i class="fa-solid fa-robot"></i>
+      </div>
+      <div>
+        <div class="chat-panel-name">AGORA Assistant</div>
+        <div class="chat-panel-status"><span class="online-dot"></span> En ligne</div>
+      </div>
+    </div>
+    <button class="chat-panel-close" id="chatbotClose"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="chat-messages" id="chatbotMessages">
+    <div class="chat-msg received">
+      <div class="msg-bubble">Salut ! Je suis AGORA, votre assistant. Comment puis-je vous aider aujourd'hui ? 🫡</div>
+      <span class="msg-time">Maintenant</span>
+    </div>
+  </div>
+  <div class="chat-input-row">
+    <input type="text" id="chatbotInput" placeholder="Posez votre question...">
+    <button class="chat-send-btn" id="chatbotSend"><i class="fa-solid fa-paper-plane"></i></button>
+  </div>
+</div>
+
+<!-- Context menu -->
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-item" id="ctxMarkRead"><i class="fa-solid fa-check"></i> Marquer comme lu</div>
+  <div class="ctx-item" id="ctxMute"><i class="fa-solid fa-bell-slash"></i> Désactiver ce type</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item danger" id="ctxDelete"><i class="fa-solid fa-trash"></i> Supprimer</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><i class="fa-solid fa-check-circle"></i> <span id="toastMsg"></span></div>
+
+<!-- ══════════ SCRIPTS ══════════ -->
+<script src="../notification/js/notification.js"></script>
+
+</body>
+</html>

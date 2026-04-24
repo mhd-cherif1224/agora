@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Modifier Profil</title>
+<title>Modifier Profil — AGORA</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="../css/edit-profile.css">
+<link rel="stylesheet" href="./css/edit-profile.css">
 </head>
 <body>
 
   <!-- NAV -->
   <nav>
     <div class="nav-logo">
-      <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+      <img src="../../images/Frame 20478.svg" width="100px" alt="">
     </div>
     <div class="nav-search">
       <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -23,21 +23,23 @@
     </div>
     <div class="nav-icons">
       <!-- Accueil -->
-      <button class="nav-icon-btn" title="Accueil" onclick="window.location.href='landing-page.html'">
+      <button class="nav-icon-btn" title="Accueil" onclick="window.location.href='../homepage/home-page.html'">
         <svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
       </button>
       <!-- Messages -->
-      <button class="nav-icon-btn" title="Messages" onclick="window.location.href='messagerie.html'">
+      <button class="nav-icon-btn" title="Messages" onclick="window.location.href='../messagerie/messagerie.html'">
         <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
       </button>
       <!-- Notifications -->
-      <button class="nav-icon-btn" title="Notifications" onclick="window.location.href='notifications.html'">
+      <button class="nav-icon-btn" title="Notifications" onclick="window.location.href='../notification/notification.html'">
         <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
         <span class="notif-dot"></span>
       </button>
+      <div class="nav-divider"></div>
+    
       <!-- Avatar → profil -->
-      <div class="nav-avatar" id="navAvatar" onclick="window.location.href='mon-profil.html'" title="Mon Profil">
-        <img id="navAvatarImg" src="../images/person.png" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;">
+      <div class="nav-avatar" id="navAvatar" onclick="window.location.href='../../html/mon-profil.html'" title="Mon Profil">
+        <img id="navAvatarImg" src="../../images/person.png" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;">
         <span id="navAvatarLetter">M</span>
       </div>
       <button class="nav-menu-btn"><span></span><span></span><span></span></button>
@@ -118,7 +120,7 @@
           <div class="profile">
             <input type="file" id="profileInput" hidden accept="image/png,image/jpeg,image/jpg,image/gif">
             <label for="profileInput">
-              <img src="../images/person.png" id="profilePreview">
+              <img src="../../images/person.png" id="profilePreview">
               <div class="camera-container">
                 <i class="fa-solid fa-camera profile-icon"></i>
               </div>
@@ -181,8 +183,8 @@
 
     <!-- SIDEBAR -->
     <div class="sidebar">
-      <div class="suggest-card" id="suggestCard">
-        <h3>Connaissez - Vous ?</h3>
+      <div class="suggest-card " id="suggestCard">
+        <h3>CONNAISSEZ - VOUS ?</h3>
         <!-- LIST PREVIEW (4 items) -->
         <div class="suggest-list" id="suggestListPreview">
           <div class="suggest-item">
@@ -267,10 +269,10 @@
           </div>
         </div>
 
-        <a href="#" class="see-all" id="seeAllBtn">voir tous les suggestions →</a>
+        <a href="#" class="see-all" id="seeAllBtn"><u>voir tous les suggestions </u>→</a>
       </div>
 
-      <p class="footer-note">© 2025 TIB Inc. All rights reserved.</p>
+      <p class="footer-note">© 2025 AGORA . All rights reserved.</p>
 
       <!-- CHAT PANEL -->
     <div class="chat-panel" id="chatPanel">
@@ -318,6 +320,31 @@
     </div>
     </div>
   </div>
+  <!-- ══ CHATBOT PANEL ══ -->
+<div class="chat-panel" id="chatbotPanel">
+  <div class="chat-panel-header">
+    <div class="chat-panel-user">
+      <div class="chat-panel-avatar" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa);">
+        <i class="fa-solid fa-robot"></i>
+      </div>
+      <div>
+        <div class="chat-panel-name">AGORA Assistant</div>
+        <div class="chat-panel-status"><span class="online-dot"></span> En ligne</div>
+      </div>
+    </div>
+    <button class="chat-panel-close" id="chatbotClose"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="chat-messages" id="chatbotMessages">
+    <div class="chat-msg received">
+      <div class="msg-bubble">Salut ! Je suis AGORA, votre assistant. Comment puis-je vous aider aujourd'hui ? 🫡</div>
+      <span class="msg-time">Maintenant</span>
+    </div>
+  </div>
+  <div class="chat-input-row">
+    <input type="text" id="chatbotInput" placeholder="Posez votre question...">
+    <button class="chat-send-btn" id="chatbotSend"><i class="fa-solid fa-paper-plane"></i></button>
+  </div>
+</div>
 
   <!-- ══ FLOATING ACTION BAR (right side) ══ -->
   <div class="fab-bar">
@@ -408,13 +435,13 @@
       <img id="cropImage" src="" alt="">
     </div>
     <div id="cropButtons">
-      <button id="cropCancel">Annuler</button>
-      <button id="cropConfirm">Confirmer</button>
+      <button id="cropCancel"><i class="fa-solid fa-xmark"></i> Annuler</button>
+      <button id="cropConfirm"><i class="fa-solid fa-check"></i>Confirmer</button>
     </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-  <script src="../js/edit-profile.js"></script>
+  <script src="./js/edit-profile.js"></script>
 
 </body>
 </html>

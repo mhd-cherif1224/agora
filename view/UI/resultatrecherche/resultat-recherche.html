@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Résultats — AGORA</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="resultat-recherche.css">
+ 
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <div class="nav-logo">
+    <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+  </div>
+
+  <div class="nav-search">
+    <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" placeholder="recherchez un service, un produit..." value="Design UI">
+  </div>
+
+  <div class="nav-icons">
+    <button class="nav-icon-btn" title="Accueil" onclick="window.location.href='../homepage/home-page.html'">
+      <svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+    </button>
+
+    <button class="nav-icon-btn" id="navChat" title="Messages" onclick="window.location.href='../messagerie/messagerie.html'">
+      <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span class="notif-dot"></span>
+    </button>
+
+    <button class="nav-icon-btn" title="Notifications">
+      <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      <span class="notif-dot"></span>
+    </button>
+
+    <div class="nav-divider"></div>
+
+    <div class="nav-avatar" id="navAvatar" onclick="window.location.href='../../html/mon-profil.html'" title="Mon Profil">
+        <img id="navAvatarImg" src="../images/person.png" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;">
+        <span id="navAvatarLetter">M</span>
+      </div>
+      <button class="nav-menu-btn"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<!-- ═══ LAYOUT ═══ -->
+<div class="layout">
+
+  <!-- ════ MAIN COL ════ -->
+  <div class="main-col">
+
+    <!-- PEOPLE CAROUSEL -->
+    <div class="people-carousel">
+      <!-- Person 1 -->
+      <div class="people-card">
+        <div class="people-avatar" style="background:linear-gradient(135deg,#e44,#f97316);">MC</div>
+        <div class="people-name">mehdi cherif</div>
+        <div class="people-role">Etudiant a l univ d abderrahmane Mira</div>
+        <button class="people-msg-btn">envoyer un message</button>
+      </div>
+      <!-- Person 2 -->
+      <div class="people-card">
+        <div class="people-avatar" style="background:linear-gradient(135deg,#059669,#34d399);">NS</div>
+        <div class="people-name">na sfiaaaaaaaa..</div>
+        <div class="people-role">etudiante a l univ de Guelma 2</div>
+        <button class="people-msg-btn">envoyer un message</button>
+      </div>
+      <!-- Person 3 -->
+      <div class="people-card">
+        <div class="people-avatar" style="background:linear-gradient(135deg,#7c3aed,#a855f7);">CO</div>
+        <div class="people-name">chaima ouk</div>
+        <div class="people-role">prof a l univ de USTHB</div>
+        <button class="people-msg-btn">envoyer un message</button>
+      </div>
+      <!-- Person 4 -->
+      <div class="people-card">
+        <div class="people-avatar" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa);">MK</div>
+        <div class="people-name">mekhmoukh</div>
+        <div class="people-role">agent de securite</div>
+        <button class="people-msg-btn">envoyer un message</button>
+      </div>
+      <!-- Voir plus -->
+      <div class="voir-plus-card">
+        <div class="voir-plus-circle">
+          <i class="fa-solid fa-arrow-right" style="font-size:16px;"></i>
+        </div>
+        <div class="voir-plus-label">Voir plus</div>
+      </div>
+    </div>
+
+    <!-- SORT BAR -->
+    <div class="sort-bar">
+      <span class="sort-label">classer par :</span>
+      <select class="sort-select">
+        <option value="recent">recent</option>
+        <option value="popular">populaire</option>
+      </select>
+    </div>
+
+    <!-- RESULTS HEADER -->
+    <div class="results-header">
+      <div>
+        <div class="results-title">Les publications trouvees</div>
+        <div class="results-count">3 résultats pour "Design UI"</div>
+      </div>
+    </div>
+
+    <!-- ═══ FEED ═══ -->
+    <div class="feed">
+
+      <!-- POST 1 — na sfiaaaaaaa -->
+      <article class="post-card">
+        <div class="post-header">
+          <div class="post-avatar" style="background:linear-gradient(135deg,#059669,#34d399);">NS</div>
+          <div class="post-meta">
+            <div class="post-name">na sfiaaaaaaaaaa</div>
+            <div class="post-role">etudiante a l univ de Guelma 2</div>
+            <div class="post-time-row">
+              <span class="post-time">25 min ago</span>
+              <span class="post-globe"><i class="fa-solid fa-earth-africa"></i></span>
+            </div>
+          </div>
+          <button class="post-more"><i class="fa-solid fa-ellipsis"></i></button>
+        </div>
+
+        <div class="post-body">
+          je vous propose mes services :<br>
+          1- je fais de <span class="see-more">...voir plus</span>
+        </div>
+
+        <img class="post-image"
+          src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&q=80"
+          alt="Design services">
+
+        <div class="post-rating-summary">
+          <div class="rating-stars-display">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
+          </div>
+          <span class="rating-score">4.0</span>
+          <span class="rating-count">(12 évaluations)</span>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="post-actions">
+          <button class="post-action-btn" data-action="rate"><i class="fa-regular fa-star"></i> Évaluer</button>
+          
+          
+        </div>
+      </article>
+
+      <!-- POST 2 — mehdi cherif -->
+      <article class="post-card">
+        <div class="post-header">
+          <div class="post-avatar" style="background:linear-gradient(135deg,#e44,#f97316);">MC</div>
+          <div class="post-meta">
+            <div class="post-name">mehdi cherif</div>
+            <div class="post-role">etudiant a l univ d abderrah ...</div>
+            <div class="post-time-row">
+              <span class="post-time">25 min ago</span>
+              <span class="post-globe"><i class="fa-solid fa-earth-africa"></i></span>
+            </div>
+          </div>
+          <button class="post-more"><i class="fa-solid fa-ellipsis"></i></button>
+        </div>
+
+        <div class="post-body">
+          je cherche quelqu'un qui fait du devloppement web pour lui proposer un job freelance lorem ipsum
+          yes yes yes<span class="see-more">...voir plus</span>
+        </div>
+
+        <img class="post-image"
+          src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80"
+          alt="Freelance web dev">
+
+        <div class="post-rating-summary">
+          <div class="rating-stars-display">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
+          </div>
+          <span class="rating-score">4.0</span>
+          <span class="rating-count">(12 évaluations)</span>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="post-actions">
+          <button class="post-action-btn" data-action="rate"><i class="fa-regular fa-star"></i> Évaluer</button>
+          
+          
+        </div>
+      </article>
+
+    </div><!-- /feed -->
+
+  </div><!-- /main-col -->
+
+  <!-- ════ SIDEBAR ════ -->
+  <aside class="sidebar">
+    <div class="suggest-card">
+      <h3>Connaissez - Vous ?</h3>
+      <div class="suggest-list">
+        <div class="suggest-item">
+          <div class="suggest-avatar" style="background:linear-gradient(135deg,#e44,#f97316);">MC</div>
+          <div class="suggest-info">
+            <div class="name">mehdi cherif</div>
+            <div class="role">etudiant a l univ d abderrahmane mira</div>
+          </div>
+        </div>
+        <div class="suggest-item">
+          <div class="suggest-avatar" style="background:linear-gradient(135deg,#059669,#34d399);">NS</div>
+          <div class="suggest-info">
+            <div class="name">na sfiaaaaaaaaaa</div>
+            <div class="role">etudiante a l univ de Guelma 2</div>
+          </div>
+        </div>
+        <div class="suggest-item">
+          <div class="suggest-avatar" style="background:linear-gradient(135deg,#7c3aed,#a855f7);">CO</div>
+          <div class="suggest-info">
+            <div class="name">chaima ouk</div>
+            <div class="role">prof a l univ de USTHB</div>
+          </div>
+        </div>
+        <div class="suggest-item">
+          <div class="suggest-avatar" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa);">MK</div>
+          <div class="suggest-info">
+            <div class="name">mekhmoukh</div>
+            <div class="role">agent de securite</div>
+          </div>
+        </div>
+      </div>
+      <a href="#" class="see-all-link">voir tous les suggestions →</a>
+    </div>
+
+    <p class="footer-note">© 2025 AGORA . All rights reserved.</p>
+  </aside>
+
+</div><!-- /layout -->
+
+<!-- FAB -->
+<div class="fab-bar">
+    <!-- Message shortcut: ATTNEKKES APRES -->
+    <button class="fab-btn" title="Messagerie" id="fabMsgBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+        </svg>
+    </button>
+
+    <!-- Help -->
+    <button class="fab-btn" title="Aide" id="fabHelpBtn">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="22" height="22">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M12 17.5v.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M12 14c0-1.5 1.5-2 2.2-3.2a2.8 2.8 0 10-4.9-1.9"
+                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </button>
+  </div>
+
+
+</body>
+</html>
