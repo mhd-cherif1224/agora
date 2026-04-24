@@ -78,7 +78,7 @@ form.addEventListener("submit", async function (e) {
         if (result.success) {
             showNotification(`Bienvenue, ${result.prenom} !`, false);
             setTimeout(() => {
-                window.location.href = "../html/landing-page.html";
+                window.location.href = "../UI/homepage/home-page.html";
             }, 1000);
         } else {
             showNotification(result.message || "Identifiants incorrects.");
