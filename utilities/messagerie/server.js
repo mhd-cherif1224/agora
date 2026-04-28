@@ -5,9 +5,18 @@ const db         = require('./db');
 
 const app    = express();
 const server = http.createServer(app);
-const io     = new Server(server);
 
-// ─── TEST CONNEXION DB ─────────────────────────────────────────────
+const io = new Server(server, {
+  cors: {
+    origin: ["http://localhost", "http://localhost:80", "http://localhost:443"],
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
+
+// ─────────────────────────────────────────
+// DB CONNECTION TEST
+// ─────────────────────────────────────────
 db.query('SELECT 1', (err) => {
   if (err) {
     console.error('❌ DB connection failed:', err.message);
@@ -16,17 +25,23 @@ db.query('SELECT 1', (err) => {
   console.log('✅ DB connected');
 });
 
-// ─── SERVE FILES ───────────────────────────────────────────────────
+// ─────────────────────────────────────────
+// STATIC FILES
+// ─────────────────────────────────────────
 app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
-// ─── UTILISATEURS CONNECTÉS ────────────────────────────────────────
-const onlineUsers = new Map(); // userId → socket.id
+// ─────────────────────────────────────────
+// ONLINE USERS (optional tracking)
+// ─────────────────────────────────────────
+const onlineUsers = new Map();
 
-// ─── SOCKET.IO ────────────────────────────────────────────────────
+// ─────────────────────────────────────────
+// SOCKET.IO
+// ─────────────────────────────────────────
 io.on('connection', (socket) => {
 
   const userId = parseInt(socket.handshake.query.userId);
@@ -36,32 +51,22 @@ io.on('connection', (socket) => {
     return socket.disconnect();
   }
 
+  // ✅ Each user joins a private room
+  socket.join(`user_${userId}`);
   onlineUsers.set(userId, socket.id);
+
   console.log(`✅ User ${userId} connected`);
 
-  // ─── 1. Charger les derniers messages ───────────────────────────
-  db.query(
-    `SELECT * FROM message
-     WHERE ID_Expediteur = ? OR ID_Destinataire = ?
-     ORDER BY DateEnvoie DESC LIMIT 50`,
-    [userId, userId],
-    (err, rows) => {
-
-      if (err) {
-        console.error('❌ History error:', err.message);
-        return;
-      }
-
-      socket.emit('history', rows.reverse());
-    }
-  );
-
-  // ─── 2. Envoyer un message ──────────────────────────────────────
+  // ───────────────────────────────────────
+  // SEND MESSAGE
+  // ───────────────────────────────────────
   socket.on('send_message', (data) => {
-
     const { ID_Expediteur, ID_Destinataire, contenue } = data;
 
-    console.log(`📨 From ${ID_Expediteur} to ${ID_Destinataire}: ${contenue}`);
+    if (!contenue || !ID_Expediteur || !ID_Destinataire) {
+      console.log('❌ Invalid message payload');
+      return;
+    }
 
     db.query(
       `INSERT INTO message (contenue, DateEnvoie, lue, ID_Expediteur, ID_Destinataire)
@@ -78,26 +83,57 @@ io.on('connection', (socket) => {
           ID: result.insertId,
           contenue,
           DateEnvoie: new Date(),
-          DateReception: null,
           lue: 0,
           ID_Expediteur,
-          ID_Destinataire,
+          ID_Destinataire
         };
 
-        // envoyer au destinataire et expéditeur
-        io.emit(`msg_${ID_Destinataire}`, msg);
-        io.emit(`msg_${ID_Expediteur}`, msg);
+        // ✅ Send ONLY to sender and receiver
+        io.to(`user_${ID_Expediteur}`).emit('new_message', msg);
+        io.to(`user_${ID_Destinataire}`).emit('new_message', msg);
       }
     );
   });
 
-  // ─── 3. Marquer comme vu ────────────────────────────────────────
+  // ───────────────────────────────────────
+  // GET CONVERSATION HISTORY
+  // ───────────────────────────────────────
+  socket.on('get_history', ({ otherUserId }) => {
+
+    if (!otherUserId) return;
+
+    db.query(
+      `SELECT * FROM message
+       WHERE (ID_Expediteur = ? AND ID_Destinataire = ?)
+          OR (ID_Expediteur = ? AND ID_Destinataire = ?)
+       ORDER BY ID ASC`,
+      [userId, otherUserId, otherUserId, userId],
+      (err, rows) => {
+
+        if (err) {
+          console.error('❌ History error:', err.message);
+          return;
+        }
+
+        socket.emit('conversation_history', {
+          otherUserId,
+          messages: rows
+        });
+      }
+    );
+  });
+
+  // ───────────────────────────────────────
+  // MARK MESSAGE AS SEEN
+  // ───────────────────────────────────────
   socket.on('mark_seen', ({ messageId, ID_Destinataire }) => {
+
+    if (!messageId) return;
 
     db.query(
       `UPDATE message 
        SET lue = 1, DateReception = NOW() 
-       WHERE ID = ? AND lue = 0`,
+       WHERE ID = ?`,
       [messageId],
       (err) => {
 
@@ -106,13 +142,15 @@ io.on('connection', (socket) => {
           return;
         }
 
-        console.log(`✅ Message ${messageId} marked as seen`);
-        io.emit(`seen_${ID_Destinataire}`, { messageId });
+        // notify only relevant user
+        io.to(`user_${ID_Destinataire}`).emit('message_seen', { messageId });
       }
     );
   });
 
-  // ─── 4. Déconnexion ─────────────────────────────────────────────
+  // ───────────────────────────────────────
+  // DISCONNECT
+  // ───────────────────────────────────────
   socket.on('disconnect', () => {
     onlineUsers.delete(userId);
     console.log(`❌ User ${userId} disconnected`);
@@ -120,7 +158,9 @@ io.on('connection', (socket) => {
 
 });
 
-// ─── LANCER SERVEUR ───────────────────────────────────────────────
+// ─────────────────────────────────────────
+// START SERVER
+// ─────────────────────────────────────────
 server.listen(3000, () => {
   console.log('🚀 Chat server running on http://localhost:3000');
 });

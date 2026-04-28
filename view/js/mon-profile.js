@@ -2,121 +2,238 @@
 // GLOBAL STATE
 // ════════════════════════════════════════
 let currentProfileSrc = null;
+let currentUser = { prenom: '', nom: '', initiales: '?' };
 
-// ========================
+// ════════════════════════════════════════
+// LOAD PROFILE FROM SESSION (PHP API)
+// ════════════════════════════════════════
+async function loadProfile() {
+  try {
+    const res = await fetch('/Mini-Projet%20-%20Copy/api/get-profile.php');
+
+    if (res.status === 401) {
+      window.location.href = '../html/login.html';
+      return;
+    }
+
+
+    const text = await res.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.error('PHP returned non-JSON:', text);
+      return;
+    }
+
+    if (!data.success) return;
+
+    currentUser.prenom    = data.prenom || '';
+    currentUser.nom       = data.nom    || '';
+    currentUser.initiales = ((data.prenom?.[0] || '') + (data.nom?.[0] || '')).toUpperCase() || '?';
+
+    const fullName = `${data.prenom} ${data.nom}`.trim();
+
+    const displayName = document.getElementById('displayName');
+    if (displayName) displayName.childNodes[0].textContent = fullName;
+
+    const displayRole = document.getElementById('displayRole');
+    if (displayRole) displayRole.textContent = data.specialite || data.niveau || data.role || '';
+
+    const displayLocation = document.getElementById('displayLocation');
+    if (displayLocation)
+      displayLocation.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${data.localisation || 'Algérie'}`;
+
+    const letter = document.getElementById('navAvatarLetter');
+    const img    = document.getElementById('navAvatarImg');
+
+    if (data.avatar) {
+      currentProfileSrc = data.avatar;
+      if (img)    { img.src = data.avatar; img.style.display = 'block'; }
+      if (letter) letter.style.display = 'none';
+      updateAllPostAvatars(data.avatar);
+    } else {
+      if (letter) letter.textContent = currentUser.initiales[0] || '?';
+    }
+
+    const profilePreview = document.getElementById('profilePreview');
+    if (profilePreview && data.avatar) profilePreview.src = data.avatar;
+
+    // ✅ Banner
+    const bannerTop = document.getElementById('bannerTop');
+    if (bannerTop && data.banner) {
+      bannerTop.style.backgroundImage    = `url('${data.banner}')`;
+      bannerTop.style.backgroundSize     = 'cover';
+      bannerTop.style.backgroundPosition = 'center';
+      bannerTop.style.backgroundRepeat   = 'no-repeat';
+    }
+
+    // ✅ Banner COLORS (ADD THIS)
+    const bannerBottom = document.getElementById('bannerBottom');
+
+    if (bannerBottom) {
+      const dark  = data.banner_color_dark;
+      const light = data.banner_color_light;
+
+      if (dark && light) {
+        bannerBottom.style.background =
+          `linear-gradient(to right, ${dark}, ${light})`;
+      }
+    }
+
+  } catch (err) {
+    console.error('loadProfile error:', err);
+  }
+}
+
+loadProfile()
+
+// ════════════════════════════════════════
 // NOTIFICATIONS TOAST
-// ========================
+// ════════════════════════════════════════
 function showNotification(message, duration = 3500) {
-    const notif = document.getElementById("notification");
-    notif.innerText = message;
-    notif.style.display = "flex";
-    clearTimeout(notif._t);
-    notif._t = setTimeout(() => { notif.style.display = "none"; }, duration);
+  const notif = document.getElementById('notification');
+  if (!notif) return;
+  notif.innerText = message;
+  notif.style.display = 'flex';
+  clearTimeout(notif._t);
+  notif._t = setTimeout(() => { notif.style.display = 'none'; }, duration);
 }
 
-// ========================
-// DOMINANT COLORS
-// ========================
+// ════════════════════════════════════════
+// DOMINANT COLORS (banner auto-gradient)
+// ════════════════════════════════════════
 function getDominantColors(source, topN = 2) {
-    let canvas, ctx;
-    if (source instanceof HTMLCanvasElement) { canvas = source; ctx = canvas.getContext('2d'); }
-    else {
-        canvas = document.createElement('canvas'); ctx = canvas.getContext('2d');
-        const MAX = 200; let w = source.naturalWidth||source.width, h = source.naturalHeight||source.height;
-        if (w>MAX||h>MAX){const s=MAX/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s);}
-        canvas.width=w; canvas.height=h; ctx.drawImage(source,0,0,w,h);
-    }
-    const data=ctx.getImageData(0,0,canvas.width,canvas.height).data, counts={};
-    for(let i=0;i<data.length;i+=4){
-        if(data[i+3]<128) continue;
-        const r=Math.round(data[i]/16)*16, g=Math.round(data[i+1]/16)*16, b=Math.round(data[i+2]/16)*16;
-        const key=`${r},${g},${b}`; counts[key]=(counts[key]||0)+1;
-    }
-    return Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,topN)
-        .map(([key])=>{const [r,g,b]=key.split(',').map(Number);return{hex:'#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('')};});
-}
-function adaptColor(hex,amount=80){
-    let r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
-    const br=(r*299+g*587+b*114)/1000;
-    if(br>128){r=Math.max(0,r-amount);g=Math.max(0,g-amount);b=Math.max(0,b-amount);}
-    else{r=Math.min(255,r+amount);g=Math.min(255,g+amount);b=Math.min(255,b+amount);}
-    return'#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
-}
-function changeBannerColor(color1,color2){
-    const br=h=>{const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return(r*299+g*587+b*114)/1000;};
-    const dark=br(color1)<br(color2)?color1:color2,light=br(color1)<br(color2)?color2:color1;
-    document.getElementById("bannerBottom").style.background=`linear-gradient(to right, ${dark}, ${light})`;
+  let canvas, ctx;
+  if (source instanceof HTMLCanvasElement) {
+    canvas = source; ctx = canvas.getContext('2d');
+  } else {
+    canvas = document.createElement('canvas'); ctx = canvas.getContext('2d');
+    const MAX = 200;
+    let w = source.naturalWidth || source.width, h = source.naturalHeight || source.height;
+    if (w > MAX || h > MAX) { const s = MAX / Math.max(w, h); w = Math.round(w * s); h = Math.round(h * s); }
+    canvas.width = w; canvas.height = h; ctx.drawImage(source, 0, 0, w, h);
+  }
+  const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data, counts = {};
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] < 128) continue;
+    const r = Math.round(data[i] / 16) * 16, g = Math.round(data[i + 1] / 16) * 16, b = Math.round(data[i + 2] / 16) * 16;
+    const key = `${r},${g},${b}`; counts[key] = (counts[key] || 0) + 1;
+  }
+  return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, topN)
+    .map(([key]) => { const [r, g, b] = key.split(',').map(Number); return { hex: '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('') }; });
 }
 
-// ========================
+function adaptColor(hex, amount = 80) {
+  let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+  const br = (r * 299 + g * 587 + b * 114) / 1000;
+  if (br > 128) { r = Math.max(0, r - amount); g = Math.max(0, g - amount); b = Math.max(0, b - amount); }
+  else { r = Math.min(255, r + amount); g = Math.min(255, g + amount); b = Math.min(255, b + amount); }
+  return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+
+function changeBannerColor(color1, color2) {
+  const br = h => { const r = parseInt(h.slice(1, 3), 16), g = parseInt(h.slice(3, 5), 16), b = parseInt(h.slice(5, 7), 16); return (r * 299 + g * 587 + b * 114) / 1000; };
+  const dark = br(color1) < br(color2) ? color1 : color2, light = br(color1) < br(color2) ? color2 : color1;
+  const bannerBottom = document.getElementById('bannerBottom');
+  if (bannerBottom) bannerBottom.style.background = `linear-gradient(to right, ${dark}, ${light})`;
+}
+
+// ════════════════════════════════════════
 // UPDATE ALL POST AVATARS
-// ========================
+// ════════════════════════════════════════
 function updateAllPostAvatars(src) {
-    currentProfileSrc = src;
-    document.querySelectorAll('.post-avatar-dyn').forEach(el => {
-        if (el.tagName === 'IMG') { el.src = src; }
-        else {
-            const img = document.createElement('img');
-            img.src = src; img.className = el.className;
-            img.style.cssText = el.style.cssText || 'width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;';
-            el.replaceWith(img);
-        }
-    });
-    // Update comment input avatars
-    document.querySelectorAll('.comment-input-avatar, .comment-avatar').forEach(av => {
-        av.style.backgroundImage = `url(${src})`;
-        av.style.backgroundSize = 'cover';
-        av.style.backgroundPosition = 'center';
-        av.textContent = '';
-    });
-    // new-post-box avatar
-    const npAv = document.getElementById('newPostAvatar');
-    if (npAv) { npAv.style.backgroundImage=`url(${src})`; npAv.style.backgroundSize='cover'; npAv.style.backgroundPosition='center'; npAv.textContent=''; }
+  currentProfileSrc = src;
+  document.querySelectorAll('.post-avatar-dyn').forEach(el => {
+    if (el.tagName === 'IMG') { el.src = src; }
+    else {
+      const img = document.createElement('img');
+      img.src = src; img.className = el.className;
+      img.style.cssText = el.style.cssText || 'width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;';
+      el.replaceWith(img);
+    }
+  });
+  document.querySelectorAll('.comment-input-avatar, .comment-avatar').forEach(av => {
+    av.style.backgroundImage = `url(${src})`;
+    av.style.backgroundSize = 'cover';
+    av.style.backgroundPosition = 'center';
+    av.textContent = '';
+  });
+  const npAv = document.getElementById('newPostAvatar');
+  if (npAv) { npAv.style.backgroundImage = `url(${src})`; npAv.style.backgroundSize = 'cover'; npAv.style.backgroundPosition = 'center'; npAv.textContent = ''; }
 }
 
-// ========================
+// ════════════════════════════════════════
 // CROPPER
-// ========================
-let cropperInstance=null, cropTarget=null;
-const cropModal=document.getElementById("cropModal"), cropImage=document.getElementById("cropImage");
+// ════════════════════════════════════════
+let cropperInstance = null, cropTarget = null;
+const cropModal  = document.getElementById('cropModal');
+const cropImage  = document.getElementById('cropImage');
 
-function openCropper(file,target,aspectRatio){
-    cropTarget=target;
-    const valid=["image/jpeg","image/png","image/jpg","image/gif"];
-    if(!valid.includes(file.type)){showNotification("Format non supporté !");return;}
-    const reader=new FileReader();
-    reader.onload=e=>{
-        if(cropperInstance){cropperInstance.destroy();cropperInstance=null;}
-        cropImage.src=e.target.result; cropModal.classList.add("active");
-        cropImage.onload=()=>{cropperInstance=new Cropper(cropImage,{aspectRatio,viewMode:1,movable:true,zoomable:true,scalable:false,cropBoxResizable:true,background:false});};
+function openCropper(file, target, aspectRatio) {
+  cropTarget = target;
+  const valid = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+  if (!valid.includes(file.type)) { showNotification('Format non supporté !'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
+    cropImage.src = e.target.result;
+    cropModal.classList.add('active');
+    cropImage.onload = () => {
+      cropperInstance = new Cropper(cropImage, { aspectRatio, viewMode: 1, movable: true, zoomable: true, scalable: false, cropBoxResizable: true, background: false });
     };
-    reader.readAsDataURL(file);
+  };
+  reader.readAsDataURL(file);
 }
 
-// ========================
-// CV
-// ========================
-const cvInput=document.getElementById("cvInput"),cvName=document.getElementById("cvName");
-let cvFileURL=null;
-cvInput.addEventListener("change",function(){if(this.files.length>0){const file=this.files[0];cvFileURL=URL.createObjectURL(file);cvName.textContent="📄 "+file.name;cvName.style.cursor="pointer";cvName.style.textDecoration="underline";}});
-cvName.addEventListener("click",function(){if(cvFileURL)window.open(cvFileURL,"_blank");});
+// ════════════════════════════════════════
+// CV UPLOAD
+// ════════════════════════════════════════
+const cvInput = document.getElementById('cvInput');
+const cvName  = document.getElementById('cvName');
+let cvFileURL = null;
 
-// ========================
+if (cvInput) {
+  cvInput.addEventListener('change', function () {
+    if (this.files.length > 0) {
+      const file = this.files[0];
+      cvFileURL = URL.createObjectURL(file);
+      cvName.textContent = '📄 ' + file.name;
+      cvName.style.cursor = 'pointer';
+      cvName.style.textDecoration = 'underline';
+    }
+  });
+}
+if (cvName) {
+  cvName.addEventListener('click', function () { if (cvFileURL) window.open(cvFileURL, '_blank'); });
+}
+
+// ════════════════════════════════════════
 // SEE ALL SUGGESTIONS
-// ========================
-const seeAllBtn=document.getElementById('seeAllBtn'),listPreview=document.getElementById('suggestListPreview'),listAll=document.getElementById('suggestListAll');
-let showingAll=false;
-seeAllBtn.addEventListener('click',e=>{
-    e.preventDefault(); showingAll=!showingAll;
-    if(showingAll){listPreview.style.display='none';listAll.style.display='flex';seeAllBtn.textContent='← réduire les suggestions';}
-    else{listAll.style.display='none';listPreview.style.display='flex';seeAllBtn.textContent='voir tous les suggestions →';}
-});
+// ════════════════════════════════════════
+const seeAllBtn      = document.getElementById('seeAllBtn');
+const listPreview    = document.getElementById('suggestListPreview');
+const listAll        = document.getElementById('suggestListAll');
+let showingAll = false;
 
-// ========================
-// CHAT PANEL
-// ========================// ── chat.js ──
-// Handles the floating chat panel open/close and message sending
+// if (seeAllBtn) {
+//   seeAllBtn.addEventListener('click', e => {
+//     e.preventDefault(); showingAll = !showingAll;
+//     if (showingAll) {
+//       if (listPreview) listPreview.style.display = 'none';
+//       if (listAll)     listAll.style.display = 'flex';
+//       seeAllBtn.textContent = '← réduire les suggestions';
+//     } else {
+//       if (listAll)     listAll.style.display = 'none';
+//       if (listPreview) listPreview.style.display = 'flex';
+//       seeAllBtn.textContent = 'voir tous les suggestions →';
+//     }
+//   });
+// }
 
+// ════════════════════════════════════════
+// CHAT PANEL + CHATBOT
+// ════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
 
   const panel      = document.getElementById('chatPanel');
@@ -127,154 +244,295 @@ document.addEventListener('DOMContentLoaded', () => {
   const sendBtn    = document.getElementById('chatSend');
   const messages   = document.getElementById('chatMessages');
 
-  const botPanel   = document.getElementById('chatbotPanel');
-  const botCloseBtn= document.getElementById('chatbotClose');
-  const fabHelpBtn = document.getElementById('fabHelpBtn');
-  const botInput   = document.getElementById('chatbotInput');
-  const botSendBtn = document.getElementById('chatbotSend');
-  const botMessages= document.getElementById('chatbotMessages');
+  const botPanel    = document.getElementById('chatbotPanel');
+  const botCloseBtn = document.getElementById('chatbotClose');
+  const fabHelpBtn  = document.getElementById('fabHelpBtn');
+  const botInput    = document.getElementById('chatbotInput');
+  const botSendBtn  = document.getElementById('chatbotSend');
+  const botMessages = document.getElementById('chatbotMessages');
 
-  function openChat()  { panel.classList.add('active'); }
-  function closeChat() { panel.classList.remove('active'); }
+  function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
 
-  function openBotChat() { botPanel.classList.add('active'); }
-  function closeBotChat() { botPanel.classList.remove('active'); }
+  function openChat()   { if (panel)    panel.classList.add('active'); }
+  function closeChat()  { if (panel)    panel.classList.remove('active'); }
+  function openBotChat()  { if (botPanel) botPanel.classList.add('active'); }
+  function closeBotChat() { if (botPanel) botPanel.classList.remove('active'); }
 
   if (fabChatBtn) fabChatBtn.addEventListener('click', openChat);
   if (navChatBtn) navChatBtn.addEventListener('click', openChat);
   if (closeBtn)   closeBtn.addEventListener('click', closeChat);
-
   if (fabHelpBtn) fabHelpBtn.addEventListener('click', openBotChat);
   if (botCloseBtn) botCloseBtn.addEventListener('click', closeBotChat);
 
+  // ── User chat ──
   function sendMessage() {
-    const text = input.value.trim();
-    if (!text) return;
-
+    if (!input) return;
+    const text = input.value.trim(); if (!text) return;
     const now  = new Date();
     const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-    const msg = document.createElement('div');
+    const msg  = document.createElement('div');
     msg.className = 'chat-msg sent';
-    msg.innerHTML = `
-      <div class="msg-bubble">${escapeHtml(text)}</div>
-      <span class="msg-time">${time}</span>
-    `;
+    msg.innerHTML = `<div class="msg-bubble">${escapeHtml(text)}</div><span class="msg-time">${time}</span>`;
     messages.appendChild(msg);
     input.value = '';
     messages.scrollTop = messages.scrollHeight;
   }
 
-  function sendBotMessage() {
-    const text = botInput.value.trim();
-    if (!text) return;
+  if (sendBtn) sendBtn.addEventListener('click', sendMessage);
+  if (input)   input.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
 
+  // ── Chatbot ──
+  function sendBotMessage() {
+    if (!botInput) return;
+    const text = botInput.value.trim(); if (!text) return;
     const now  = new Date();
     const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
 
-    // Add user message
     const userMsg = document.createElement('div');
     userMsg.className = 'chat-msg sent';
-    userMsg.innerHTML = `
-      <div class="msg-bubble">${escapeHtml(text)}</div>
-      <span class="msg-time">${time}</span>
-    `;
+    userMsg.innerHTML = `<div class="msg-bubble">${escapeHtml(text)}</div><span class="msg-time">${time}</span>`;
     botMessages.appendChild(userMsg);
     botInput.value = '';
     botMessages.scrollTop = botMessages.scrollHeight;
 
-    // Get user ID from localStorage
-    const userId = localStorage.getItem('utilisateur_id') || localStorage.getItem('admin_id') || 'anonymous';
-
-    // Send to bot API
     fetch('http://localhost:5000/chat', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ 
-        message: text,
-        user_id: userId
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, user_id: currentUser.prenom || 'anonymous' }),
     })
-    .then(response => response.json())
-    .then(data => {
-      if (data.response) {
+      .then(r => r.json())
+      .then(data => {
+        const reply = data.response || 'Désolé, une erreur s\'est produite.';
+        const t = new Date();
         const botMsg = document.createElement('div');
         botMsg.className = 'chat-msg received';
-        botMsg.innerHTML = `
-          <div class="msg-bubble">${escapeHtml(data.response)}</div>
-          <span class="msg-time">${new Date().getHours()}:${String(new Date().getMinutes()).padStart(2, '0')}</span>
-        `;
+        botMsg.innerHTML = `<div class="msg-bubble">${escapeHtml(reply)}</div><span class="msg-time">${t.getHours()}:${String(t.getMinutes()).padStart(2, '0')}</span>`;
         botMessages.appendChild(botMsg);
         botMessages.scrollTop = botMessages.scrollHeight;
-      } else if (data.error) {
-        console.error('Bot error:', data.error);
+      })
+      .catch(() => {
+        const t = new Date();
         const errorMsg = document.createElement('div');
         errorMsg.className = 'chat-msg received';
-        errorMsg.innerHTML = `
-          <div class="msg-bubble">Désolé, une erreur s'est produite.</div>
-          <span class="msg-time">${new Date().getHours()}:${String(new Date().getMinutes()).padStart(2, '0')}</span>
-        `;
+        errorMsg.innerHTML = `<div class="msg-bubble">Impossible de contacter l'assistant.</div><span class="msg-time">${t.getHours()}:${String(t.getMinutes()).padStart(2, '0')}</span>`;
         botMessages.appendChild(errorMsg);
         botMessages.scrollTop = botMessages.scrollHeight;
-      }
-    })
-    .catch(error => {
-      console.error('Fetch error:', error);
-      const errorMsg = document.createElement('div');
-      errorMsg.className = 'chat-msg received';
-      errorMsg.innerHTML = `
-        <div class="msg-bubble">Impossible de contacter l'assistant.</div>
-        <span class="msg-time">${new Date().getHours()}:${String(new Date().getMinutes()).padStart(2, '0')}</span>
-      `;
-      botMessages.appendChild(errorMsg);
-      botMessages.scrollTop = botMessages.scrollHeight;
-    });
+      });
   }
-
-  if (sendBtn) sendBtn.addEventListener('click', sendMessage);
-  if (input)   input.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
 
   if (botSendBtn) botSendBtn.addEventListener('click', sendBotMessage);
   if (botInput)   botInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendBotMessage(); });
 
-  function escapeHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
 });
 
-
-// ========================
+// ════════════════════════════════════════
 // HELP PANEL
-// ========================
-const helpOverlay=document.getElementById('helpOverlay'),helpClose=document.getElementById('helpClose');
-document.getElementById('fabHelpBtn').addEventListener('click',()=>{helpOverlay.classList.add('active');});
-helpClose.addEventListener('click',()=>{helpOverlay.classList.remove('active');});
-helpOverlay.addEventListener('click',e=>{if(e.target===helpOverlay)helpOverlay.classList.remove('active');});
+// ════════════════════════════════════════
+const helpOverlay = document.getElementById('helpOverlay');
+const helpClose   = document.getElementById('helpClose');
+const fabHelpBtnGlobal = document.getElementById('fabHelpBtn');
 
-// ========================
+if (fabHelpBtnGlobal) fabHelpBtnGlobal.addEventListener('click', () => helpOverlay?.classList.add('active'));
+if (helpClose)        helpClose.addEventListener('click', () => helpOverlay?.classList.remove('active'));
+if (helpOverlay)      helpOverlay.addEventListener('click', e => { if (e.target === helpOverlay) helpOverlay.classList.remove('active'); });
+
+// ════════════════════════════════════════
 // LINKS WIDGET
-// ========================
-const openBtn=document.getElementById("openModal"),modal=document.getElementById("linkModal"),closeBtn=document.getElementById("closeModal"),saveBtn=document.querySelector(".save-btn"),input=document.getElementById("modalLinkInput"),container=document.getElementById("linksContainer"),emptyMsg=document.getElementById("linksEmpty"),badge=document.getElementById("linksBadge"),toggleBtn=document.getElementById("linksToggleBtn"),dropdown=document.getElementById("linksDropdown");
-let links=JSON.parse(localStorage.getItem("links"))||[];
-toggleBtn.addEventListener("click",e=>{e.stopPropagation();dropdown.classList.toggle("open");toggleBtn.classList.toggle("active");});
-document.addEventListener("click",e=>{if(!dropdown.contains(e.target)&&e.target!==toggleBtn){dropdown.classList.remove("open");toggleBtn.classList.remove("active");}});
-function displayLinks(){container.innerHTML="";links.forEach((link,index)=>{const div=document.createElement("div");div.className="link-item";const icon=document.createElement("div");icon.className="link-item-icon";icon.innerHTML='<i class="fa-solid fa-link"></i>';const a=document.createElement("a");try{a.textContent=new URL(link).hostname.replace("www.","");}catch{a.textContent=link;}a.href=link;a.title=link;a.target="_blank";a.addEventListener("click",e=>e.stopPropagation());const delBtn=document.createElement("button");delBtn.innerHTML="&#x2715;";delBtn.className="delete-btn";delBtn.title="Supprimer";delBtn.addEventListener("click",e=>{e.stopPropagation();links.splice(index,1);localStorage.setItem("links",JSON.stringify(links));displayLinks();});div.appendChild(icon);div.appendChild(a);div.appendChild(delBtn);container.appendChild(div);});emptyMsg.style.display=links.length===0?"block":"none";if(links.length>0){badge.textContent=links.length;badge.style.display="flex";}else{badge.style.display="none";}}
-openBtn.addEventListener("click",e=>{e.stopPropagation();dropdown.classList.remove("open");toggleBtn.classList.remove("active");modal.style.display="flex";document.body.classList.add("modal-open");setTimeout(()=>input.focus(),50);});
-closeBtn.addEventListener("click",()=>{modal.style.display="none";document.body.classList.remove("modal-open");input.value="";});
-window.addEventListener("click",e=>{if(e.target===modal){modal.style.display="none";document.body.classList.remove("modal-open");input.value="";}});
-input.addEventListener("keydown",e=>{if(e.key==="Enter")saveBtn.click();});
-saveBtn.addEventListener("click",()=>{const link=input.value.trim();if(!link){showNotification("⚠️  Entrez un lien !");return;}if(!link.startsWith("http")){showNotification("⚠️  Lien invalide !");return;}links.push(link);localStorage.setItem("links",JSON.stringify(links));input.value="";modal.style.display="none";document.body.classList.remove("modal-open");displayLinks();showNotification("✓  Lien ajouté !");});
+// ════════════════════════════════════════
+const openBtn   = document.getElementById('openModal');
+const modal     = document.getElementById('linkModal');
+const closeModalBtn = document.getElementById('closeModal');
+const saveBtn   = document.querySelector('.save-btn');
+const linkInput = document.getElementById('modalLinkInput');
+const container = document.getElementById('linksContainer');
+const emptyMsg  = document.getElementById('linksEmpty');
+const badge     = document.getElementById('linksBadge');
+const toggleBtn = document.getElementById('linksToggleBtn');
+const dropdown  = document.getElementById('linksDropdown');
+
+let links = JSON.parse(localStorage.getItem('links')) || [];
+
+if (toggleBtn) {
+  toggleBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    dropdown?.classList.toggle('open');
+    toggleBtn.classList.toggle('active');
+  });
+}
+document.addEventListener('click', e => {
+  if (dropdown && !dropdown.contains(e.target) && e.target !== toggleBtn) {
+    dropdown.classList.remove('open');
+    toggleBtn?.classList.remove('active');
+  }
+});
+
+function displayLinks() {
+  if (!container) return;
+  container.innerHTML = '';
+  links.forEach((link, index) => {
+    const div = document.createElement('div'); div.className = 'link-item';
+    const icon = document.createElement('div'); icon.className = 'link-item-icon'; icon.innerHTML = '<i class="fa-solid fa-link"></i>';
+    const a = document.createElement('a');
+    try { a.textContent = new URL(link).hostname.replace('www.', ''); } catch { a.textContent = link; }
+    a.href = link; a.title = link; a.target = '_blank';
+    a.addEventListener('click', e => e.stopPropagation());
+    const delBtn = document.createElement('button');
+    delBtn.innerHTML = '&#x2715;'; delBtn.className = 'delete-btn'; delBtn.title = 'Supprimer';
+    delBtn.addEventListener('click', e => {
+      e.stopPropagation(); links.splice(index, 1);
+      localStorage.setItem('links', JSON.stringify(links)); displayLinks();
+    });
+    div.appendChild(icon); div.appendChild(a); div.appendChild(delBtn); container.appendChild(div);
+  });
+  if (emptyMsg) emptyMsg.style.display = links.length === 0 ? 'block' : 'none';
+  if (badge) {
+    if (links.length > 0) { badge.textContent = links.length; badge.style.display = 'flex'; }
+    else { badge.style.display = 'none'; }
+  }
+}
+
+if (openBtn) {
+  openBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    dropdown?.classList.remove('open'); toggleBtn?.classList.remove('active');
+    if (modal) { modal.style.display = 'flex'; document.body.classList.add('modal-open'); }
+    setTimeout(() => linkInput?.focus(), 50);
+  });
+}
+if (closeModalBtn) {
+  closeModalBtn.addEventListener('click', () => {
+    if (modal) modal.style.display = 'none';
+    document.body.classList.remove('modal-open');
+    if (linkInput) linkInput.value = '';
+  });
+}
+window.addEventListener('click', e => {
+  if (e.target === modal) {
+    modal.style.display = 'none';
+    document.body.classList.remove('modal-open');
+    if (linkInput) linkInput.value = '';
+  }
+});
+if (linkInput) linkInput.addEventListener('keydown', e => { if (e.key === 'Enter') saveBtn?.click(); });
+if (saveBtn) {
+  saveBtn.addEventListener('click', () => {
+    const link = linkInput?.value.trim();
+    if (!link) { showNotification('⚠️  Entrez un lien !'); return; }
+    if (!link.startsWith('http')) { showNotification('⚠️  Lien invalide !'); return; }
+    links.push(link); localStorage.setItem('links', JSON.stringify(links));
+    if (linkInput) linkInput.value = '';
+    if (modal) modal.style.display = 'none';
+    document.body.classList.remove('modal-open');
+    displayLinks(); showNotification('✓  Lien ajouté !');
+  });
+}
 displayLinks();
+
+// ════════════════════════════════════════
+// LOAD ALL USERS FOR SIDEBAR
+// ════════════════════════════════════════
+async function loadAllUsers() {
+  const list = document.getElementById('usersList');
+  if (!list) {
+    console.error('usersList not found');
+    return;
+  }
+
+  list.innerHTML = 'Chargement...';
+
+  try {
+    const res = await fetch('/Mini-Projet%20-%20Copy/api/get-all-users.php');
+
+    if (res.status === 401) {
+      list.innerHTML = 'Non connecté';
+      return;
+    }
+
+    if (!res.ok) {
+      list.innerHTML = `Erreur serveur: ${res.status}`;
+      return;
+    }
+
+    const users = await res.json();
+
+    if (!Array.isArray(users)) {
+      list.innerHTML = 'Données invalides';
+      console.error('Invalid data:', users);
+      return;
+    }
+
+    if (users.length === 0) {
+      list.innerHTML = 'Aucun utilisateur';
+      return;
+    }
+
+    list.innerHTML = '';
+
+    users.forEach(user => {
+      const item = document.createElement('div');
+      item.className = 'suggest-item';
+
+      const avatarDiv = document.createElement('div');
+      avatarDiv.className = 'suggest-avatar';
+
+      if (user.photo_profil) {
+        const img = document.createElement('img');
+        img.src = user.photo_profil;
+        img.alt = user.prenom;
+        img.onerror = () => {
+          avatarDiv.textContent = (user.prenom[0] + user.nom[0]).toUpperCase();
+          avatarDiv.style.background = 'linear-gradient(135deg,#6366f1,#4338ca)';
+        };
+        avatarDiv.appendChild(img);
+      } else {
+        avatarDiv.textContent = (user.prenom[0] + user.nom[0]).toUpperCase();
+        avatarDiv.style.background = 'linear-gradient(135deg,#6366f1,#4338ca)';
+      }
+
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'suggest-info';
+
+      const nameDiv = document.createElement('div');
+      nameDiv.className = 'name';
+      nameDiv.textContent = `${user.prenom} ${user.nom}`;
+
+      const roleDiv = document.createElement('div');
+      roleDiv.className = 'role';
+      roleDiv.textContent = user.specialite || user.niveau || user.role || 'Utilisateur';
+
+      infoDiv.appendChild(nameDiv);
+      infoDiv.appendChild(roleDiv);
+
+      item.appendChild(avatarDiv);
+      item.appendChild(infoDiv);
+
+      // Make clickable to view profile
+      item.style.cursor = 'pointer';
+      item.addEventListener('click', () => {
+        // For now, just show notification or redirect
+        showNotification(`Profil de ${user.prenom} ${user.nom}`);
+        // Could redirect to profile?userId=${user.ID}
+      });
+
+      list.appendChild(item);
+    });
+
+  } catch (err) {
+    console.error('Fetch error:', err);
+    list.innerHTML = 'Erreur connexion';
+  }
+}
+
+loadAllUsers();
 
 // ════════════════════════════════════════
 // INJECT STYLES FOR POST INTERACTIONS
 // ════════════════════════════════════════
-(function(){
-    const s=document.createElement('style');
-    s.textContent=`
+(function () {
+  const s = document.createElement('style');
+  s.textContent = `
     @keyframes postCardIn{from{transform:translateY(-14px);opacity:0}to{transform:translateY(0);opacity:1}}
     @keyframes postCardOut{to{opacity:0;transform:translateX(30px)}}
 
@@ -340,239 +598,360 @@ displayLinks();
     .file-dl-link:hover{background:var(--border)}
     .file-dl-link i:first-child{color:var(--accent);font-size:14px}
     .dl-icon{margin-left:auto;color:var(--muted);font-size:12px}
-    `;
-    document.head.appendChild(s);
+  `;
+  document.head.appendChild(s);
 })();
-
-// ════════════════════════════════════════
-// EDIT POST MODAL — défini plus bas via openEditModal()
-// ════════════════════════════════════════
-// (le système complet est injecté en bas du fichier)
 
 // ════════════════════════════════════════
 // SHARE SHEET
 // ════════════════════════════════════════
-const shareOverlay=document.createElement('div');
-shareOverlay.className='share-overlay'; shareOverlay.id='shareOverlay';
-const SHARE_PLATFORMS=[
-    {label:'Facebook', color:'#1877F2', icon:'fa-brands fa-facebook-f',  url:t=>`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(location.href)}&quote=${encodeURIComponent(t)}`},
-    {label:'WhatsApp', color:'#25D366', icon:'fa-brands fa-whatsapp',    url:t=>`https://api.whatsapp.com/send?text=${encodeURIComponent(t)}`},
-    {label:'Twitter/X',color:'#000',    icon:'fa-brands fa-x-twitter',   url:t=>`https://twitter.com/intent/tweet?text=${encodeURIComponent(t)}`},
-    {label:'LinkedIn', color:'#0A66C2', icon:'fa-brands fa-linkedin-in', url:t=>`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(location.href)}`},
-    {label:'Telegram', color:'#26A5E4', icon:'fa-brands fa-telegram',    url:t=>`https://t.me/share/url?url=${encodeURIComponent(location.href)}&text=${encodeURIComponent(t)}`},
-    {label:'Gmail',    color:'#EA4335', icon:'fa-solid fa-envelope',     url:t=>`mailto:?subject=Post intéressant&body=${encodeURIComponent(t)}`},
-    {label:'Reddit',   color:'#FF4500', icon:'fa-brands fa-reddit-alien',url:t=>`https://www.reddit.com/submit?url=${encodeURIComponent(location.href)}&title=${encodeURIComponent(t)}`},
-    {label:'Snapchat', color:'#FFFC00', icon:'fa-brands fa-snapchat',    url:t=>`https://www.snapchat.com/scan?attachmentUrl=${encodeURIComponent(location.href)}`, textColor:'#000'},
+const shareOverlay = document.createElement('div');
+shareOverlay.className = 'share-overlay'; shareOverlay.id = 'shareOverlay';
+
+const SHARE_PLATFORMS = [
+  { label: 'Facebook', color: '#1877F2', icon: 'fa-brands fa-facebook-f',   url: t => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(location.href)}&quote=${encodeURIComponent(t)}` },
+  { label: 'WhatsApp', color: '#25D366', icon: 'fa-brands fa-whatsapp',     url: t => `https://api.whatsapp.com/send?text=${encodeURIComponent(t)}` },
+  { label: 'Twitter/X',color: '#000',    icon: 'fa-brands fa-x-twitter',    url: t => `https://twitter.com/intent/tweet?text=${encodeURIComponent(t)}` },
+  { label: 'LinkedIn', color: '#0A66C2', icon: 'fa-brands fa-linkedin-in',  url: t => `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(location.href)}` },
+  { label: 'Telegram', color: '#26A5E4', icon: 'fa-brands fa-telegram',     url: t => `https://t.me/share/url?url=${encodeURIComponent(location.href)}&text=${encodeURIComponent(t)}` },
+  { label: 'Gmail',    color: '#EA4335', icon: 'fa-solid fa-envelope',      url: t => `mailto:?subject=Post intéressant&body=${encodeURIComponent(t)}` },
+  { label: 'Reddit',   color: '#FF4500', icon: 'fa-brands fa-reddit-alien', url: t => `https://www.reddit.com/submit?url=${encodeURIComponent(location.href)}&title=${encodeURIComponent(t)}` },
+  { label: 'Snapchat', color: '#FFFC00', icon: 'fa-brands fa-snapchat',     url: t => `https://www.snapchat.com/scan?attachmentUrl=${encodeURIComponent(location.href)}`, textColor: '#000' },
 ];
-shareOverlay.innerHTML=`<div class="share-sheet"><div class="share-title">Partager ce post</div><div class="share-grid" id="shareGrid"></div><button class="share-copy-btn" id="shareCopyBtn"><i class="fa-regular fa-copy"></i> Copier le lien</button><button class="share-close-btn" id="shareCloseBtn">Fermer</button></div>`;
+
+shareOverlay.innerHTML = `
+  <div class="share-sheet">
+    <div class="share-title">Partager ce post</div>
+    <div class="share-grid" id="shareGrid"></div>
+    <button class="share-copy-btn" id="shareCopyBtn"><i class="fa-regular fa-copy"></i> Copier le lien</button>
+    <button class="share-close-btn" id="shareCloseBtn">Fermer</button>
+  </div>`;
 document.body.appendChild(shareOverlay);
-let shareText='';
-SHARE_PLATFORMS.forEach(p=>{
-    const div=document.createElement('div'); div.className='share-item';
-    div.innerHTML=`<div class="share-icon" style="background:${p.color};color:${p.textColor||'#fff'}"><i class="${p.icon}"></i></div><span class="share-label">${p.label}</span>`;
-    div.addEventListener('click',()=>{window.open(p.url(shareText),'_blank');shareOverlay.classList.remove('active');});
-    document.getElementById('shareGrid').appendChild(div);
+
+let shareText = '';
+SHARE_PLATFORMS.forEach(p => {
+  const div = document.createElement('div'); div.className = 'share-item';
+  div.innerHTML = `<div class="share-icon" style="background:${p.color};color:${p.textColor || '#fff'}"><i class="${p.icon}"></i></div><span class="share-label">${p.label}</span>`;
+  div.addEventListener('click', () => { window.open(p.url(shareText), '_blank'); shareOverlay.classList.remove('active'); });
+  document.getElementById('shareGrid').appendChild(div);
 });
-document.getElementById('shareCopyBtn').addEventListener('click',()=>{
-    navigator.clipboard.writeText(location.href).catch(()=>{});
-    showNotification('✓ Lien copié dans le presse-papiers !');
-    shareOverlay.classList.remove('active');
+document.getElementById('shareCopyBtn').addEventListener('click', () => {
+  navigator.clipboard.writeText(location.href).catch(() => {});
+  showNotification('✓ Lien copié dans le presse-papiers !');
+  shareOverlay.classList.remove('active');
 });
-document.getElementById('shareCloseBtn').addEventListener('click',()=>{shareOverlay.classList.remove('active');});
-shareOverlay.addEventListener('click',e=>{if(e.target===shareOverlay)shareOverlay.classList.remove('active');});
+document.getElementById('shareCloseBtn').addEventListener('click', () => shareOverlay.classList.remove('active'));
+shareOverlay.addEventListener('click', e => { if (e.target === shareOverlay) shareOverlay.classList.remove('active'); });
+
+// ════════════════════════════════════════
+// EDIT POST MODAL
+// ════════════════════════════════════════
+const oldEditOverlay = document.getElementById('editPostOverlay');
+if (oldEditOverlay) oldEditOverlay.remove();
+
+const editPostOverlay = document.createElement('div');
+editPostOverlay.className = 'edit-post-overlay'; editPostOverlay.id = 'editPostOverlay';
+editPostOverlay.innerHTML = `
+  <div class="edit-post-modal">
+    <div class="edit-post-title">✏️ Modifier le post</div>
+    <textarea class="edit-post-textarea" id="editPostTextarea" placeholder="Contenu du post…"></textarea>
+    <div class="edit-post-actions">
+      <button class="edit-cancel-btn" id="editCancelBtn">Annuler</button>
+      <button class="edit-save-btn"   id="editSaveBtn">Enregistrer</button>
+    </div>
+  </div>`;
+document.body.appendChild(editPostOverlay);
+
+let editTargetCard = null;
+function openEditModal(card) {
+  editTargetCard = card;
+  const body = card.querySelector('.post-body');
+  document.getElementById('editPostTextarea').value = body ? body.textContent.trim() : '';
+  editPostOverlay.classList.add('active');
+  setTimeout(() => document.getElementById('editPostTextarea').focus(), 80);
+}
+document.getElementById('editCancelBtn').addEventListener('click', () => editPostOverlay.classList.remove('active'));
+editPostOverlay.addEventListener('click', e => { if (e.target === editPostOverlay) editPostOverlay.classList.remove('active'); });
+document.getElementById('editSaveBtn').addEventListener('click', () => {
+  if (!editTargetCard) return;
+  const body = editTargetCard.querySelector('.post-body');
+  if (body) body.textContent = document.getElementById('editPostTextarea').value.trim();
+  editPostOverlay.classList.remove('active');
+  showNotification('✓ Post modifié avec succès !');
+});
+
+// ════════════════════════════════════════
+// BUILD HELPERS
+// ════════════════════════════════════════
+function buildDynAvatar(src, size) {
+  if (src) {
+    const img = document.createElement('img');
+    img.src = src; img.className = 'post-avatar post-avatar-dyn';
+    img.style.cssText = `width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;`;
+    return img;
+  }
+  const div = document.createElement('div');
+  div.className = 'post-avatar-placeholder post-avatar-dyn';
+  div.style.cssText = `width:${size}px;height:${size}px;font-size:${Math.round(size * .36)}px;`;
+  // ✅ Dynamic initials — no hardcoded 'M'
+  div.textContent = currentUser.initiales || '?';
+  return div;
+}
+
+function buildCommentSection(card) {
+  const sec = document.createElement('div'); sec.className = 'comments-section';
+  // ✅ Dynamic initials
+  const initiales = currentUser.initiales || '?';
+  const cmtAvStyle = currentProfileSrc
+    ? `background-image:url(${currentProfileSrc});background-size:cover;background-position:center`
+    : '';
+  sec.innerHTML = `
+    <div class="comment-list"></div>
+    <div class="comment-input-row">
+      <div class="comment-input-avatar" style="${cmtAvStyle}">${currentProfileSrc ? '' : initiales}</div>
+      <input class="comment-input" placeholder="Écrire un commentaire…">
+      <button class="comment-send"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>`;
+  card.appendChild(sec);
+
+  const cmtInput = sec.querySelector('.comment-input');
+  const cmtSend  = sec.querySelector('.comment-send');
+  const cmtList  = sec.querySelector('.comment-list');
+
+  function addComment() {
+    const txt = cmtInput.value.trim(); if (!txt) return;
+    const now  = new Date(), time = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
+    const item = document.createElement('div'); item.className = 'comment-item';
+    // ✅ Dynamic author name — no hardcoded 'Mehdi cherif'
+    const fullName = `${currentUser.prenom} ${currentUser.nom}`.trim() || 'Moi';
+    const avHTML = currentProfileSrc
+      ? `<div class="comment-avatar" style="background-image:url(${currentProfileSrc});background-size:cover;background-position:center;background-color:transparent"></div>`
+      : `<div class="comment-avatar">${initiales}</div>`;
+    item.innerHTML = `${avHTML}<div class="comment-bubble"><div class="comment-author">${fullName}</div><div class="comment-text">${txt.replace(/</g, '&lt;')}</div><div class="comment-time">${time}</div></div>`;
+    cmtList.appendChild(item); cmtInput.value = '';
+    const cBtn = card.querySelector('.comment-btn');
+    if (cBtn) { const n = parseInt(cBtn.textContent.match(/\d+/)?.[0] || '0'); cBtn.innerHTML = `<i class="fa-regular fa-comment"></i> ${n + 1}`; }
+    showNotification('💬 Commentaire ajouté avec succès !');
+  }
+  cmtSend.addEventListener('click', addComment);
+  cmtInput.addEventListener('keydown', e => { if (e.key === 'Enter') addComment(); });
+  return sec;
+}
 
 // ════════════════════════════════════════
 // BIND POST INTERACTIONS
 // ════════════════════════════════════════
 function enrichCard(card) {
-    // Pin badge
-    if (!card.querySelector('.post-pin-badge')) {
-        const badge=document.createElement('div'); badge.className='post-pin-badge';
-        badge.innerHTML='<i class="fa-solid fa-thumbtack"></i> Épinglé';
-        card.insertBefore(badge,card.firstChild);
-    }
+  // Pin badge
+  if (!card.querySelector('.post-pin-badge')) {
+    const pinBadge = document.createElement('div'); pinBadge.className = 'post-pin-badge';
+    pinBadge.innerHTML = '<i class="fa-solid fa-thumbtack"></i> Épinglé';
+    card.insertBefore(pinBadge, card.firstChild);
+  }
 
-    // Dynamic avatar in post-top
-    const oldAv=card.querySelector('.post-top .post-avatar-placeholder:not(.post-avatar-dyn)');
-    if(oldAv){
-        const dyn=buildDynAvatar(currentProfileSrc,36);
-        oldAv.replaceWith(dyn);
-    }
+  // Dynamic avatar in post-top
+  const oldAv = card.querySelector('.post-top .post-avatar-placeholder:not(.post-avatar-dyn)');
+  if (oldAv) { const dyn = buildDynAvatar(currentProfileSrc, 36); oldAv.replaceWith(dyn); }
 
-    // Classify footer buttons
-    const footer=card.querySelector('.post-footer');
-    if(footer){
-        footer.querySelectorAll('.post-action').forEach(btn=>{
-            if(btn.querySelector('.fa-comment')||btn.querySelector('[class*="fa-comment"]')) btn.classList.add('comment-btn');
-            if(btn.querySelector('.fa-arrow-up-from-bracket')) btn.classList.add('share-btn');
-            if(btn.querySelector('.fa-heart')) btn.classList.add('like-btn');
-        });
-    }
+  // Classify footer buttons
+  const footer = card.querySelector('.post-footer');
+  if (footer) {
+    footer.querySelectorAll('.post-action').forEach(btn => {
+      if (btn.querySelector('.fa-comment') || btn.querySelector('[class*="fa-comment"]')) btn.classList.add('comment-btn');
+      if (btn.querySelector('.fa-arrow-up-from-bracket')) btn.classList.add('share-btn');
+      if (btn.querySelector('.fa-heart')) btn.classList.add('like-btn');
+    });
+  }
 
-    // 3-dot menu
-    const menuBtn=card.querySelector('.post-menu-btn');
-    if(menuBtn&&!menuBtn.querySelector('.post-ctx-menu')){
-        const ctx=document.createElement('div'); ctx.className='post-ctx-menu';
-        ctx.innerHTML=`
-          <div class="ctx-item" data-action="pin"><i class="fa-solid fa-thumbtack"></i> Épingler</div>
-          <div class="ctx-item" data-action="edit"><i class="fa-solid fa-pen"></i> Modifier</div>
-          <div class="ctx-item danger" data-action="delete"><i class="fa-solid fa-trash"></i> Supprimer</div>`;
-        menuBtn.appendChild(ctx);
-        menuBtn.addEventListener('click',e=>{
-            e.stopPropagation();
-            document.querySelectorAll('.post-ctx-menu.open').forEach(m=>{if(m!==ctx)m.classList.remove('open');});
-            ctx.classList.toggle('open');
-        });
-        ctx.querySelectorAll('.ctx-item').forEach(item=>{
-            item.addEventListener('click',e=>{
-                e.stopPropagation(); ctx.classList.remove('open');
-                const action=item.dataset.action;
-                if(action==='delete'){
-                    // Modal de confirmation sans alert()
-                    const confirmOverlay=document.createElement('div');
-                    confirmOverlay.style.cssText='position:fixed;inset:0;background:rgba(26,23,20,.6);backdrop-filter:blur(6px);z-index:2000;display:flex;justify-content:center;align-items:center;';
-                    confirmOverlay.innerHTML=`
-                      <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;
-                          padding:28px 24px;width:100%;max-width:320px;
-                          box-shadow:0 24px 64px rgba(0,0,0,.22);text-align:center;
-                          animation:postModalIn .22s cubic-bezier(.34,1.3,.64,1) both;">
-                        <div style="width:48px;height:48px;background:#fee2e2;border-radius:14px;
-                            display:flex;align-items:center;justify-content:center;
-                            margin:0 auto 14px;font-size:22px;">🗑️</div>
-                        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;
-                            color:var(--text);margin-bottom:8px;">Supprimer ce post ?</div>
-                        <div style="font-size:12px;color:var(--muted);margin-bottom:22px;line-height:1.55;">
-                            Cette action est irréversible.<br>Le post sera définitivement supprimé.</div>
-                        <div style="display:flex;gap:10px;">
-                          <button id="delCancelBtn" style="flex:1;padding:10px;border:1px solid var(--border);
-                              border-radius:12px;background:transparent;font-family:'Syne',sans-serif;
-                              font-weight:700;font-size:13px;cursor:pointer;transition:background .2s;">Annuler</button>
-                          <button id="delConfirmBtn" style="flex:1;padding:10px;border:none;
-                              border-radius:12px;background:#dc2626;color:#fff;
-                              font-family:'Syne',sans-serif;font-weight:700;font-size:13px;
-                              cursor:pointer;transition:background .2s;">Supprimer</button>
-                        </div>
-                      </div>`;
-                    document.body.appendChild(confirmOverlay);
-                    document.getElementById('delCancelBtn').addEventListener('click',()=>confirmOverlay.remove());
-                    confirmOverlay.addEventListener('click',e=>{if(e.target===confirmOverlay)confirmOverlay.remove();});
-                    document.getElementById('delConfirmBtn').addEventListener('click',()=>{
-                        confirmOverlay.remove();
-                        card.style.animation='postCardOut .3s ease forwards';
-                        setTimeout(()=>card.remove(),280);
-                        showNotification('🗑️ Post supprimé');
-                    });
-                } else if(action==='edit'){
-                    openEditModal(card);
-                } else if(action==='pin'){
-                    const pinBadge=card.querySelector('.post-pin-badge');
-                    if(pinBadge){
-                        pinBadge.classList.toggle('visible');
-                        const isPinned=pinBadge.classList.contains('visible');
-                        item.innerHTML=`<i class="fa-solid fa-thumbtack"></i> ${isPinned?'Désépingler':'Épingler'}`;
-                        showNotification(isPinned?'📌 Post épinglé':'📌 Post désépinglé');
-                        if(isPinned){
-                            const newPostBox=document.querySelector('.new-post-box');
-                            newPostBox.insertAdjacentElement('afterend',card);
-                        }
-                    }
-                }
-            });
-        });
-    }
+  // 3-dot menu
+  const menuBtn = card.querySelector('.post-menu-btn');
+  if (menuBtn && !menuBtn.querySelector('.post-ctx-menu')) {
+    const ctx = document.createElement('div'); ctx.className = 'post-ctx-menu';
+    ctx.innerHTML = `
+      <div class="ctx-item" data-action="pin"><i class="fa-solid fa-thumbtack"></i> Épingler</div>
+      <div class="ctx-item" data-action="edit"><i class="fa-solid fa-pen"></i> Modifier</div>
+      <div class="ctx-item danger" data-action="delete"><i class="fa-solid fa-trash"></i> Supprimer</div>`;
+    menuBtn.appendChild(ctx);
+    menuBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      document.querySelectorAll('.post-ctx-menu.open').forEach(m => { if (m !== ctx) m.classList.remove('open'); });
+      ctx.classList.toggle('open');
+    });
+    ctx.querySelectorAll('.ctx-item').forEach(item => {
+      item.addEventListener('click', e => {
+        e.stopPropagation(); ctx.classList.remove('open');
+        const action = item.dataset.action;
 
-    // Like
-    const likeBtn=card.querySelector('.like-btn');
-    if(likeBtn&&!likeBtn._bound){
-        likeBtn._bound=true;
-        likeBtn.addEventListener('click',function(){
-            this.classList.toggle('liked');
-            const icon=this.querySelector('i');
-            const n=parseInt(this.textContent.match(/\d+/)?.[0]||'0');
-            if(this.classList.contains('liked')){icon.className='fa-solid fa-heart';this.innerHTML=`<i class="fa-solid fa-heart"></i> ${n+1}`;}
-            else{icon.className='fa-regular fa-heart';this.innerHTML=`<i class="fa-regular fa-heart"></i> ${Math.max(0,n-1)}`;}
-        });
-    }
+        if (action === 'delete') {
+          const confirmOverlay = document.createElement('div');
+          confirmOverlay.style.cssText = 'position:fixed;inset:0;background:rgba(26,23,20,.6);backdrop-filter:blur(6px);z-index:2000;display:flex;justify-content:center;align-items:center;';
+          confirmOverlay.innerHTML = `
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:28px 24px;width:100%;max-width:320px;box-shadow:0 24px 64px rgba(0,0,0,.22);text-align:center;animation:postModalIn .22s cubic-bezier(.34,1.3,.64,1) both;">
+              <div style="width:48px;height:48px;background:#fee2e2;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:22px;">🗑️</div>
+              <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--text);margin-bottom:8px;">Supprimer ce post ?</div>
+              <div style="font-size:12px;color:var(--muted);margin-bottom:22px;line-height:1.55;">Cette action est irréversible.<br>Le post sera définitivement supprimé.</div>
+              <div style="display:flex;gap:10px;">
+                <button id="delCancelBtn" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:12px;background:transparent;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:background .2s;">Annuler</button>
+                <button id="delConfirmBtn" style="flex:1;padding:10px;border:none;border-radius:12px;background:#dc2626;color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:background .2s;">Supprimer</button>
+              </div>
+            </div>`;
+          document.body.appendChild(confirmOverlay);
+          document.getElementById('delCancelBtn').addEventListener('click', () => confirmOverlay.remove());
+          confirmOverlay.addEventListener('click', e => { if (e.target === confirmOverlay) confirmOverlay.remove(); });
+          document.getElementById('delConfirmBtn').addEventListener('click', () => {
+            confirmOverlay.remove();
+            card.style.animation = 'postCardOut .3s ease forwards';
+            setTimeout(() => card.remove(), 280);
+            showNotification('🗑️ Post supprimé');
+          });
 
-    // Comment
-    const commentBtn=card.querySelector('.comment-btn');
-    if(commentBtn&&!commentBtn._bound){
-        commentBtn._bound=true;
-        commentBtn.addEventListener('click',()=>{
-            let sec=card.querySelector('.comments-section');
-            if(!sec){sec=buildCommentSection(card);}
-            sec.classList.toggle('open');
-            if(sec.classList.contains('open'))sec.querySelector('.comment-input').focus();
-        });
-    }
+        } else if (action === 'edit') {
+          openEditModal(card);
 
-    // Share
-    
-}
+        } else if (action === 'pin') {
+          const pinBadge = card.querySelector('.post-pin-badge');
+          if (pinBadge) {
+            pinBadge.classList.toggle('visible');
+            const isPinned = pinBadge.classList.contains('visible');
+            item.innerHTML = `<i class="fa-solid fa-thumbtack"></i> ${isPinned ? 'Désépingler' : 'Épingler'}`;
+            showNotification(isPinned ? '📌 Post épinglé' : '📌 Post désépinglé');
+            if (isPinned) { const newPostBox = document.querySelector('.new-post-box'); newPostBox?.insertAdjacentElement('afterend', card); }
+          }
+        }
+      });
+    });
+  }
 
-function buildDynAvatar(src,size){
-    if(src){
-        const img=document.createElement('img');
-        img.src=src; img.className='post-avatar post-avatar-dyn';
-        img.style.cssText=`width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;`;
-        return img;
-    }
-    const div=document.createElement('div');
-    div.className='post-avatar-placeholder post-avatar-dyn';
-    div.style.cssText=`width:${size}px;height:${size}px;font-size:${Math.round(size*.36)}px;`;
-    div.textContent='M'; return div;
-}
+  // Like
+  const likeBtn = card.querySelector('.like-btn');
+  if (likeBtn && !likeBtn._bound) {
+    likeBtn._bound = true;
+    likeBtn.addEventListener('click', function () {
+      this.classList.toggle('liked');
+      const n = parseInt(this.textContent.match(/\d+/)?.[0] || '0');
+      if (this.classList.contains('liked')) { this.innerHTML = `<i class="fa-solid fa-heart"></i> ${n + 1}`; }
+      else { this.innerHTML = `<i class="fa-regular fa-heart"></i> ${Math.max(0, n - 1)}`; }
+    });
+  }
 
-function buildCommentSection(card){
-    const uid=Date.now();
-    const sec=document.createElement('div'); sec.className='comments-section';
-    const cmtAvStyle=currentProfileSrc?`background-image:url(${currentProfileSrc});background-size:cover;background-position:center`:'';
-    sec.innerHTML=`
-      <div class="comment-list"></div>
-      <div class="comment-input-row">
-        <div class="comment-input-avatar" style="${cmtAvStyle}">${currentProfileSrc?'':'M'}</div>
-        <input class="comment-input" placeholder="Écrire un commentaire…">
-        <button class="comment-send"><i class="fa-solid fa-paper-plane"></i></button>
-      </div>`;
-    card.appendChild(sec);
-    const cmtInput=sec.querySelector('.comment-input'), cmtSend=sec.querySelector('.comment-send'), cmtList=sec.querySelector('.comment-list');
-    function addComment(){
-        const txt=cmtInput.value.trim(); if(!txt) return;
-        const now=new Date(), time=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
-        const item=document.createElement('div'); item.className='comment-item';
-        const avHTML=currentProfileSrc
-            ?`<div class="comment-avatar" style="background-image:url(${currentProfileSrc});background-size:cover;background-position:center;background-color:transparent"></div>`
-            :`<div class="comment-avatar">M</div>`;
-        item.innerHTML=`${avHTML}<div class="comment-bubble"><div class="comment-author">Mehdi cherif</div><div class="comment-text">${txt.replace(/</g,'&lt;')}</div><div class="comment-time">${time}</div></div>`;
-        cmtList.appendChild(item); cmtInput.value='';
-        const cBtn=card.querySelector('.comment-btn');
-        if(cBtn){const n=parseInt(cBtn.textContent.match(/\d+/)?.[0]||'0');cBtn.innerHTML=`<i class="fa-regular fa-comment"></i> ${n+1}`;}
-        showNotification('💬 Commentaire ajouté avec succès !');
-    }
-    cmtSend.addEventListener('click',addComment);
-    cmtInput.addEventListener('keydown',e=>{if(e.key==='Enter')addComment();});
-    return sec;
+  // Comment
+  const commentBtn = card.querySelector('.comment-btn');
+  if (commentBtn && !commentBtn._bound) {
+    commentBtn._bound = true;
+    commentBtn.addEventListener('click', () => {
+      let sec = card.querySelector('.comments-section');
+      if (!sec) { sec = buildCommentSection(card); }
+      sec.classList.toggle('open');
+      if (sec.classList.contains('open')) sec.querySelector('.comment-input').focus();
+    });
+  }
+
+  // Share
+  const shareBtn = card.querySelector('.share-btn');
+  if (shareBtn && !shareBtn._bound) {
+    shareBtn._bound = true;
+    shareBtn.addEventListener('click', () => {
+      const title = card.querySelector('.post-title')?.textContent || '';
+      const body  = card.querySelector('.post-body')?.textContent  || '';
+      shareText = `${title}\n${body}\n${location.href}`;
+      shareOverlay.classList.add('active');
+    });
+  }
 }
 
 /* Close ctx menus on outside click */
-document.addEventListener('click',()=>document.querySelectorAll('.post-ctx-menu.open').forEach(m=>m.classList.remove('open')));
+document.addEventListener('click', () => document.querySelectorAll('.post-ctx-menu.open').forEach(m => m.classList.remove('open')));
 
 /* Enrich all existing cards */
 document.querySelectorAll('.post-card').forEach(enrichCard);
 
+async function loadAllUsers() {
+  const list = document.getElementById('usersList');
+  if (!list) {
+    console.warn('usersList container not found');
+    return;
+  }
 
-// ════════════════════════════════════════
-// MAKE A POST MODAL
-// ════════════════════════════════════════
+  list.innerHTML = 'Chargement...';
 
-   
-// ════════════════════════════════════════
-// EDIT POST — système complet
-// Remplace l'ancien editOverlay + le bloc else if(action==='edit')
-// À ajouter dans mon-profile.js, après la déclaration de editOverlay
-// ════════════════════════════════════════
+  try {
+    const res = await fetch('/Mini-Projet%20-%20Copy/api/get-all-users.php');
+    console.log('Fetch response status:', res.status);
 
-/* ── Supprimer l'ancien editOverlay s'il existe ── */
-const oldEditOverlay = document.getElementById('editPostOverlay');
-if (oldEditOverlay) oldEditOverlay.remove();
+    if (!res.ok) {
+      list.innerHTML = 'Erreur serveur: ' + res.status;
+      return;
+    }
 
+    const users = await res.json();
+    console.log('Users loaded:', users);
+
+    if (!Array.isArray(users)) {
+      list.innerHTML = 'Données invalides';
+      console.error('Expected array, got:', users);
+      return;
+    }
+
+    list.innerHTML = '';
+
+    users.forEach(user => {
+      const item = document.createElement('div');
+      item.className = 'suggest-item';
+
+      const avatarDiv = document.createElement('div');
+      avatarDiv.className = 'suggest-avatar';
+
+      if (user.photo_profil) {
+        const img = document.createElement('img');
+        img.src = user.photo_profil;
+        img.alt = user.prenom;
+        img.onerror = () => {
+          avatarDiv.textContent = (user.prenom[0] + user.nom[0]).toUpperCase();
+          avatarDiv.style.background = 'linear-gradient(135deg,#6366f1,#4338ca)';
+        };
+        avatarDiv.appendChild(img);
+      } else {
+        avatarDiv.textContent = (user.prenom[0] + user.nom[0]).toUpperCase();
+        avatarDiv.style.background = 'linear-gradient(135deg,#6366f1,#4338ca)';
+      }
+
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'suggest-info';
+
+      const nameDiv = document.createElement('div');
+      nameDiv.className = 'name';
+      nameDiv.textContent = `${user.prenom} ${user.nom}`;
+
+      const roleDiv = document.createElement('div');
+      roleDiv.className = 'role';
+      roleDiv.textContent = user.specialite || user.niveau || user.role || 'Utilisateur';
+
+      infoDiv.appendChild(nameDiv);
+      infoDiv.appendChild(roleDiv);
+
+      item.appendChild(avatarDiv);
+      item.appendChild(infoDiv);
+
+      // Make clickable to view profile
+      item.style.cursor = 'pointer';
+      item.addEventListener('click', () => {
+  window.location.href = `../UI/profile/profile.html?id=${user.ID}`;
+});
+
+      list.appendChild(item);
+    });
+
+  } catch (err) {
+    console.error('Fetch error:', err);
+    list.innerHTML = 'Erreur connexion: ' + err.message;
+  }
+}
+
+// Call on page load
+document.addEventListener('DOMContentLoaded', loadAllUsers);
+// Also call immediately in case DOM is already loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadAllUsers);
+} else {
+  loadAllUsers();
+}

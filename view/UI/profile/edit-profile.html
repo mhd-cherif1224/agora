@@ -15,7 +15,7 @@
   <!-- NAV -->
   <nav>
     <div class="nav-logo">
-      <img src="../../images/Frame 20478.svg" width="100px" alt="">
+      <img src="../../images/logo.svg" width="100px" alt="">
     </div>
     <div class="nav-search">
       <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -66,7 +66,7 @@
           <div class="banner-bottom" id="bannerBottom">
             <div class="banner-user-info">
               <div class="banner-name" id="displayName">
-                Mehdi cherif
+                NOM PRENOM
                 <button class="cv-btn">
                   <input type="file" id="cvInput" hidden accept=".pdf,.doc,.docx">
                   <label for="cvInput">+ Ajouter Votre CV</label>
@@ -74,9 +74,9 @@
                 <!-- Affichage du fichier -->
                 <span id="cvName"></span>
               </div>
-              <div class="banner-role" id="displayRole">Etudiant a l'univ d'abderrahmane mira</div>
+              <div class="banner-role" id="displayRole">par exemple : Etudiant a l'univ d'abderrahmane mira</div>
               <div class="banner-location" id="displayLocation">
-                <i class="fa-solid fa-location-dot"></i> Bejaia, Algeria
+                <i class="fa-solid fa-location-dot"></i>par exemple : Bejaia, Algeria
               </div>
               
               <!-- Icône lien dans la bannière -->
@@ -142,14 +142,21 @@
         <!-- FORM -->
         <div class="form-section">
           <h3>Changer Vos Informations</h3>
+           
+            <div class="form-row full">
+              <div class="form-group">
+                <label>Status</label>
+                <input type="text" id="inputStatus" placeholder="STATUS" value="" disabled>
+              </div>
+            </div>
           <div class="form-row">
             <div class="form-group">
               <label>Nom</label>
-              <input type="text" id="inputNom" placeholder="Mehdi" value="Mehdi">
+              <input type="text" id="inputNom" placeholder="PRENOM" value="PRENOM">
             </div>
             <div class="form-group">
               <label>Prenom</label>
-              <input type="text" id="inputPrenom" placeholder="cherif" value="cherif">
+              <input type="text" id="inputPrenom" placeholder="PRENOM" value="PRENOM">
             </div>
           </div>
           <div class="form-row full">
@@ -161,17 +168,17 @@
           <div class="form-row full">
             <div class="form-group">
               <label>Adresse</label>
-              <input type="text" id="inputAdresse" placeholder="Bejaia, Algeria" value="Bejaia, Algeria">
+              <input type="text" id="inputAdresse" placeholder="par exemple : Bejaia, Algeria" value="Bejaia, Algeria">
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
               <label>Niveau</label>
-              <input type="text" id="inputNiveau" placeholder="L1" value="L1">
+              <input type="text" id="inputNiveau" placeholder="par exemple : L1" value="L1">
             </div>
             <div class="form-group">
               <label>Specialite</label>
-              <input type="text" id="inputSpecialite" placeholder="Genie Logiciel" value="Genie Logiciel">
+              <input type="text" id="inputSpecialite" placeholder="par exemple : Genie Logiciel" value="Genie Logiciel">
             </div>
           </div>
         </div>
@@ -182,144 +189,49 @@
     </div><!-- /main-col -->
 
     <!-- SIDEBAR -->
-    <div class="sidebar">
+     <div class="sidebar">
       <div class="suggest-card " id="suggestCard">
         <h3>CONNAISSEZ - VOUS ?</h3>
-        <!-- LIST PREVIEW (4 items) -->
-        <div class="suggest-list" id="suggestListPreview">
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#e8734a,#c9543a)">M</div>
-            <div class="suggest-info">
-              <div class="name">Mehdi Cherif</div>
-              <div class="role">Etudiant — Univ. Abderrahmane Mira</div>
-            </div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#5b8dee,#3a6de0)">N</div>
-            <div class="suggest-info">
-              <div class="name">Na Sfia</div>
-              <div class="role">Etudiante — Univ. As Suema 7</div>
-            </div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#4ecdc4,#2ab5ab)">C</div>
-            <div class="suggest-info">
-              <div class="name">Chaima Ouk</div>
-              <div class="role">Etudiante — Univ. As Suema 7</div>
-            </div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">Me</div>
-            <div class="suggest-info">
-              <div class="name">Mekhmoukh</div>
-              <div class="role">Agent de sécurité</div>
-            </div>
-          </div>
+        <!-- LIST OF ALL USERS -->
+        <div class="suggest-list" id="usersList">
+          <!-- Populated by JS -->
         </div>
-
-        <!-- ALL LIST (hidden by default) -->
-        <div class="suggest-list suggest-list-all" id="suggestListAll" style="display:none;">
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#e8734a,#c9543a)">M</div>
-            <div class="suggest-info"><div class="name">Mehdi Cherif</div><div class="role">Etudiant — Univ. Abderrahmane Mira</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#5b8dee,#3a6de0)">N</div>
-            <div class="suggest-info"><div class="name">Na Sfia</div><div class="role">Etudiante — Univ. As Suema 7</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#4ecdc4,#2ab5ab)">C</div>
-            <div class="suggest-info"><div class="name">Chaima Ouk</div><div class="role">Etudiante — Univ. As Suema 7</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">Me</div>
-            <div class="suggest-info"><div class="name">Mekhmoukh</div><div class="role">Agent de sécurité</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706)">Y</div>
-            <div class="suggest-info"><div class="name">Yacine Boudali</div><div class="role">Développeur Web — Alger</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#10b981,#059669)">A</div>
-            <div class="suggest-info"><div class="name">Amira Hadj</div><div class="role">Designer UI/UX — Oran</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#f43f5e,#be123c)">K</div>
-            <div class="suggest-info"><div class="name">Karim Zerrouk</div><div class="role">Ingénieur Réseau — Constantine</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#6366f1,#4338ca)">S</div>
-            <div class="suggest-info"><div class="name">Sofiane Belaid</div><div class="role">Data Scientist — Sétif</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#14b8a6,#0d9488)">L</div>
-            <div class="suggest-info"><div class="name">Lynda Mansouri</div><div class="role">Comptable — Béjaïa</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#f97316,#ea580c)">R</div>
-            <div class="suggest-info"><div class="name">Rachid Touati</div><div class="role">Architecte — Tizi-Ouzou</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9)">H</div>
-            <div class="suggest-info"><div class="name">Houda Khelil</div><div class="role">Médecin généraliste — Blida</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#0ea5e9,#0284c7)">I</div>
-            <div class="suggest-info"><div class="name">Imed Benmoussa</div><div class="role">Enseignant — Annaba</div></div>
-          </div>
-        </div>
-
-        <a href="#" class="see-all" id="seeAllBtn"><u>voir tous les suggestions </u>→</a>
       </div>
 
-      <p class="footer-note">© 2025 AGORA . All rights reserved.</p>
+
+      <p class="footer-note">© 2026 THE trio. All rights reserved.</p>
 
       <!-- CHAT PANEL -->
-    <div class="chat-panel" id="chatPanel">
-    <div class="chat-panel-header">
-        <div class="chat-panel-user">
-        <div class="suggest-avatar" style="background:linear-gradient(135deg,#5b8dee,#3a6de0);width:32px;height:32px;font-size:12px;">N</div>
-        <div>
-            <div class="chat-panel-name">Na Sfia</div>
-            <div class="chat-panel-status"><span class="online-dot"></span> En ligne</div>
+      <div class="chat-panel" id="chatPanel">
+        <div class="chat-panel-header">
+          <div class="chat-panel-user">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#5b8dee,#3a6de0);width:32px;height:32px;font-size:12px;">N</div>
+            <div>
+              <div class="chat-panel-name">Na Sfia</div>
+              <div class="chat-panel-status"><span class="online-dot"></span> En ligne</div>
+            </div>
+          </div>
+          <button class="chat-panel-close" id="chatPanelClose"><i class="fa-solid fa-xmark"></i></button>
         </div>
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-msg received"><div class="msg-bubble">Salut ! Tu as vu le projet rendu ?</div><div class="msg-time">10:42</div></div>
+          <div class="chat-msg sent"><div class="msg-bubble">Oui je l'ai soumis hier soir 😅</div><div class="msg-time">10:44</div></div>
+          <div class="chat-msg received"><div class="msg-bubble">Parfait, on se voit demain pour la présentation ?</div><div class="msg-time">10:45</div></div>
+          <div class="chat-msg sent"><div class="msg-bubble">Oui 9h à la fac 👍</div><div class="msg-time">10:46</div></div>
         </div>
-        <button class="chat-panel-close" id="chatPanelClose">
-        <i class="fa-solid fa-xmark"></i>
-        </button>
-    </div>
-
-    <div class="chat-messages" id="chatMessages">
-        <div class="chat-msg received">
-        <div class="msg-bubble">Salut ! Tu as vu le projet rendu ?</div>
-        <div class="msg-time">10:42</div>
+        <div class="chat-input-row">
+          <input type="text" id="chatInput" placeholder="Écrire un message…">
+          <button class="chat-send-btn" id="chatSendBtn">
+            <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
+              <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M22 2L15 22 11 13 2 9l20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
         </div>
-        <div class="chat-msg sent">
-        <div class="msg-bubble">Oui je l'ai soumis hier soir 😅</div>
-        <div class="msg-time">10:44</div>
-        </div>
-        <div class="chat-msg received">
-        <div class="msg-bubble">Parfait, on se voit demain pour la présentation ?</div>
-        <div class="msg-time">10:45</div>
-        </div>
-        <div class="chat-msg sent">
-        <div class="msg-bubble">Oui 9h à la fac 👍</div>
-        <div class="msg-time">10:46</div>
-        </div>
-    </div>
-
-    <div class="chat-input-row">
-        <input type="text" id="chatInput" placeholder="Écrire un message…">
-        <button class="chat-send-btn" id="chatSendBtn">
-        <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
-            <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <path d="M22 2L15 22 11 13 2 9l20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        </button>
-    </div>
-    </div>
-    </div>
-  </div>
+      </div>
+    </div><!-- /sidebar -->
+  </div><!-- /layout -->
+  
   <!-- ══ CHATBOT PANEL ══ -->
 <div class="chat-panel" id="chatbotPanel">
   <div class="chat-panel-header">
@@ -421,6 +333,30 @@
             <span>Parler à un conseiller</span>
           </div>
           <i class="fa-solid fa-chevron-right help-arrow"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ USER PROFILE MODAL ══ -->
+  <div class="user-profile-overlay" id="userProfileOverlay">
+    <div class="user-profile-modal" id="userProfileModal">
+      <button class="user-profile-close" id="userProfileClose"><i class="fa-solid fa-xmark"></i></button>
+      <div class="upm-banner" id="upmBanner"></div>
+      <div class="upm-avatar" id="upmAvatar"></div>
+      <div class="upm-body">
+        <div class="upm-name" id="upmName"></div>
+        <div class="upm-role" id="upmRole"></div>
+        <div class="upm-location" id="upmLocation"></div>
+        <div class="upm-stats">
+          <div class="upm-stat"><span id="upmPosts">—</span><small>Posts</small></div>
+          <div class="upm-stat"><span id="upmFollowers">—</span><small>Abonnés</small></div>
+          <div class="upm-stat"><span id="upmFollowing">—</span><small>Abonnements</small></div>
+        </div>
+        <div class="upm-bio" id="upmBio"></div>
+        <div class="upm-actions">
+          <button class="upm-btn upm-btn-primary"><i class="fa-solid fa-user-plus"></i> Suivre</button>
+          <button class="upm-btn upm-btn-secondary"><i class="fa-solid fa-envelope"></i> Message</button>
         </div>
       </div>
     </div>

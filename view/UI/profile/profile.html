@@ -5,18 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Profil - na sfiaaaaaaaa</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<!-- Fonts (same as edit-profile) -->
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="./css/profile.css">
+<link rel="stylesheet" href="./css/profile.css  ">
+
 
 </head>
 <body>
-
-  <!-- NAV -->
+  
+  <!-- ══ NAV ══ -->
   <nav>
     <div class="nav-logo">
-      <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
-    </div>
+    <img src="../../images/logo.svg" width="100px" alt="">
+  </div>
     <div class="nav-search">
       <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="text" placeholder="recherchez un service, un produit...">
@@ -25,308 +27,396 @@
       <button class="nav-icon-btn" title="Accueil" onclick="window.location.href='../homepage/home-page.html'">
         <svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
       </button>
-      <button class="nav-icon-btn has-notif" title="Messages">
+      <button class="nav-icon-btn" title="Messages" onclick="window.location.href='../messagerie/messagerie.html'">
         <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-        <span class="notif-dot"></span>
       </button>
-      <button class="nav-icon-btn has-notif" title="Notifications">
+      <button class="nav-icon-btn" title="Notifications"  onclick="window.location.href='../notification/notification.html'">
         <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
         <span class="notif-dot"></span>
       </button>
-      <div class="nav-avatar" title="Mon Profil" onclick="window.location.href='edit-profile.html'">
-        <span>M</span>
+      <div class="nav-divider"></div>
+      <div class="nav-avatar" id="navAvatar" onclick="window.location.href='../../html/mon-profil.html'" title="Mon Profil">
+        <img id="navAvatarImg" src="../../images/person.png" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;">
+        <span id="navAvatarLetter">M</span>
       </div>
       <button class="nav-menu-btn"><span></span><span></span><span></span></button>
     </div>
   </nav>
 
-  <!-- LAYOUT -->
+  <!-- ══ LAYOUT ══ -->
   <div class="layout">
     <div class="main-col">
 
-      <!-- PROFILE CARD -->
-      <div class="profile-card">
+      <!-- ══ BANNER ══ -->
+      <div class="banner-card">
+        <div class="banner">
 
-        <!-- BANNER TOP -->
-        <div class="banner-top" id="bannerTop">
-          <!-- Mario pixel art banner rendered via canvas in JS -->
-          <canvas id="pixelCanvas"></canvas>
-        </div>
-
-        <!-- BANNER BOTTOM -->
-        <div class="banner-bottom">
-          <!-- Profile picture -->
-          <div class="profile-avatar-wrap">
-            <div class="profile-avatar">
-              <div class="avatar-placeholder">
-                <i class="fa-solid fa-user"></i>
-              </div>
-            </div>
+          <!-- TOP -->
+          <div class="banner-top" id="bannerTop">
+            <input type="file" id="bannerInput" hidden accept="image/png,image/jpeg,image/jpg,image/gif">
+            
           </div>
 
-          <div class="profile-info">
-            <div class="profile-name-row">
-              <h1 class="profile-name">na sfiaaaaaaaa</h1>
-              <div class="profile-actions">
-                <button class="btn-message" id="openChatBtn">
-                  <i class="fa-regular fa-comment-dots"></i>
-                  envoyer un message
+          <!-- BOTTOM -->
+          <div class="banner-bottom" id="bannerBottom">
+            <div class="banner-user-info">
+              <div class="banner-name" id="displayName">
+                NOM PRENOM
+                <!-- Affichage du fichier -->
+                <span id="cvName"></span>
+              </div>
+              <div class="banner-role" id="displayRole">Etudiant a l'univ d'abderrahmane mira</div>
+              <div class="banner-location" id="displayLocation">
+                <i class="fa-solid fa-location-dot"></i> Bejaia, Algeria
+              </div>
+              
+              <!-- Icône lien dans la bannière -->
+              <div class="links-widget">
+
+                <!-- Bouton icône avec badge -->
+                <button class="links-icon-btn" id="linksToggleBtn" title="Mes liens">
+                  <i class="fa-solid fa-link"></i>
+                  <span class="links-badge" id="linksBadge" style="display:none;">0</span>
                 </button>
-                <button class="btn-more" id="moreBtn">
-                  <span></span><span></span><span></span>
-                </button>
-                <!-- Dropdown menu -->
-                <div class="more-dropdown" id="moreDropdown">
-                  <button class="dropdown-item"><i class="fa-solid fa-user-plus"></i> Suivre</button>
-                  <button class="dropdown-item"><i class="fa-solid fa-share-nodes"></i> Partager le profil</button>
-                  <button class="dropdown-item"><i class="fa-solid fa-flag"></i> Signaler</button>
+
+                <!-- Dropdown liste des liens -->
+                <div class="links-dropdown" id="linksDropdown">
+                  <div class="links-dropdown-header">
+                    <span>Mes liens</span>
+                    <button class="links-add-btn" id="openModal" title="Ajouter un lien">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                  </div>
+                  <div class="links-list" id="linksContainer">
+                    <!-- liens générés par JS -->
+                  </div>
+                  <p class="links-empty" id="linksEmpty">Aucun lien ajouté</p>
+                </div>
+
+              </div>
+
+              <!-- MODAL AJOUTER UN LIEN -->
+              <div id="linkModal" class="modal">
+                <div class="modal-content">
+                  <button class="close-btn" id="closeModal">&times;</button>
+                  <h2>Ajouter un lien</h2>
+                  <input type="url" id="modalLinkInput" placeholder="https://exemple.com">
+                  <button class="save-btn">Enregistrer</button>
                 </div>
               </div>
             </div>
-            <p class="profile-role">Etudiante a l univ de Guelma 2</p>
-            <p class="profile-location"><i class="fa-solid fa-location-dot"></i> Guelma, Algeria</p>
-
-            <div class="profile-links-row">
-              <button class="link-pill" id="linkBtn">
-                <i class="fa-solid fa-link"></i>
-                Consulter le lien
-              </button>
-              <button class="link-pill" id="cvBtn">
-                <i class="fa-solid fa-file-lines"></i>
-                Consulter le CV
-              </button>
-            </div>
+            <a href="#" class="edit-profile-btn" id="messageBtn" data-user-id="USER_ID_HERE">
+  Envoyez un message
+</a>
           </div>
-        </div>
 
-        <button class="voir-plus-btn" id="voirPlusBtn">
-          voir plus <i class="fa-solid fa-chevron-down"></i>
-        </button>
-
-        <!-- EXPANDED SECTION -->
-        <div class="expanded-section" id="expandedSection">
-          <div class="expanded-grid">
-            <div class="expanded-item">
-              <div class="expanded-icon"><i class="fa-solid fa-graduation-cap"></i></div>
-              <div>
-                <div class="expanded-label">Niveau</div>
-                <div class="expanded-value">L3</div>
-              </div>
-            </div>
-            <div class="expanded-item">
-              <div class="expanded-icon"><i class="fa-solid fa-code"></i></div>
-              <div>
-                <div class="expanded-label">Spécialité</div>
-                <div class="expanded-value">Génie Logiciel</div>
-              </div>
-            </div>
-            <div class="expanded-item">
-              <div class="expanded-icon"><i class="fa-solid fa-envelope"></i></div>
-              <div>
-                <div class="expanded-label">Email</div>
-                <div class="expanded-value">nasfia@univ-guelma.dz</div>
-              </div>
-            </div>
-            <div class="expanded-item">
-              <div class="expanded-icon"><i class="fa-solid fa-calendar"></i></div>
-              <div>
-                <div class="expanded-label">Membre depuis</div>
-                <div class="expanded-value">Janvier 2024</div>
-              </div>
-            </div>
+          <!-- PROFILE CIRCLE -->
+          <div class="profile">
+            
+            
+              <img src="../../images/person.png" id="profilePreview">
+              
+            
           </div>
+
         </div>
       </div>
+      <br>
+      <!-- ══ POSTS ══ -->
+      <div class="posts-section feed">
+        <div class="posts-header"><h3>Vos Postes</h3></div>
 
-      <!-- PUBLICATIONS -->
-      <div class="publications-card">
-        <h2 class="pub-title">Les publications de na sfiaaaaaaaa</h2>
-        <div class="pub-divider"></div>
-
-        <!-- Post 1 -->
-        <div class="post" id="post1">
+        <!-- POST 1 -->
+        <article class="post-card" data-service-id="101">
           <div class="post-header">
-            <div class="post-avatar">
-              <div class="avatar-placeholder small"><i class="fa-solid fa-user"></i></div>
-            </div>
+            <div class="post-avatar" style="background:linear-gradient(135deg,#e44,#f97316);">MC</div>
             <div class="post-meta">
-              <div class="post-author">na sfiaaaaaaaa</div>
-              <div class="post-sub-row">
-                <span class="post-role">Etudiante a l univ de Guelma 2</span>
-                <span class="post-dot">·</span>
-                <span class="post-time">25 min ago</span>
-                <span class="post-dot">·</span>
-                <i class="fa-solid fa-globe post-globe"></i>
+              <div class="post-name">Mehdi cherif</div>
+              <div class="post-role">Etudiant a l'univ d'abderrahmane mira</div>
+              <div class="post-time-row">
+                <span class="post-time">Il y a 35 minutes</span>
+                <span class="post-globe"><i class="fa-solid fa-earth-africa"></i></span>
               </div>
             </div>
-            <button class="post-more"><span></span><span></span><span></span></button>
+            <button class="post-more"><i class="fa-solid fa-ellipsis"></i></button>
+          </div>
+
+          <div class="post-title">Recherche développeur web freelance</div>
+          <div class="post-tags">
+            <span class="post-tag pink">HTML5</span>
+            <span class="post-tag blue">CSS3</span>
+            <span class="post-tag indigo">React.js</span>
+            <span class="post-tag green">Freelance</span>
           </div>
           <div class="post-body">
-            <p class="post-text">
-              je vous propose mes services :<br>
-              1- je fais de <span class="see-more-text" id="seeMoreText1" style="display:none"> la conception et du développement d'applications web et mobiles. Je suis disponible pour des projets freelance ou des stages.</span>
-              <button class="see-more-btn" id="seeMoreBtn1">...voir plus</button>
-            </p>
-            <div class="post-image-wrap">
-              <div class="post-image-placeholder">
-                <div class="post-img-overlay">
-                  <i class="fa-solid fa-network-wired"></i>
-                  <span>Services Numériques</span>
+            Je cherche un développeur web expérimenté pour rejoindre un projet e-commerce en pleine croissance.
+            La mission comprend la refonte de notre interface utilisateur et l'intégration d'une API REST…
+          </div>
+
+          <!-- Rating summary -->
+          <div class="post-rating-summary">
+            <div class="rating-stars-display">
+              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
+            </div>
+            <span class="rating-score">4.0</span>
+            <span class="rating-count">(12 évaluations)</span>
+          </div>
+
+          <!-- Actions -->
+          <div class="post-actions">
+            <button class="post-action-btn" data-action="rate"><i class="fa-regular fa-star"></i> Évaluer</button>
+            
+          </div>
+
+          <!-- Rating panel (hidden) -->
+          <div class="rating-panel" hidden>
+            <div class="rating-panel-inner">
+              <p class="rating-panel-label">Votre évaluation</p>
+              <div class="star-picker">
+                <i class="fa-regular fa-star" data-star="1"></i>
+                <i class="fa-regular fa-star" data-star="2"></i>
+                <i class="fa-regular fa-star" data-star="3"></i>
+                <i class="fa-regular fa-star" data-star="4"></i>
+                <i class="fa-regular fa-star" data-star="5"></i>
+              </div>
+              <textarea class="rating-comment-input" placeholder="Laissez un commentaire (optionnel)..."></textarea>
+              <div class="rating-panel-actions">
+                <button class="rating-cancel-btn">Annuler</button>
+                <button class="rating-submit-btn">Soumettre</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comments list (hidden) -->
+          <div class="comments-list" hidden>
+            <div class="comment-item">
+              <div class="comment-avatar" style="background:linear-gradient(135deg,#059669,#34d399);">NS</div>
+              <div class="comment-body">
+                <div class="comment-header">
+                  <span class="comment-name">Na Sfia</span>
+                  <div class="comment-stars">
+                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
+                  </div>
+                  <span class="comment-date">20/04/2026</span>
                 </div>
+                <p class="comment-text">Très bonne offre, profil sérieux et réactif !</p>
               </div>
             </div>
           </div>
-          <div class="post-actions">
-            <button class="post-action-btn" id="likeBtn1">
-              <i class="fa-regular fa-heart"></i>
-              <span>J'aime</span>
-            </button>
-            <button class="post-action-btn">
-              <i class="fa-regular fa-comment"></i>
-              <span>Commenter</span>
-            </button>
-            <button class="post-action-btn">
-              <i class="fa-solid fa-share-nodes"></i>
-              <span>Partager</span>
-            </button>
-          </div>
-        </div>
+        </article>
 
-        <!-- Post 2 -->
-        <div class="post">
+        <!-- POST 2 -->
+        <article class="post-card" data-service-id="102">
           <div class="post-header">
-            <div class="post-avatar">
-              <div class="avatar-placeholder small"><i class="fa-solid fa-user"></i></div>
-            </div>
+            <div class="post-avatar" style="background:linear-gradient(135deg,#e44,#f97316);">MC</div>
             <div class="post-meta">
-              <div class="post-author">na sfiaaaaaaaa</div>
-              <div class="post-sub-row">
-                <span class="post-role">Etudiante a l univ de Guelma 2</span>
-                <span class="post-dot">·</span>
-                <span class="post-time">2 h ago</span>
-                <span class="post-dot">·</span>
-                <i class="fa-solid fa-globe post-globe"></i>
+              <div class="post-name">Mehdi cherif</div>
+              <div class="post-role">Etudiant a l'univ d'abderrahmane mira</div>
+              <div class="post-time-row">
+                <span class="post-time">Hier à 14:20</span>
+                <span class="post-globe"><i class="fa-solid fa-earth-africa"></i></span>
               </div>
             </div>
-            <button class="post-more"><span></span><span></span><span></span></button>
+            <button class="post-more"><i class="fa-solid fa-ellipsis"></i></button>
           </div>
-          <div class="post-body">
-            <p class="post-text">Nouvelle session de révisions pour les examens de fin de semestre ! 📚 N'hésitez pas à me contacter pour du tutorat en programmation.</p>
-          </div>
-          <div class="post-actions">
-            <button class="post-action-btn" id="likeBtn2">
-              <i class="fa-regular fa-heart"></i>
-              <span>J'aime</span>
-            </button>
-            <button class="post-action-btn">
-              <i class="fa-regular fa-comment"></i>
-              <span>Commenter</span>
-            </button>
-            <button class="post-action-btn">
-              <i class="fa-solid fa-share-nodes"></i>
-              <span>Partager</span>
-            </button>
-          </div>
-        </div>
 
-      </div>
+          <div class="post-title">Nouveau projet : Refonte d'une app mobile</div>
+          <div class="post-tags">
+            <span class="post-tag purple">UI/UX</span>
+            <span class="post-tag blue">Mobile</span>
+            <span class="post-tag orange">JavaScript</span>
+          </div>
+          <div class="post-img-placeholder gradient-1"><span>Aperçu design</span></div>
+          <div class="post-body">
+            Voici un aperçu de la nouvelle interface que je conçois pour une startup locale.
+            Retours bienvenus !
+          </div>
+
+          <div class="post-rating-summary">
+            <div class="rating-stars-display">
+              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star-half-stroke"></i><i class="fa-regular fa-star"></i>
+            </div>
+            <span class="rating-score">3.5</span>
+            <span class="rating-count">(8 évaluations)</span>
+          </div>
+
+          <div class="post-actions">
+            <button class="post-action-btn" data-action="rate"><i class="fa-regular fa-star"></i> Évaluer</button>
+             
+          </div>
+
+          <div class="rating-panel" hidden>
+            <div class="rating-panel-inner">
+              <p class="rating-panel-label">Votre évaluation</p>
+              <div class="star-picker">
+                <i class="fa-regular fa-star" data-star="1"></i>
+                <i class="fa-regular fa-star" data-star="2"></i>
+                <i class="fa-regular fa-star" data-star="3"></i>
+                <i class="fa-regular fa-star" data-star="4"></i>
+                <i class="fa-regular fa-star" data-star="5"></i>
+              </div>
+              <textarea class="rating-comment-input" placeholder="Laissez un commentaire (optionnel)..."></textarea>
+              <div class="rating-panel-actions">
+                <button class="rating-cancel-btn">Annuler</button>
+                <button class="rating-submit-btn">Soumettre</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="comments-list" hidden></div>
+        </article>
+
+        <!-- POST 3 -->
+        <article class="post-card" data-service-id="103">
+          <div class="post-header">
+            <div class="post-avatar" style="background:linear-gradient(135deg,#e44,#f97316);">MC</div>
+            <div class="post-meta">
+              <div class="post-name">Mehdi cherif</div>
+              <div class="post-role">Etudiant a l'univ d'abderrahmane mira</div>
+              <div class="post-time-row">
+                <span class="post-time">14 avr.</span>
+                <span class="post-globe"><i class="fa-solid fa-earth-africa"></i></span>
+              </div>
+            </div>
+            <button class="post-more"><i class="fa-solid fa-ellipsis"></i></button>
+          </div>
+
+          <div class="post-title">Algorithmes de tri — récap de la semaine</div>
+          <div class="post-tags">
+            <span class="post-tag green">Python</span>
+          </div>
+          <div class="post-img-placeholder gradient-3"><span>Notes de cours</span></div>
+          <div class="post-body">
+            Cette semaine j'ai approfondi les algorithmes de tri (QuickSort, MergeSort, HeapSort).
+            Partage de mes notes de cours pour ceux qui préparent les examens…
+          </div>
+
+          <div class="post-rating-summary">
+            <div class="rating-stars-display">
+              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+            </div>
+            <span class="rating-score">5.0</span>
+            <span class="rating-count">(5 évaluations)</span>
+          </div>
+
+          <div class="post-actions">
+            <button class="post-action-btn" data-action="rate"><i class="fa-regular fa-star"></i> Évaluer</button>
+             
+          </div>
+
+          <div class="rating-panel" hidden>
+            <div class="rating-panel-inner">
+              <p class="rating-panel-label">Votre évaluation</p>
+              <div class="star-picker">
+                <i class="fa-regular fa-star" data-star="1"></i>
+                <i class="fa-regular fa-star" data-star="2"></i>
+                <i class="fa-regular fa-star" data-star="3"></i>
+                <i class="fa-regular fa-star" data-star="4"></i>
+                <i class="fa-regular fa-star" data-star="5"></i>
+              </div>
+              <textarea class="rating-comment-input" placeholder="Laissez un commentaire (optionnel)..."></textarea>
+              <div class="rating-panel-actions">
+                <button class="rating-cancel-btn">Annuler</button>
+                <button class="rating-submit-btn">Soumettre</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="comments-list" hidden></div>
+        </article>
+
+      </div><!-- /posts-section -->
     </div><!-- /main-col -->
 
-    <!-- SIDEBAR -->
+    <!-- ══ SIDEBAR ══ -->
     <div class="sidebar">
-      <div class="suggest-card">
-        <h3 class="suggest-heading">Connaissez - Vous ?</h3>
-
-        <div class="suggest-list" id="suggestListPreview">
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#f43f5e,#be123c)">
-              <img src="../../images/mehdi.jpg" alt="M" onerror="this.style.display='none';this.parentElement.textContent='M'">
-            </div>
-            <div class="suggest-info">
-              <div class="name">mehdi cherif</div>
-              <div class="role">etudiant a l univ d abderrahmane mira</div>
-            </div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#5b8dee,#3a6de0)">N</div>
-            <div class="suggest-info">
-              <div class="name">na sfiaaaaaaaa</div>
-              <div class="role">etudiante a l univ de Guelma 2</div>
-            </div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#10b981,#059669)">C</div>
-            <div class="suggest-info">
-              <div class="name">chaima ouk</div>
-              <div class="role">prof a l univ de USTHB</div>
-            </div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#6366f1,#4338ca)">M</div>
-            <div class="suggest-info">
-              <div class="name">mekhmoukh</div>
-              <div class="role">agent de securite</div>
-            </div>
-          </div>
+      <div class="suggest-card " id="suggestCard">
+        <h3>CONNAISSEZ - VOUS ?</h3>
+        <!-- LIST OF ALL USERS -->
+        <div class="suggest-list" id="usersList">
+          <!-- Populated by JS -->
         </div>
-
-        <a href="#" class="see-all" id="seeAllBtn"><u>voir tous les suggestions</u> →</a>
       </div>
 
+
       <p class="footer-note">© 2026 THE trio. All rights reserved.</p>
+
+      <!-- CHAT PANEL -->
+      <div class="chat-panel" id="chatPanel">
+        <div class="chat-panel-header">
+          <div class="chat-panel-user">
+            <div class="suggest-avatar" style="background:linear-gradient(135deg,#5b8dee,#3a6de0);width:32px;height:32px;font-size:12px;">N</div>
+            <div>
+              <div class="chat-panel-name">Na Sfia</div>
+              <div class="chat-panel-status"><span class="online-dot"></span> En ligne</div>
+            </div>
+          </div>
+          <button class="chat-panel-close" id="chatPanelClose"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-msg received"><div class="msg-bubble">Salut ! Tu as vu le projet rendu ?</div><div class="msg-time">10:42</div></div>
+          <div class="chat-msg sent"><div class="msg-bubble">Oui je l'ai soumis hier soir 😅</div><div class="msg-time">10:44</div></div>
+          <div class="chat-msg received"><div class="msg-bubble">Parfait, on se voit demain pour la présentation ?</div><div class="msg-time">10:45</div></div>
+          <div class="chat-msg sent"><div class="msg-bubble">Oui 9h à la fac 👍</div><div class="msg-time">10:46</div></div>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="chatInput" placeholder="Écrire un message…">
+          <button class="chat-send-btn" id="chatSendBtn">
+            <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
+              <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M22 2L15 22 11 13 2 9l20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div><!-- /sidebar -->
+  </div><!-- /layout -->
+
+  <!-- ══ CHATBOT PANEL ══ -->
+<div class="chat-panel" id="chatbotPanel">
+  <div class="chat-panel-header">
+    <div class="chat-panel-user">
+      <div class="chat-panel-avatar" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa);">
+        <i class="fa-solid fa-robot"></i>
+      </div>
+      <div>
+        <div class="chat-panel-name">AGORA Assistant</div>
+        <div class="chat-panel-status"><span class="online-dot"></span> En ligne</div>
+      </div>
+    </div>
+    <button class="chat-panel-close" id="chatbotClose"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="chat-messages" id="chatbotMessages">
+    <div class="chat-msg received">
+      <div class="msg-bubble">Salut ! Je suis AGORA, votre assistant. Comment puis-je vous aider aujourd'hui ? 🫡</div>
+      <span class="msg-time">Maintenant</span>
     </div>
   </div>
-
-  <!-- FLOATING ACTION BAR -->
+  <div class="chat-input-row">
+    <input type="text" id="chatbotInput" placeholder="Posez votre question...">
+    <button class="chat-send-btn" id="chatbotSend"><i class="fa-solid fa-paper-plane"></i></button>
+  </div>
+</div>
+  <!-- ══ FAB BAR ══ -->
   <div class="fab-bar">
     <button class="fab-btn" title="Messagerie" id="fabMsgBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
         <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
       </svg>
     </button>
     <button class="fab-btn" title="Aide" id="fabHelpBtn">
-      <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
+      <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
         <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/>
         <path d="M12 17.5v.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
         <path d="M12 14c0-1.5 1.5-2 2.2-3.2a2.8 2.8 0 10-4.9-1.9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
   </div>
-
-  <!-- CHAT PANEL -->
-  <div class="chat-panel" id="chatPanel">
-    <div class="chat-panel-header">
-      <div class="chat-panel-user">
-        <div class="suggest-avatar" style="background:linear-gradient(135deg,#5b8dee,#3a6de0);width:32px;height:32px;font-size:12px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">N</div>
-        <div>
-          <div class="chat-panel-name">Na Sfia</div>
-          <div class="chat-panel-status"><span class="online-dot"></span> En ligne</div>
-        </div>
-      </div>
-      <button class="chat-panel-close" id="chatPanelClose">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </div>
-    <div class="chat-messages" id="chatMessages">
-      <div class="chat-msg received">
-        <div class="msg-bubble">Bonjour ! Je suis disponible pour discuter de mes services.</div>
-        <div class="msg-time">10:30</div>
-      </div>
-    </div>
-    <div class="chat-input-row">
-      <input type="text" id="chatInput" placeholder="Écrire un message…">
-      <button class="chat-send-btn" id="chatSendBtn">
-        <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
-          <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          <path d="M22 2L15 22 11 13 2 9l20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-    </div>
-  </div>
-
-  <!-- NOTIFICATION TOAST -->
-  <div id="notification"></div>
-
+  <script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
   <script src="./js/profile.js"></script>
 </body>
 </html>

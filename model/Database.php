@@ -6,7 +6,7 @@ class Database {
         if (self::$instance === null) {
             try {
                 self::$instance = new PDO(
-                    'mysql:host=localhost;dbname=echange_services_étudiants;charset=utf8',
+                    'mysql:host=localhost;dbname= echange_services_étudiants;charset=utf8',
                     'root',      
                     '',          
                     [
@@ -15,7 +15,7 @@ class Database {
                     ]
                 );
             } catch (PDOException $e) {
-                die("Erreur de connexion : " . $e->getMessage());
+                throw new PDOException("Erreur de connexion : " . $e->getMessage());
             }
         }
         return self::$instance;

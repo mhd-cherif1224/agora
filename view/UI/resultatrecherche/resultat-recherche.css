@@ -64,14 +64,13 @@
 }
 
 .nav-logo {
-  width: 36px; height: 36px;
-  background: linear-gradient(135deg, var(--color-pink), var(--color-pink-light));
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
+  width: 155px; height: 155px;
+  display: flex; align-items: center;
   flex-shrink: 0;
-  box-shadow: 0 0 14px var(--color-accent-glow);
+
+  
 }
-.nav-logo svg { width: 20px; height: 20px; fill: white; }
+.nav-logo img {  width: 100%; height: 100%; fill: white; }
 
 .nav-search {
   flex: 1; max-width: 340px;

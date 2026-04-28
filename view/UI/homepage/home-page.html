@@ -14,14 +14,15 @@
   <link rel="stylesheet" href="css/feed.css">
   <link rel="stylesheet" href="css/sidebar.css">
   <link rel="stylesheet" href="css/chat.css">
+   <script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
 </head>
 <body>
 
 <!-- ═══════════════════════════════════════ NAV ═══ -->
 <nav>
   <div class="nav-logo">
-    <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
-  </div>
+      <img src="../../images/logo.svg" width="100px" alt="">
+    </div>
 
   <div class="nav-search">
     <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -288,92 +289,15 @@
   <!-- ════════════ SIDEBAR ════════════ -->
   <div class="sidebar">
       <div class="suggest-card " id="suggestCard">
-        <h3>Connaissez - Vous ?</h3>
-        <!-- LIST PREVIEW (4 items) -->
-        <div class="suggest-list" id="suggestListPreview">
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#e8734a,#c9543a)">M</div>
-            <div class="suggest-info">
-              <div class="name">Mehdi Cherif</div>
-              <div class="role">Etudiant — Univ. Abderrahmane Mira</div>
-            </div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#5b8dee,#3a6de0)">N</div>
-            <div class="suggest-info">
-              <div class="name">Na Sfia</div>
-              <div class="role">Etudiante — Univ. As Suema 7</div>
-            </div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#4ecdc4,#2ab5ab)">C</div>
-            <div class="suggest-info">
-              <div class="name">Chaima Ouk</div>
-              <div class="role">Etudiante — Univ. As Suema 7</div>
-            </div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">Me</div>
-            <div class="suggest-info">
-              <div class="name">Mekhmoukh</div>
-              <div class="role">Agent de sécurité</div>
-            </div>
-          </div>
+        <h3>CONNAISSEZ - VOUS ?</h3>
+        <!-- LIST OF ALL USERS -->
+        <div class="suggest-list" id="usersList">
+          <!-- Populated by JS -->
         </div>
-
+      </div>
         <!-- ALL LIST (hidden by default) -->
-        <div class="suggest-list suggest-list-all" id="suggestListAll" style="display:none;">
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#e8734a,#c9543a)">M</div>
-            <div class="suggest-info"><div class="name">Mehdi Cherif</div><div class="role">Etudiant — Univ. Abderrahmane Mira</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#5b8dee,#3a6de0)">N</div>
-            <div class="suggest-info"><div class="name">Na Sfia</div><div class="role">Etudiante — Univ. As Suema 7</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#4ecdc4,#2ab5ab)">C</div>
-            <div class="suggest-info"><div class="name">Chaima Ouk</div><div class="role">Etudiante — Univ. As Suema 7</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">Me</div>
-            <div class="suggest-info"><div class="name">Mekhmoukh</div><div class="role">Agent de sécurité</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706)">Y</div>
-            <div class="suggest-info"><div class="name">Yacine LMadani</div><div class="role">Développeur Web — Alger</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#10b981,#059669)">A</div>
-            <div class="suggest-info"><div class="name">Amira Hadj</div><div class="role">Designer UI/UX — Oran</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#f43f5e,#be123c)">K</div>
-            <div class="suggest-info"><div class="name">Karim Zerrouk</div><div class="role">Ingénieur Réseau — Constantine</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#6366f1,#4338ca)">S</div>
-            <div class="suggest-info"><div class="name">Sofiane Belaid</div><div class="role">Data Scientist — Sétif</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#14b8a6,#0d9488)">L</div>
-            <div class="suggest-info"><div class="name">Lynda Mansouri</div><div class="role">Comptable — Béjaïa</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#f97316,#ea580c)">R</div>
-            <div class="suggest-info"><div class="name">Rachid Touati</div><div class="role">Architecte — Tizi-Ouzou</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9)">H</div>
-            <div class="suggest-info"><div class="name">Houda Khelil</div><div class="role">Médecin généraliste — Blida</div></div>
-          </div>
-          <div class="suggest-item">
-            <div class="suggest-avatar" style="background:linear-gradient(135deg,#0ea5e9,#0284c7)">I</div>
-            <div class="suggest-info"><div class="name">Imed Benmoussa</div><div class="role">Enseignant — Annaba</div></div>
-          </div>
-        </div>
-
-        <a href="#" class="see-all-link see-all" id="seeAllBtn"><u>voir tous les suggestions </u>→</a>
+        
+        
       </div>
       <p class="footer-note">© 2025 AGORA . All rights reserved.</p>
 

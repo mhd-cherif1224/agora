@@ -1,9 +1,12 @@
 /* ── MESSAGERIE LAYOUT ── */
 .msg-layout {
   display: grid;
-  grid-template-columns: 340px 1fr;
+  grid-template-columns: clamp(80px, 25vw, 340px) 1fr;
   height: calc(100vh - 54px);
   overflow: hidden;
+
+  /* FIX */
+  align-items: stretch;
 }
 
 /* ════════════════════════════
@@ -105,7 +108,7 @@
 
 .conv-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
 .conv-time { font-size: 10px; color: var(--color-muted); }
-.conv-badge {
+.conv-unread {
   width: 18px; height: 18px; border-radius: 50%;
   background: var(--color-accent);
   color: white; font-size: 9px; font-weight: 700;
@@ -113,6 +116,23 @@
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 2px 6px var(--color-accent-glow);
 }
+
+/* Empty conversation list */
+.conv-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+/* Loading and error states */
+.conv-loading, .conv-error {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+.conv-error { color: #ef4444; }
 
 /* ════════════════════════════
    RIGHT PANEL — Active chat
@@ -293,9 +313,29 @@
 .send-btn:active { transform: scale(.92); }
 
 /* ── RESPONSIVE ── */
-@media (max-width: 700px) {
-  .msg-layout { grid-template-columns: 1fr; }
-  .chat-panel { display: none; }
-  .msg-layout.chat-open .conv-panel { display: none; }
-  .msg-layout.chat-open .chat-panel { display: flex; }
+@media (max-width: 520px) {
+
+  /* shrink sidebar width */
+  .msg-layout {
+    grid-template-columns: 80px 1fr;
+  }
+
+  /* center items */
+  .conv-item {
+    justify-content: center;
+    padding: 10px 0;
+  }
+
+  /* hide ALL text content */
+  .conv-info,
+  .conv-meta {
+    display: none;
+  }
+
+  /* avatar slightly smaller */
+  .conv-avatar {
+    width: 42px;
+    height: 42px;
+  }
+
 }

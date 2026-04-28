@@ -1,0 +1,46 @@
+SELECT 
+  u.ID,
+  u.nom,
+  u.prenom,
+  u.photo_profil,
+
+  m.contenue AS last_message,
+  m.DateEnvoie AS last_message_time,
+
+  CASE 
+    WHEN m.ID_Expediteur = 1 THEN 1
+    ELSE 0
+  END AS is_sent_by_me
+
+FROM message m
+
+JOIN utilisateur u 
+  ON u.ID = (
+    CASE 
+      WHEN m.ID_Expediteur = 1 THEN m.ID_Destinataire
+      ELSE m.ID_Expediteur
+    END
+  )
+
+JOIN (
+  SELECT 
+    CASE 
+      WHEN ID_Expediteur = 1 THEN ID_Destinataire
+      ELSE ID_Expediteur
+    END AS other_user,
+    MAX(DateEnvoie) AS last_time
+  FROM message
+  WHERE ID_Expediteur = 1 OR ID_Destinataire = 1
+  GROUP BY other_user
+) t
+
+ON (
+  (
+    (m.ID_Expediteur = 1 AND m.ID_Destinataire = t.other_user)
+    OR
+    (m.ID_Expediteur = t.other_user AND m.ID_Destinataire = 1)
+  )
+  AND m.DateEnvoie = t.last_time
+)
+
+ORDER BY m.DateEnvoie DESC;
