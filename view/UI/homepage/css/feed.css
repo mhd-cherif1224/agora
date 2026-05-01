@@ -273,6 +273,22 @@
   line-height: 1.55; margin: 0;
 }
 
+.post-categories{
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 0 18px 8px;
+}
+
+.category-pill{
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.04);
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 720px) {
   .layout { grid-template-columns: 1fr; }

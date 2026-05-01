@@ -1,8 +1,10 @@
 <?php
+header('Content-Type: application/json');
+
 require_once __DIR__ . '/../controller/session-config.php';
 require_once __DIR__ . '/../model/Database.php';
 
-header('Content-Type: application/json');
+
 
 // Check session
 if (!isset($_SESSION['utilisateur_id'])) {

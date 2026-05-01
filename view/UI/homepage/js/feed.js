@@ -1,7 +1,214 @@
 // ── feed.js ──
 // Handles star rating + comment system on post cards
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded',async () => {
+
+  await loadServices();
+  async function loadServices() {
+
+    try {
+
+        const response = await fetch(
+      "../../../api/get-services.php"
+    );
+
+        const data = await response.json();
+
+        if (!data.success) {
+            console.error(data.message);
+            return;
+        }
+
+        const feed = document.querySelector(".feed");
+
+        feed.innerHTML = data.services
+            .map(service => createServiceCard(service))
+            .join("");
+
+    } catch (error) {
+
+        console.error("Error:", error);
+
+    }
+
+}
+function createServiceCard(service) {
+
+    const initials =
+    (service.nom?.charAt(0) || "") +
+    (service.prenom?.charAt(0) || "");
+
+const profileImage = service.photo_profil
+    ? `/Mini-Projet%20-%20Copy/${service.photo_profil}`
+    : null;
+
+const serviceImage = service.service_photo
+    ? `/Mini-Projet%20-%20Copy/${service.service_photo}`
+    : null;
+
+const categories = service.categorie
+    ? service.categorie.split(",")
+    : [];
+
+return `
+
+<article class="post-card" data-service-id="${service.ID}">
+    
+    <div class="post-header">
+
+        <div class="post-avatar">
+            ${
+                profileImage
+                ? `
+                    <img 
+                        src="${profileImage}" 
+                        style="width:100%;height:100%;object-fit:cover;border-radius:50%;"
+                    >
+                  `
+                : initials
+            }
+        </div>
+
+        <div class="post-meta">
+
+            <div class="post-name">
+                ${service.nom} ${service.prenom}
+            </div>
+
+            <div class="post-role">
+                ${service.specialite || ""}
+                ${service.niveau || ""}
+            </div>
+
+            <div class="post-time-row">
+                <span class="post-time">
+                    ${service.DateDePublication}
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="post-title">
+        ${service.titre}
+    </div>
+
+    <div class="post-categories">
+        ${
+            categories.map(cat => `
+                <span class="category-pill">
+                    ${cat.trim()}
+                </span>
+            `).join("")
+        }
+    </div>
+
+    ${
+        serviceImage
+        ? `
+            <img 
+                class="post-image"
+                src="${serviceImage}"
+                style="width:100%;object-fit:cover;"
+            >
+        `
+        : ""
+    }
+
+    <div class="post-body">
+        ${service.description}
+    </div>
+
+    <div class="post-rating-summary">
+
+        <div class="rating-stars-display">
+            ${generateStars(service.note_moyenne)}
+        </div>
+
+        <span class="rating-score">
+            ${service.note_moyenne}
+        </span>
+
+        <span class="rating-count">
+            (${service.nb_avis} évaluations)
+        </span>
+
+    </div>
+
+    <div class="post-actions">
+
+        <button class="post-action-btn" data-action="rate">
+            <i class="fa-regular fa-star"></i>
+            Évaluer
+        </button>
+
+    </div>
+
+    <div class="rating-panel" hidden>
+
+        <div class="rating-panel-inner">
+
+            <p class="rating-panel-label">
+                Votre évaluation
+            </p>
+
+            <div class="star-picker">
+                <i class="fa-regular fa-star" data-star="1"></i>
+                <i class="fa-regular fa-star" data-star="2"></i>
+                <i class="fa-regular fa-star" data-star="3"></i>
+                <i class="fa-regular fa-star" data-star="4"></i>
+                <i class="fa-regular fa-star" data-star="5"></i>
+            </div>
+
+            <textarea 
+                class="rating-comment-input"
+                placeholder="Commentaire..."
+            ></textarea>
+
+            <div class="rating-panel-actions">
+
+                <button class="rating-cancel-btn">
+                    Annuler
+                </button>
+
+                <button class="rating-submit-btn">
+                    Soumettre
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="comments-list" hidden></div>
+
+</article>
+
+`;
+}
+
+function generateStars(note) {
+
+    note = parseFloat(note);
+
+    const fullStars = Math.floor(note);
+
+    let html = "";
+
+    for(let i = 0; i < 5; i++){
+
+        if(i < fullStars){
+            html += `<i class="fa-solid fa-star"></i>`;
+        } else {
+            html += `<i class="fa-regular fa-star"></i>`;
+        }
+
+    }
+
+    return html;
+}
 
   document.querySelector('.feed').addEventListener('click', (e) => {
 

@@ -436,6 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
     lastConv.initials = (user.prenom[0] + user.nom[0]).toUpperCase();
     lastConv.messages = [];
 
+
     updateChatPanelHeader();
 
     // clear UI
@@ -474,20 +475,21 @@ if (messageBtn) {
 
     const nameEl   = panel.querySelector('.chat-panel-name');
     const avatarEl = panel.querySelector('.chat-panel-avatar');
+   
 
     if (nameEl) nameEl.textContent = lastConv.name;
     //  lastConv.avatar = user.photo_profil || null;
-
+    console.log(lastConv.avatar)
     
-    if (avatarEl) {
+    
       if (lastConv.avatar) {
-        avatarEl.innerHTML = `<img src="${lastConv.photo_profil}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+        avatarEl.innerHTML = `<img src="/Mini-Projet%20-%20Copy/${lastConv.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
         avatarEl.style.background = 'none';
       } else {
         avatarEl.textContent = lastConv.initials;
         avatarEl.style.background = lastConv.gradient;
       }
-    }
+   
   }
 
 
