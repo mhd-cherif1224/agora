@@ -30,7 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
   function closeBotChat(){ botPanel.classList.remove('active'); }
 
   if (fabChatBtn) fabChatBtn.addEventListener('click', openChat);
-  if (navChatBtn) navChatBtn.addEventListener('click', openChat);
   if (closeBtn)   closeBtn.addEventListener('click', closeChat);
   if (fabHelpBtn)  fabHelpBtn.addEventListener('click', openBotChat);
   if (botCloseBtn) botCloseBtn.addEventListener('click', closeBotChat);
@@ -42,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     await loadUserProfile();
     await loadLastConversation();
   }
+
 
   // ─────────────────────────────────────────
   // 1. LOAD CURRENT USER PROFILE
@@ -304,9 +304,60 @@ document.addEventListener('DOMContentLoaded', () => {
     return gradients[(seed || 0) % gradients.length];
   }
 
+  //message a user
+
+  const messageBtn = document.getElementById('messageBtn');
+
+if (messageBtn) {
+  messageBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+
+    const userId = messageBtn.dataset.userId;
+
+    openChatWithUser(userId);
+  });
+}
+
+async function openChatWithUser(userId) {
+  if (!userId) return;
+
+  try {
+    const res = await fetch(`/Mini-Projet%20-%20Copy/api/get-user.php?id=${userId}`);
+    const data = await res.json();
+
+    if (!data.success) return;
+
+    const user = data.user || data;
+
+    lastConv = {
+      id: user.ID,
+      name: `${user.prenom} ${user.nom}`,
+      avatar: user.photo_profil || null,
+      initials: (user.prenom[0] + user.nom[0]).toUpperCase(),
+      gradient: randomGradient(user.ID),
+      messages: []
+    };
+
+    updateChatPanelHeader();
+    openChat();
+
+    // reset messages UI
+    const messages = document.getElementById('chatMessages');
+    if (messages) messages.innerHTML = '';
+
+    // reconnect socket for this user
+    if (socket) {
+      socket.disconnect();
+      socket = null;
+    }
+
+    initWebSocket();
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 });
 
 
-socket.on('conversation_history', (data) => {
-  console.log('HISTORY RECEIVED:', data); // 👈 add this
-});

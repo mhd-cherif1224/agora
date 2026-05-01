@@ -73,6 +73,7 @@ nav {
   width: 155px; height: 155px;
   display: flex; align-items: center;
   flex-shrink: 0;
+  cursor: pointer;
 
   
 }

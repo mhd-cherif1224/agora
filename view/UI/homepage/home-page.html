@@ -14,13 +14,14 @@
   <link rel="stylesheet" href="css/feed.css">
   <link rel="stylesheet" href="css/sidebar.css">
   <link rel="stylesheet" href="css/chat.css">
+  <link rel="stylesheet" href="css/post-modal.css">
    <script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
 </head>
 <body>
 
 <!-- ═══════════════════════════════════════ NAV ═══ -->
 <nav>
-  <div class="nav-logo">
+  <div class="nav-logo" onclick="window.location.href='../homepage/home-page.html'">
       <img src="../../images/logo.svg" width="100px" alt="">
     </div>
 
@@ -47,7 +48,7 @@
     <div class="nav-divider"></div>
 
     <div class="nav-avatar" id="navAvatar" onclick="window.location.href='../../html/mon-profil.html'" title="Mon Profil">
-        <img id="navAvatarImg" src="../images/person.png" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;">
+        <img id="navAvatarImg" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;">
         <span id="navAvatarLetter">M</span>
       </div>
       <button class="nav-menu-btn"><span></span><span></span><span></span></button>
@@ -431,6 +432,7 @@
           <button class="timer-confirm-btn" id="timerConfirm">Confirmer</button>
         </div>
       </div>
+      <div class="cat-dropdown" id="catDropdown"></div>
       <button class="post-publish-btn" id="postPublishBtn">publier</button>
     </div>
   </div>
