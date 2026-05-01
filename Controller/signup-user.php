@@ -21,7 +21,25 @@ if (empty($password)) {
     echo json_encode(['success' => false, 'message' => 'Mot de passe requis.']);
     exit;
 }
-
+// ── AJOUT : Validation email universitaire ──
+// Accepte : @univ-bejaia.dz (personnel/profs)
+//       ET : @fac.univ-bejaia.dz où fac ∈ {se, snv, shs, eco, droit, st} (étudiants)
+$facultes_valides = ['se', 'snv', 'shs', 'eco', 'droit', 'st'];
+$facultes_pattern = implode('|', $facultes_valides);
+ 
+$est_universitaire = preg_match(
+    '/^[^@]+@((' . $facultes_pattern . ')\.)?univ-bejaia\.dz$/i',
+    $email
+);
+ 
+if (!$est_universitaire) {
+    ob_end_clean();
+    echo json_encode([
+        'success' => false,
+        'message' => 'L\'inscription est réservée aux membres de l\'Université de Béjaïa. Veuillez utiliser votre email universitaire (@univ-bejaia.dz ou @fac.univ-bejaia.dz).'
+    ]);
+    exit;
+}
 // Vérifier que l'email n'existe pas déjà
 $pdo  = Database::getConnection();
 $stmt = $pdo->prepare("SELECT ID FROM utilisateur WHERE email = :email LIMIT 1");

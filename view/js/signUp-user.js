@@ -15,7 +15,15 @@ function validatePassword(password) {
         special:   /[^A-Za-z0-9]/.test(password),
     };
 }
-
+// ── AJOUT : Validation email universitaire côté client ──
+function validateUniversityEmail(email) {
+    const facultes = ['se', 'snv', 'shs', 'eco', 'droit', 'st'];
+    const pattern  = new RegExp(
+        '^[^@]+@((' + facultes.join('|') + ')\\.)?univ-bejaia\\.dz$',
+        'i'
+    );
+    return pattern.test(email);
+}
 // ── Notifications ──
 function showNotification(message) {
     const notif = document.getElementById("notification");
