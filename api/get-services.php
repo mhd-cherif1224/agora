@@ -6,6 +6,14 @@ header('Content-Type: application/json');
 
 try {
 
+    $sort = $_GET['sort'] ?? 'recent';
+
+    $orderBy = "s.DateDePublication DESC";
+
+    if ($sort === "popular") {
+        $orderBy = "nb_avis DESC, note_moyenne DESC";
+    }
+
     $pdo = Database::getConnection();
 
     $stmt = $pdo->prepare("
@@ -52,7 +60,7 @@ try {
 
     GROUP BY s.ID
 
-    ORDER BY s.DateDePublication DESC
+    ORDER BY $orderBy
 ");
 
     $stmt->execute();

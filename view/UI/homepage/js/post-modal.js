@@ -432,7 +432,49 @@ function showNotification(msg) {
     }
   });
 
+  document.addEventListener("DOMContentLoaded", () => {
+    loadSessionUser();
+});
+
+async function loadSessionUser() {
+
+    try {
+
+        const userId = localStorage.getItem("userId");
+
+        if (!userId) return;
+
+        const response = await fetch(
+            `/Mini-Projet%20-%20Copy/api/get-profile.php?id=${userId}`
+        );
+
+        const data = await response.json();
+
+        if (!data.success) return;
+
+        const user = data.user;
+
+        const profileImage = user.photo_profil
+            ? `/Mini-Projet%20-%20Copy/${user.photo_profil}`
+            : "";
+
+        document.getElementById("postModalAvatar").src =
+            profileImage;
+
+        document.getElementById("postModalName").textContent =
+            `${user.nom} ${user.prenom}`;
+
+        document.getElementById("postModalRole").textContent =
+            `${user.specialite || ""} ${user.niveau || ""}`;
+
+    } catch (error) {
+        console.error(error);
+    }
+}
+
   // ════ EDIT MODAL ════
+
+
   const editOverlay = document.createElement('div');
   editOverlay.className = 'edit-post-overlay'; editOverlay.id = 'editPostOverlay';
   editOverlay.innerHTML = `

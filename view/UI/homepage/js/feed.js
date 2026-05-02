@@ -1,37 +1,47 @@
 // ── feed.js ──
 // Handles star rating + comment system on post cards
 
-document.addEventListener('DOMContentLoaded',async () => {
+document.addEventListener("DOMContentLoaded", async () => {
 
-  await loadServices();
-  async function loadServices() {
+    const sortSelect = document.querySelector(".sort-select");
 
-    try {
+    sortSelect.addEventListener("change", async () => {
+        await loadServices(sortSelect.value);
+    });
 
-        const response = await fetch(
-      "../../../api/get-services.php"
-    );
+    await loadServices(sortSelect.value);
 
-        const data = await response.json();
 
-        if (!data.success) {
-            console.error(data.message);
-            return;
+    async function loadServices(sort = "recent") {
+
+        try {
+
+            const response = await fetch(
+                `../../../api/get-services.php?sort=${sort}`
+            );
+
+            const data = await response.json();
+
+            if (!data.success) {
+                console.error(data.message);
+                return;
+            }
+
+            const feed = document.querySelector(".feed");
+
+            feed.innerHTML = data.services
+                .map(service => createServiceCard(service))
+                .join("");
+
+        } catch (error) {
+
+            console.error("Error:", error);
+
         }
-
-        const feed = document.querySelector(".feed");
-
-        feed.innerHTML = data.services
-            .map(service => createServiceCard(service))
-            .join("");
-
-    } catch (error) {
-
-        console.error("Error:", error);
 
     }
 
-}
+
 function createServiceCard(service) {
 
     const initials =
@@ -96,14 +106,21 @@ return `
         ${service.titre}
     </div>
 
-    <div class="post-categories">
+    <div class="post-tags">
+    
+          <span class="post-tag blue">
         ${
             categories.map(cat => `
-                <span class="category-pill">
+                
                     ${cat.trim()}
-                </span>
+               
             `).join("")
         }
+
+        <span>
+    </div>
+    <div class="post-body">
+        ${service.description}
     </div>
 
     ${
@@ -118,9 +135,7 @@ return `
         : ""
     }
 
-    <div class="post-body">
-        ${service.description}
-    </div>
+    
 
     <div class="post-rating-summary">
 
@@ -244,6 +259,33 @@ function generateStars(note) {
     return html;
 }
 
+async function refreshService(serviceId) {
+
+    try {
+
+        const response = await fetch(
+            `../../../api/get-single-service.php?id=${serviceId}`
+        );
+
+        const data = await response.json();
+
+        if (!data.success) return;
+
+        const newCard = createServiceCard(data.service);
+
+        const oldCard = document.querySelector(
+            `[data-service-id="${serviceId}"]`
+        );
+
+        if (oldCard) {
+            oldCard.outerHTML = newCard;
+        }
+
+    } catch (error) {
+        console.error(error);
+    }
+}
+
   document.querySelector('.feed').addEventListener('click', (e) => {
 
     // ── RATE button → toggle rating panel
@@ -348,6 +390,8 @@ function submitRating(card) {
       textarea.placeholder = 'Laissez un commentaire (optionnel)...';
       textarea.classList.remove('input-error');
     }, 2000);
+
+    refreshService(serviceId);
     return;
   }
 

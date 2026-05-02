@@ -1255,7 +1255,8 @@ function createServiceCard(service) {
             ${service.titre}
         </div>
 
-        <div class="post-categories">
+        <div class="post-tags">
+          <span class="post-tag green">
             ${
                 categories.map(cat => `
                     <span class="category-pill">
@@ -1263,6 +1264,7 @@ function createServiceCard(service) {
                     </span>
                 `).join("")
             }
+          </span>
         </div>
 
         <div class="post-body">
