@@ -21,6 +21,7 @@ let lastConv = null;
    INIT
 ───────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
+  loadUserProfile();
   loadNotifications();
   setupFilters();
   setupMarkAll();
@@ -29,6 +30,51 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ─────────────────────────────────────────────
    FETCH FROM API
 ───────────────────────────────────────────── */
+
+async function loadUserProfile() {
+  try {
+    const res = await fetch('../../../api/get-profile.php');
+
+    if (res.status === 401) {
+      window.location.href = '/Mini-Projet - Copy/view/html/login.html';
+      return;
+    }
+
+    const data = await res.json();
+
+    if (!data.success || !data.id) {
+      console.error('Invalid profile response', data);
+      return;
+    }
+
+    currentUser = {
+      id: data.id,
+      nom: data.nom,
+      prenom: data.prenom,
+      avatar: data.avatar
+    };
+
+    // NAV avatar
+    const navImg = document.getElementById('navAvatarImg');
+    const navLetter = document.getElementById('navAvatarLetter');
+
+    if (data.avatar) {
+      navImg.src = data.avatar;
+      navImg.style.display = 'block';
+      navLetter.style.display = 'none';
+    } else {
+      navLetter.textContent = (data.prenom[0] + data.nom[0]).toUpperCase();
+      navImg.style.display = 'none';
+      navLetter.style.display = 'block';
+    }
+
+    initWebSocket();
+
+  } catch (err) {
+    console.error('Profile error:', err);
+  }
+}
+
 async function loadNotifications() {
   try {
     const res = await fetch('../../../api/get-notifications.php');
