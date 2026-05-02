@@ -1,6 +1,8 @@
 // ── feed.js ──
 // Handles star rating + comment system on post cards
 
+let socket = []
+
 document.addEventListener("DOMContentLoaded", async () => {
 
     const sortSelect = document.querySelector(".sort-select");
@@ -8,6 +10,60 @@ document.addEventListener("DOMContentLoaded", async () => {
     sortSelect.addEventListener("change", async () => {
         await loadServices(sortSelect.value);
     });
+
+await loadUserProfile();
+
+
+async function loadUserProfile() {
+  try {
+    const res = await fetch('/Mini-Projet%20-%20Copy/api/get-profile.php');
+
+    if (res.status === 401) {
+      window.location.href = '/Mini-Projet - Copy/view/html/login.html';
+      return;
+    }
+
+    const data = await res.json();
+
+    if (!data.success || !data.id) {
+      console.error('Invalid profile response', data);
+      return;
+    }
+
+    currentUser = {
+      id: data.id,
+      nom: data.nom,
+      prenom: data.prenom,
+      avatar: data.avatar
+    };
+
+    // NAV avatar
+    const navImg = document.getElementById('navAvatarImg');
+    const navLetter = document.getElementById('navAvatarLetter');
+    const composetImg = document.querySelector("#composerAvatar");
+    console.log(composetImg)
+
+    if (data.avatar) {
+      navImg.src = data.avatar;
+      navImg.style.display = 'block';
+      navLetter.style.display = 'none';
+
+      composetImg.src = data.avatar;
+      composetImg.style.display = 'block';
+      
+    } else {
+      navLetter.textContent = (data.prenom[0] + data.nom[0]).toUpperCase();
+      navImg.style.display = 'none';
+      navLetter.style.display = 'block';
+
+      composetImg.textContent = (data.prenom[0] + data.nom[0]).toUpperCase();
+      composetImg.style.display = 'block';
+    }
+
+  } catch (err) {
+    console.error('Profile error:', err);
+  }
+}
 
     await loadServices(sortSelect.value);
 
@@ -404,7 +460,7 @@ function submitRating(card) {
     note,
     commentaire: commentaire || null,
     DateEval: dateEval,
-    ID_Utilisateur: 1,   // replace with real session user id
+    ID_Utilisateur: currentUser.id,   // replace with real session user id
     ID_Service: serviceId
   };
 

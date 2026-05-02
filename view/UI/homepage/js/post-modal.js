@@ -68,6 +68,72 @@ function _renderHiddenPanel() {
   });
 }
 
+//user profile load
+
+loadUserProfile();
+
+
+async function loadUserProfile() {
+  try {
+    const res = await fetch('/Mini-Projet%20-%20Copy/api/get-profile.php');
+
+    if (res.status === 401) {
+      window.location.href = '/Mini-Projet - Copy/view/html/login.html';
+      return;
+    }
+
+    const data = await res.json();
+
+    if (!data.success || !data.id) {
+      console.error('Invalid profile response', data);
+      return;
+    }
+
+    currentUser = {
+      id: data.id,
+      nom: data.nom,
+      prenom: data.prenom,
+      role : data.role,
+      avatar: data.avatar
+    };
+
+    // NAV avatar
+    const pmAvatar = document.getElementById('pmAvatar');
+    const postModalName = document.querySelector('.post-modal-name');
+    const postModalRole = document.querySelector('.post-modal-role');
+    
+    if(data.nom){
+      postModalName.textContent = data.nom;
+    }else{
+      console.log("error loading the post modal name ")
+    }
+
+    if(data.role){
+      postModalRole.textContent = data.role;
+    }else{
+      console.log("error loading the post modal role ")
+    }
+
+   
+    console.log(pmAvatar)
+
+    if (data.avatar) {
+      pmAvatar.src = data.avatar;
+      pmAvatar.style.display = 'block';
+      
+      
+    } else{
+
+      console.log("error loading the pmAvatar ")
+    }
+
+    initWebSocket();
+
+  } catch (err) {
+    console.error('Profile error:', err);
+  }
+}
+
 
 // ════════════════════════════════════════
 // NOTIFICATION helper
