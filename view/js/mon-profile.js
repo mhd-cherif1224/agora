@@ -281,6 +281,8 @@ document.addEventListener('DOMContentLoaded', () => {
     await loadLastConversation();
   }
 
+  
+
   // ─────────────────────────────────────────
   // 1. LOAD CURRENT USER PROFILE
   // ─────────────────────────────────────────
@@ -1164,11 +1166,168 @@ async function loadAllUsers() {
   }
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+    loadServices();
+});
+
+async function loadServices() {
+
+    try {
+
+        const response = await fetch(
+            "/Mini-Projet%20-%20Copy/api/get-services.php"
+        );
+
+        const data = await response.json();
+
+        console.log("Services loaded:", data);
+
+        if (!data.success) return;
+
+        const container = document.getElementById("servicesContainer");
+
+        if (!container) {
+            console.log("Container not found");
+            return;
+        }
+
+        container.innerHTML = "";
+
+        data.services.forEach(service => {
+            container.innerHTML += createServiceCard(service);
+        });
+
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
+function createServiceCard(service) {
+
+    const profileImage = service.photo_profil
+        ? `/Mini-Projet%20-%20Copy/${service.photo_profil}`
+        : "";
+
+    const serviceImage = service.service_photo
+        ? `/Mini-Projet%20-%20Copy/${service.service_photo}`
+        : null;
+
+    const categories = service.categorie
+        ? service.categorie.split(",")
+        : [];
+
+    return `
+
+    <article class="post-card" data-service-id="${service.ID}">
+        
+        <div class="post-header">
+
+            <div class="post-avatar">
+                <img 
+                    src="${profileImage}" 
+                    style="width:100%;height:100%;object-fit:cover;border-radius:50%;"
+                >
+            </div>
+
+            <div class="post-meta">
+
+                <div class="post-name">
+                    ${service.nom} ${service.prenom}
+                </div>
+
+                <div class="post-role">
+                    ${service.specialite || ""}
+                    ${service.niveau || ""}
+                </div>
+
+                <div class="post-time-row">
+                    <span class="post-time">
+                        ${service.DateDePublication}
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="post-title">
+            ${service.titre}
+        </div>
+
+        <div class="post-categories">
+            ${
+                categories.map(cat => `
+                    <span class="category-pill">
+                        ${cat.trim()}
+                    </span>
+                `).join("")
+            }
+        </div>
+
+        <div class="post-body">
+            ${service.description}
+        </div>
+
+        ${
+            serviceImage
+            ? `
+                <img 
+                    class="post-image"
+                    src="${serviceImage}"
+                >
+            `
+            : ""
+        }
+
+        <div class="post-rating-summary">
+
+            <div class="rating-stars-display">
+                ${generateStars(service.note_moyenne)}
+            </div>
+
+            <span class="rating-score">
+                ${service.note_moyenne}
+            </span>
+
+            <span class="rating-count">
+                (${service.nb_avis} évaluations)
+            </span>
+
+        </div>
+
+    </article>
+
+    `;
+}
+
+function generateStars(note) {
+
+    note = parseFloat(note);
+
+    const fullStars = Math.floor(note);
+
+    let html = "";
+
+    for(let i = 0; i < 5; i++){
+
+        if(i < fullStars){
+            html += `<i class="fa-solid fa-star"></i>`;
+        } else {
+            html += `<i class="fa-regular fa-star"></i>`;
+        }
+
+    }
+
+    return html;
+}
+
 // Call on page load
-document.addEventListener('DOMContentLoaded', loadAllUsers);
+document.addEventListener('DOMContentLoaded', loadAllUsers );
 // Also call immediately in case DOM is already loaded
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', loadAllUsers);
+  document.addEventListener('DOMContentLoaded', loadAllUsers)
 } else {
   loadAllUsers();
+  loadMyServices();
 }

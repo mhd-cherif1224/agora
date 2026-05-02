@@ -50,6 +50,8 @@ const categories = service.categorie
     ? service.categorie.split(",")
     : [];
 
+const timeAgo = getTimeAgo(service.DateDePublication);
+
 return `
 
 <article class="post-card" data-service-id="${service.ID}">
@@ -82,7 +84,7 @@ return `
 
             <div class="post-time-row">
                 <span class="post-time">
-                    ${service.DateDePublication}
+                    ${timeAgo}
                 </span>
             </div>
 
@@ -187,6 +189,38 @@ return `
 </article>
 
 `;
+}
+function getTimeAgo(dateString) {
+    const now = new Date();
+    const serviceDate = new Date(dateString);
+
+    const diffMs = now - serviceDate;
+
+    const minutes = Math.floor(diffMs / (1000 * 60));
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (minutes < 60) {
+        return `il y a ${minutes} min`;
+    }
+
+    if (hours < 24) {
+        return `il y a ${hours} h`;
+    }
+
+    if (days < 30) {
+        return `il y a ${days} jours`;
+    }
+
+    const months = Math.floor(days / 30);
+
+    if (months < 12) {
+        return `il y a ${months} mois`;
+    }
+
+    const years = Math.floor(months / 12);
+
+    return `il y a ${years} an(s)`;
 }
 
 function generateStars(note) {
