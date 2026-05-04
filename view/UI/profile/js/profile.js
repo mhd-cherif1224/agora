@@ -23,6 +23,54 @@ function buildPhotoUrl(path) {
   return `/Mini-Projet - Copy/${path}`;
 }
 
+
+// ─────────────────────────────────────────
+// LOAD USER PROFILE
+// ─────────────────────────────────────────
+async function loadUserProfile() {
+  try {
+    const res = await fetch('/Mini-Projet%20-%20Copy/api/get-profile.php');
+
+    if (res.status === 401) {
+      window.location.href = '/Mini-Projet - Copy/view/html/login.html';
+      return;
+    }
+
+    const data = await res.json();
+
+    if (!data.success || !data.id) {
+      console.error('Invalid profile response', data);
+      return;
+    }
+
+    currentUser = {
+      id: data.id,
+      nom: data.nom,
+      prenom: data.prenom,
+      avatar: data.avatar
+    };
+
+    // NAV avatar
+    const navImg = document.getElementById('navAvatarImg');
+    const navLetter = document.getElementById('navAvatarLetter');
+
+    if (data.avatar) {
+      navImg.src = data.avatar;
+      navImg.style.display = 'block';
+      navLetter.style.display = 'none';
+    } else {
+      navLetter.textContent = (data.prenom[0] + data.nom[0]).toUpperCase();
+      navImg.style.display = 'none';
+      navLetter.style.display = 'block';
+    }
+
+    initWebSocket();
+
+  } catch (err) {
+    console.error('Profile error:', err);
+  }
+}
+
 // ════════════════════════════════════════
 // LOAD PROFILE FROM SESSION (PHP API)
 // ════════════════════════════════════════
@@ -36,13 +84,14 @@ async function loadProfile() {
       : `../../../api/get-profile.php`;
 
     const res = await fetch(url);
-
+    
     if (res.status === 401) {
       window.location.href = '../html/login.html';
       return;
     }
 
     const data = await res.json();
+    console.log("the data :"+data)
     if (!data.success) return;
 
     const user = data.user || data;
@@ -66,23 +115,6 @@ async function loadProfile() {
     const letter = document.getElementById('navAvatarLetter');
     const img    = document.getElementById('navAvatarImg');
 
-    if (user.photo_profil) {
-      // Always store the fully-built URL so every consumer gets the right path
-      currentProfileSrc = buildPhotoUrl(user.photo_profil);
-
-      if (img) {
-        img.src = currentProfileSrc;
-        img.style.display = 'block';
-      }
-      if (letter) letter.style.display = 'none';
-
-      updateAllPostAvatars(currentProfileSrc);
-    } else {
-      if (letter) {
-        letter.textContent = currentUser.initiales[0] || '?';
-        letter.style.display = '';
-      }
-    }
 
     const profilePreview = document.getElementById('profilePreview');
     if (profilePreview && user.photo_profil)
@@ -359,26 +391,6 @@ document.addEventListener('DOMContentLoaded', () => {
     await loadLastConversation();
   }
 
-  // ─────────────────────────────────────────
-  // 1. LOAD CURRENT USER PROFILE
-  // ─────────────────────────────────────────
-  async function loadUserProfile() {
-    try {
-      const res  = await fetch('/Mini-Projet%20-%20Copy/api/get-profile.php');
-      if (!res.ok) return;
-      const data = await res.json();
-      if (!data.success || !data.id) return;
-
-      currentUser = {
-        id:     data.id,
-        nom:    data.nom,
-        prenom: data.prenom,
-        avatar: data.avatar
-      };
-    } catch (err) {
-      console.warn('chat.js: could not load profile', err);
-    }
-  }
 
   //scroll to bottom of chat func
   function scrollToBottom() {
@@ -1174,7 +1186,7 @@ function enrichCard(card) {
             confirmOverlay.remove();
             card.style.animation = 'postCardOut .3s ease forwards';
             setTimeout(() => card.remove(), 280);
-            showNotification('🗑️ Post supprimé');
+            showNotification('Post supprimé');
           });
 
         } else if (action === 'edit') {
@@ -1242,6 +1254,252 @@ function enrichCard(card) {
 
 
 
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadServices();
+});
+
+async function loadServices() {
+
+    try {
+      
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get("id");
+        console.log(userId)
+
+        const response = await fetch(
+            `/Mini-Projet%20-%20Copy/api/get-user-service.php?id=${userId}`
+        );
+
+        const data = await response.json();
+        
+        console.log("Services loaded:", data);
+        
+        if (!data.success) return;
+
+        const container = document.getElementById("servicesContainer");
+
+        if (!container) {
+            console.log("Container not found");
+            return;
+        }
+
+        container.innerHTML = "";
+
+        data.services.forEach(service => {
+            container.innerHTML += createServiceCard(service);
+        });
+
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
+function createServiceCard(service) {
+
+    const profileImage = service.photo_profil
+        ? `/Mini-Projet%20-%20Copy/${service.photo_profil}`
+        : "";
+
+    console.log(service)
+
+    const serviceImage = service.service_photo
+        ? `/Mini-Projet%20-%20Copy/${service.service_photo}`
+        : null;
+
+    const categories = service.categorie
+        ? service.categorie.split(",")
+        : [];
+
+    return `
+
+    <article class="post-card" data-service-id="${service.ID}">
+        
+        <div class="post-header">
+
+            <div class="post-avatar">
+                <img 
+                    src="${profileImage}" 
+                    style="width:100%;height:100%;object-fit:cover;border-radius:50%;"
+                >
+            </div>
+
+            <div class="post-meta">
+
+                <div class="post-name">
+                    ${service.nom} ${service.prenom}
+                </div>
+
+                <div class="post-time-row">
+                    <span class="post-time">
+                        ${getTimeAgo(service.DateDePublication)}
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="post-title">
+            ${service.titre}
+        </div>
+
+        <div class="post-tags">
+          <span class="post-tag ">
+            ${
+                categories.map(cat => `
+                    <span class="category-pill green">
+                        ${cat.trim()}
+                    </span>
+                `).join("")
+            }
+          </span>
+        </div>
+
+        <div class="post-body">
+            ${service.description}
+            <br>
+            prix : ${service.prix} DZD
+        </div>
+        <div class="post-body">${service.status}</div>
+
+        ${
+            serviceImage
+            ? `
+                <img 
+                    class="post-image"
+                    src="${serviceImage}"
+                >
+            `
+            : ""
+        }
+        
+        
+        <div class="post-rating-summary">
+
+        <div class="rating-stars-display">
+            ${generateStars(service.note_moyenne)}
+        </div>
+
+        <span class="rating-score">
+            ${service.note_moyenne}
+        </span>
+
+        <span class="rating-count">
+            (${service.nb_avis} évaluations)
+        </span>
+
+    </div>
+
+    <div class="post-actions">
+
+        <button class="post-action-btn" data-action="rate">
+            <i class="fa-regular fa-star"></i>
+            Évaluer
+        </button>
+
+    </div>
+
+    <div class="rating-panel" hidden>
+
+        <div class="rating-panel-inner">
+
+            <p class="rating-panel-label">
+                Votre évaluation
+            </p>
+
+            <div class="star-picker">
+                <i class="fa-regular fa-star" data-star="1"></i>
+                <i class="fa-regular fa-star" data-star="2"></i>
+                <i class="fa-regular fa-star" data-star="3"></i>
+                <i class="fa-regular fa-star" data-star="4"></i>
+                <i class="fa-regular fa-star" data-star="5"></i>
+            </div>
+
+            <textarea 
+                class="rating-comment-input"
+                placeholder="Commentaire..."
+            ></textarea>
+
+            <div class="rating-panel-actions">
+
+                <button class="rating-cancel-btn">
+                    Annuler
+                </button>
+
+                <button class="rating-submit-btn">
+                    Soumettre
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="comments-list" hidden></div>
+
+</article>
+
+    `;
+}
+
+
+function getTimeAgo(dateString) {
+    const now = new Date();
+    const serviceDate = new Date(dateString);
+
+    const diffMs = now - serviceDate;
+
+    const minutes = Math.floor(diffMs / (1000 * 60));
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (minutes < 60) {
+        return `il y a ${minutes} min`;
+    }
+
+    if (hours < 24) {
+        return `il y a ${hours} h`;
+    }
+
+    if (days < 30) {
+        return `il y a ${days} jours`;
+    }
+
+    const months = Math.floor(days / 30);
+
+    if (months < 12) {
+        return `il y a ${months} mois`;
+    }
+
+    const years = Math.floor(months / 12);
+
+    return `il y a ${years} an(s)`;
+}
+
+function generateStars(note) {
+
+    note = parseFloat(note);
+
+    const fullStars = Math.floor(note);
+
+    let html = "";
+
+    for(let i = 0; i < 5; i++){
+
+        if(i < fullStars){
+            html += `<i class="fa-solid fa-star"></i>`;
+        } else {
+            html += `<i class="fa-regular fa-star"></i>`;
+        }
+
+    }
+
+    return html;
 }
 
 /* Close ctx menus on outside click */

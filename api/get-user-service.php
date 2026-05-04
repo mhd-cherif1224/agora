@@ -1,20 +1,18 @@
 <?php
 
-session_start();
-
 require_once __DIR__ . '/../model/Database.php';
 
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['utilisateur_id'])) {
+if (!isset($_GET['id'])) {
     echo json_encode([
         'success' => false,
-        'message' => 'Utilisateur non connecté'
+        'message' => 'ID utilisateur manquant'
     ]);
     exit;
 }
 
-$userId = intval($_SESSION['utilisateur_id']);
+$userId = intval($_GET['id']);
 
 try {
 

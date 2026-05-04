@@ -1,6 +1,5 @@
 // ── chat.js ──
 // Handles the floating chat panel open/close and message sending
-
 document.addEventListener('DOMContentLoaded', () => {
 
   const panel      = document.getElementById('chatPanel');

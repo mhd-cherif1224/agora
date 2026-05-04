@@ -270,10 +270,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (fabChatBtn) fabChatBtn.addEventListener('click', openChat);
   if (closeBtn)   closeBtn.addEventListener('click', closeChat);
-  if (fabHelpBtn)  fabHelpBtn.addEventListener('click', openBotChat);
+  
   if (botCloseBtn) botCloseBtn.addEventListener('click', closeBotChat);
 
-  // ── Bootstrap ──
+  const fabHelpBtn = document.getElementById('fabHelpBtn');
+
+  if (fabHelpBtn) {
+      fabHelpBtn.addEventListener('click', openBotChat);
+  }
+    // ── Bootstrap ──
   initChat();
 
   async function initChat() {
@@ -655,7 +660,7 @@ displayLinks();
 async function loadAllUsers() {
   const list = document.getElementById('usersList');
   if (!list) {
-    console.error('usersList not found');
+    console.warn('usersList container not found');
     return;
   }
 
@@ -663,27 +668,19 @@ async function loadAllUsers() {
 
   try {
     const res = await fetch('/Mini-Projet%20-%20Copy/api/get-all-users.php');
-
-    if (res.status === 401) {
-      list.innerHTML = 'Non connecté';
-      return;
-    }
+    console.log('Fetch response status:', res.status);
 
     if (!res.ok) {
-      list.innerHTML = `Erreur serveur: ${res.status}`;
+      list.innerHTML = 'Erreur serveur: ' + res.status;
       return;
     }
 
     const users = await res.json();
+    console.log('Users loaded:', users);
 
     if (!Array.isArray(users)) {
       list.innerHTML = 'Données invalides';
-      console.error('Invalid data:', users);
-      return;
-    }
-
-    if (users.length === 0) {
-      list.innerHTML = 'Aucun utilisateur';
+      console.error('Expected array, got:', users);
       return;
     }
 
@@ -730,21 +727,20 @@ async function loadAllUsers() {
       // Make clickable to view profile
       item.style.cursor = 'pointer';
       item.addEventListener('click', () => {
-        // For now, just show notification or redirect
-        showNotification(`Profil de ${user.prenom} ${user.nom}`);
-        // Could redirect to profile?userId=${user.ID}
-      });
+  window.location.href = `../UI/profile/profile.html?id=${user.ID}`;
+});
 
       list.appendChild(item);
     });
 
   } catch (err) {
     console.error('Fetch error:', err);
-    list.innerHTML = 'Erreur connexion';
+    list.innerHTML = 'Erreur connexion: ' + err.message;
   }
 }
 
-loadAllUsers();
+
+
 
 // ════════════════════════════════════════
 // INJECT STYLES FOR POST INTERACTIONS
@@ -1084,87 +1080,6 @@ document.addEventListener('click', () => document.querySelectorAll('.post-ctx-me
 /* Enrich all existing cards */
 document.querySelectorAll('.post-card').forEach(enrichCard);
 
-async function loadAllUsers() {
-  const list = document.getElementById('usersList');
-  if (!list) {
-    console.warn('usersList container not found');
-    return;
-  }
-
-  list.innerHTML = 'Chargement...';
-
-  try {
-    const res = await fetch('/Mini-Projet%20-%20Copy/api/get-all-users.php');
-    console.log('Fetch response status:', res.status);
-
-    if (!res.ok) {
-      list.innerHTML = 'Erreur serveur: ' + res.status;
-      return;
-    }
-
-    const users = await res.json();
-    console.log('Users loaded:', users);
-
-    if (!Array.isArray(users)) {
-      list.innerHTML = 'Données invalides';
-      console.error('Expected array, got:', users);
-      return;
-    }
-
-    list.innerHTML = '';
-
-    users.forEach(user => {
-      const item = document.createElement('div');
-      item.className = 'suggest-item';
-
-      const avatarDiv = document.createElement('div');
-      avatarDiv.className = 'suggest-avatar';
-
-      if (user.photo_profil) {
-        const img = document.createElement('img');
-        img.src = user.photo_profil;
-        img.alt = user.prenom;
-        img.onerror = () => {
-          avatarDiv.textContent = (user.prenom[0] + user.nom[0]).toUpperCase();
-          avatarDiv.style.background = 'linear-gradient(135deg,#6366f1,#4338ca)';
-        };
-        avatarDiv.appendChild(img);
-      } else {
-        avatarDiv.textContent = (user.prenom[0] + user.nom[0]).toUpperCase();
-        avatarDiv.style.background = 'linear-gradient(135deg,#6366f1,#4338ca)';
-      }
-
-      const infoDiv = document.createElement('div');
-      infoDiv.className = 'suggest-info';
-
-      const nameDiv = document.createElement('div');
-      nameDiv.className = 'name';
-      nameDiv.textContent = `${user.prenom} ${user.nom}`;
-
-      const roleDiv = document.createElement('div');
-      roleDiv.className = 'role';
-      roleDiv.textContent = user.specialite || user.niveau || user.role || 'Utilisateur';
-
-      infoDiv.appendChild(nameDiv);
-      infoDiv.appendChild(roleDiv);
-
-      item.appendChild(avatarDiv);
-      item.appendChild(infoDiv);
-
-      // Make clickable to view profile
-      item.style.cursor = 'pointer';
-      item.addEventListener('click', () => {
-  window.location.href = `../UI/profile/profile.html?id=${user.ID}`;
-});
-
-      list.appendChild(item);
-    });
-
-  } catch (err) {
-    console.error('Fetch error:', err);
-    list.innerHTML = 'Erreur connexion: ' + err.message;
-  }
-}
 
 document.addEventListener("DOMContentLoaded", () => {
     loadServices();
@@ -1173,15 +1088,16 @@ document.addEventListener("DOMContentLoaded", () => {
 async function loadServices() {
 
     try {
+      
 
         const response = await fetch(
-            "/Mini-Projet%20-%20Copy/api/get-services.php"
+            "/Mini-Projet%20-%20Copy/api/get-my-services.php"
         );
 
         const data = await response.json();
-
+        
         console.log("Services loaded:", data);
-
+        
         if (!data.success) return;
 
         const container = document.getElementById("servicesContainer");
@@ -1208,6 +1124,8 @@ function createServiceCard(service) {
     const profileImage = service.photo_profil
         ? `/Mini-Projet%20-%20Copy/${service.photo_profil}`
         : "";
+
+    console.log(service)
 
     const serviceImage = service.service_photo
         ? `/Mini-Projet%20-%20Copy/${service.service_photo}`
@@ -1236,14 +1154,9 @@ function createServiceCard(service) {
                     ${service.nom} ${service.prenom}
                 </div>
 
-                <div class="post-role">
-                    ${service.specialite || ""}
-                    ${service.niveau || ""}
-                </div>
-
                 <div class="post-time-row">
                     <span class="post-time">
-                        ${service.DateDePublication}
+                        ${getTimeAgo(service.DateDePublication)}
                     </span>
                 </div>
 
@@ -1256,10 +1169,10 @@ function createServiceCard(service) {
         </div>
 
         <div class="post-tags">
-          <span class="post-tag green">
+          <span class="post-tag ">
             ${
                 categories.map(cat => `
-                    <span class="category-pill">
+                    <span class="category-pill green">
                         ${cat.trim()}
                     </span>
                 `).join("")
@@ -1269,7 +1182,10 @@ function createServiceCard(service) {
 
         <div class="post-body">
             ${service.description}
+            <br>
+            prix : ${service.prix} DZD
         </div>
+        <div class="post-body">${service.status}</div>
 
         ${
             serviceImage
@@ -1281,7 +1197,8 @@ function createServiceCard(service) {
             `
             : ""
         }
-
+        
+        
         <div class="post-rating-summary">
 
             <div class="rating-stars-display">
@@ -1301,6 +1218,40 @@ function createServiceCard(service) {
     </article>
 
     `;
+}
+
+
+function getTimeAgo(dateString) {
+    const now = new Date();
+    const serviceDate = new Date(dateString);
+
+    const diffMs = now - serviceDate;
+
+    const minutes = Math.floor(diffMs / (1000 * 60));
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (minutes < 60) {
+        return `il y a ${minutes} min`;
+    }
+
+    if (hours < 24) {
+        return `il y a ${hours} h`;
+    }
+
+    if (days < 30) {
+        return `il y a ${days} jours`;
+    }
+
+    const months = Math.floor(days / 30);
+
+    if (months < 12) {
+        return `il y a ${months} mois`;
+    }
+
+    const years = Math.floor(months / 12);
+
+    return `il y a ${years} an(s)`;
 }
 
 function generateStars(note) {
@@ -1331,5 +1282,5 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', loadAllUsers)
 } else {
   loadAllUsers();
-  loadMyServices();
+  
 }

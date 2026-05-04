@@ -127,8 +127,6 @@ async function loadUserProfile() {
       console.log("error loading the pmAvatar ")
     }
 
-    initWebSocket();
-
   } catch (err) {
     console.error('Profile error:', err);
   }
@@ -983,16 +981,105 @@ if (postPublishBtn) {
 
     // Example send to backend
     await fetch('/api/create-post.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        text,
-        categories: categoryIds
-      })
-    });
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        titre,
+        description,
+        prix,
+        categories: selectedCategories.map(c => c.ID)
+    })
+});
 
   });
 }
+
+// Call function (for testing / auto run)
+publierService();
+
+// ======================================
+// Fonction pour publier un service
+// ======================================
+async function publierService() {
+
+    try {
+
+        // Get inputs
+        const titre = document.getElementById("postTitle").value.trim();
+        const prix = document.getElementById("postPrice").value.trim();
+        const description = document.getElementById("postTextarea").value.trim();
+
+        // Validation
+        if (!titre && !description) {
+            console.log("veuillez remplir tous les champs obligatoires");
+            return;
+        }
+
+        // Create form data
+        const formData = new FormData();
+
+        formData.append("titre", titre);
+        formData.append("prix", prix);
+        formData.append("description", description);
+
+        // Add selected categories
+        if (selectedCategories.length > 0) {
+
+            selectedCategories.forEach(category => {
+
+                formData.append(
+                    "categories[]",
+                    category.ID
+                );
+
+            });
+        }
+
+        // Debug
+        for (let pair of formData.entries()) {
+            console.log(pair[0], pair[1]);
+        }
+
+        // Send to backend
+        const response = await fetch(
+            "../../../api/create-service.php",
+            {
+                method: "POST",
+                credentials: "include",
+                body: formData
+            }
+        );
+
+        const result = await response.json();
+
+        console.log("Server response:", result);
+
+    } catch (error) {
+
+        console.error("Publish error:", error);
+
+    }
+}
+
+
+// Exécuter la fonction au clic sur publier
+document
+    .getElementById("postPublishBtn")
+    .addEventListener("click", publierService);
+
+
+
+// ===============================
+// Publish button click event
+// ===============================
+document
+    .getElementById("postPublishBtn")
+    .addEventListener(
+        "click",
+        publierService
+    );
 
 
 
