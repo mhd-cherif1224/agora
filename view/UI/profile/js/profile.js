@@ -29,7 +29,7 @@ function buildPhotoUrl(path) {
 // ─────────────────────────────────────────
 async function loadUserProfile() {
   try {
-    const res = await fetch('/Mini-Projet%20-%20Copy/api/get-profile.php');
+    const res = await fetch('../../../api/get-profile.php');
 
     if (res.status === 401) {
       window.location.href = '/Mini-Projet - Copy/view/html/login.html';
@@ -403,7 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─────────────────────────────────────────
   async function loadLastConversation() {
     try {
-      const res  = await fetch('/Mini-Projet%20-%20Copy/api/get-conversations.php');
+      const res  = await fetch('/../../../api/get-conversations.php');
       if (!res.ok) return;
       const data = await res.json();
       if (!Array.isArray(data) || data.length === 0) return;
@@ -495,7 +495,7 @@ if (messageBtn) {
     
     
       if (lastConv.avatar) {
-        avatarEl.innerHTML = `<img src="/Mini-Projet%20-%20Copy/${lastConv.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+        avatarEl.innerHTML = `<img src="../../../${lastConv.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
         avatarEl.style.background = 'none';
       } else {
         avatarEl.textContent = lastConv.initials;
@@ -819,7 +819,7 @@ async function loadAllUsers() {
   list.innerHTML = 'Chargement...';
 
   try {
-    const res = await fetch('/Mini-Projet%20-%20Copy/api/get-all-users.php');
+    const res = await fetch('../../../api/get-all-users.php');
     console.log('Fetch response status:', res.status);
 
     if (!res.ok) {
@@ -1270,7 +1270,7 @@ async function loadServices() {
         console.log(userId)
 
         const response = await fetch(
-            `/Mini-Projet%20-%20Copy/api/get-user-service.php?id=${userId}`
+            `../../../api/get-user-service.php?id=${userId}`
         );
 
         const data = await response.json();
@@ -1301,13 +1301,13 @@ async function loadServices() {
 function createServiceCard(service) {
 
     const profileImage = service.photo_profil
-        ? `/Mini-Projet%20-%20Copy/${service.photo_profil}`
+        ? `../../../${service.photo_profil}`
         : "";
 
     console.log(service)
 
     const serviceImage = service.service_photo
-        ? `/Mini-Projet%20-%20Copy/${service.service_photo}`
+        ? `../../../${service.service_photo}`
         : null;
 
     const categories = service.categorie

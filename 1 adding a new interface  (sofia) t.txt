@@ -10,7 +10,7 @@ l affichage des services de chaque categories, example :
 
 
 3 publication d un service (cherif) time constraint : 1 day
-4 notifications statistics : (cherif) time constraint : 4 hours
+4 notifications statistics : (cherif) time constraint : 4 hours 
 5 making evaluations : (cherif) time constraint : 4 hours
 6 limiting the posting to only the proposeur : (cherif) time constraint : 1 hour
 

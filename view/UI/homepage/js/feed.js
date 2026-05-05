@@ -16,7 +16,7 @@ await loadUserProfile();
 
 async function loadUserProfile() {
   try {
-    const res = await fetch('/Mini-Projet%20-%20Copy/api/get-profile.php');
+    const res = await fetch('../../../api/get-profile.php');
 
     if (res.status === 401) {
       window.location.href = '/Mini-Projet - Copy/view/html/login.html';
@@ -104,11 +104,11 @@ function createServiceCard(service) {
     (service.prenom?.charAt(0) || "");
 
 const profileImage = service.photo_profil
-    ? `/Mini-Projet%20-%20Copy/${service.photo_profil}`
+    ? `../../../${service.photo_profil}`
     : null;
 
 const serviceImage = service.service_photo
-    ? `/Mini-Projet%20-%20Copy/${service.service_photo}`
+    ? `../../../${service.service_photo}`
     : null;
 
 const categories = service.categorie

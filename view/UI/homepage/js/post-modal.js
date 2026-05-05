@@ -76,7 +76,7 @@ loadUserProfile();
 
 async function loadUserProfile() {
   try {
-    const res = await fetch('/Mini-Projet%20-%20Copy/api/get-profile.php');
+    const res = await fetch('../../../api/get-profile.php');
 
     if (res.status === 401) {
       window.location.href = '/Mini-Projet - Copy/view/html/login.html';
@@ -464,7 +464,7 @@ async function loadSessionUser() {
         if (!userId) return;
 
         const response = await fetch(
-            `/Mini-Projet%20-%20Copy/api/get-profile.php?id=${userId}`
+            `../../../api/get-profile.php?id=${userId}`
         );
 
         const data = await response.json();
@@ -474,7 +474,7 @@ async function loadSessionUser() {
         const user = data.user;
 
         const profileImage = user.photo_profil
-            ? `/Mini-Projet%20-%20Copy/${user.photo_profil}`
+            ? `../../../${user.photo_profil}`
             : "";
 
         document.getElementById("postModalAvatar").src =
@@ -814,7 +814,7 @@ async function loadSessionUser() {
   if (!dropdown) return;
 
   try {
-    const res = await fetch('/Mini-Projet%20-%20Copy/api/get-all-categories.php');
+    const res = await fetch('../../../api/get-all-categories.php');
 
     if (!res.ok) throw new Error('HTTP error ' + res.status);
 
@@ -956,7 +956,7 @@ async function publierService() {
         }
 
         const response = await fetch(
-            '/Mini-Projet%20-%20Copy/api/update-service.php',
+            '../../../api/update-service.php',
             {
                 method: "POST",
                 credentials: "include",

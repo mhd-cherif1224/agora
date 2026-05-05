@@ -430,7 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─────────────────────────────────────────
   async function loadUserProfile() {
     try {
-      const res  = await fetch('/Mini-Projet%20-%20Copy/api/get-profile.php');
+      const res  = await fetch('../../../api/get-profile.php');
       if (!res.ok) return;
       const data = await res.json();
       if (!data.success || !data.id) return;
@@ -457,7 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─────────────────────────────────────────
   async function loadLastConversation() {
     try {
-      const res  = await fetch('/Mini-Projet%20-%20Copy/api/get-conversations.php');
+      const res  = await fetch('../../../api/get-conversations.php');
       if (!res.ok) return;
       const data = await res.json();
       if (!Array.isArray(data) || data.length === 0) return;
@@ -771,7 +771,7 @@ async function loadAllUsers() {
   list.innerHTML = 'Chargement...';
 
   try {
-    const res = await fetch('/Mini-Projet%20-%20Copy/api/get-all-users.php');
+    const res = await fetch('../../../api/get-all-users.php');
     console.log('Fetch response status:', res.status);
 
     if (!res.ok) {

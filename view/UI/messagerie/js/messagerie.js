@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ─────────────────────────────────────────
 async function loadUserProfile() {
   try {
-    const res = await fetch('/Mini-Projet%20-%20Copy/api/get-profile.php');
+    const res = await fetch('../../../api/get-profile.php');
 
     if (res.status === 401) {
       window.location.href = '/Mini-Projet - Copy/view/html/login.html';
@@ -80,7 +80,7 @@ async function loadConversations() {
   list.innerHTML = 'Chargement...';
 
   try {
-    const res = await fetch('/Mini-Projet%20-%20Copy/api/get-conversations.php');
+    const res = await fetch('../../../api/get-conversations.php');
 
     if (!res.ok) {
       list.innerHTML = 'Erreur serveur';

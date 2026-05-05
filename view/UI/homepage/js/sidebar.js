@@ -43,7 +43,7 @@ async function loadAllUsers() {
   list.innerHTML = 'Chargement...';
 
   try {
-    const res = await fetch('/Mini-Projet%20-%20Copy/api/get-all-users.php');
+    const res = await fetch('../../../api/get-all-users.php');
 
     if (!res.ok) {
       list.innerHTML = 'Erreur serveur: ' + res.status;

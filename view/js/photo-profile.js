@@ -10,7 +10,7 @@ const cropModal = document.getElementById("cropModal");
 const cropImage = document.getElementById("cropImage");
 
 // DOIT être l'URL Apache, pas Live Server
-const COMPLETE_URL = "http://localhost/plateforme-univ/Controller/complet-signupuser.php";
+const COMPLETE_URL = "../../Controller/complet-signupuser.php";
 
 console.log("script loaded");
 
@@ -215,7 +215,7 @@ async function finaliserInscription() {
 
         if (data.success) {
             // Inscription terminée → redirection
-            window.location.href = "/plateforme-univ/view/UI/homepage/home-page.html";
+            window.location.href = "../html/login-user.html";
         } else {
             // Erreur PHP → afficher le message
             showNotification(data.message || "Erreur lors de l'enregistrement.");
