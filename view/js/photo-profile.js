@@ -9,7 +9,8 @@ let banniereBase64  = null;
 const cropModal = document.getElementById("cropModal");
 const cropImage = document.getElementById("cropImage");
 
-const COMPLETE_URL = "../../Controller/complet-signup.php";
+// DOIT être l'URL Apache, pas Live Server
+const COMPLETE_URL = "http://localhost/plateforme-univ/Controller/complet-signupuser.php";
 
 console.log("script loaded");
 
@@ -60,7 +61,10 @@ function getDominantColors(source, topN = 2) {
         .slice(0, topN)
         .map(([key]) => {
             const [r, g, b] = key.split(',').map(Number);
-            return { rgb: `rgb(${r},${g},${b})`, hex: '#' + [r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('') };
+            return {
+                rgb: `rgb(${r},${g},${b})`,
+                hex: '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('')
+            };
         });
 }
 
@@ -69,11 +73,14 @@ function adaptColor(hex, amount = 80) {
     const brightness = (r*299 + g*587 + b*114) / 1000;
     if (brightness > 128) { r=Math.max(0,r-amount); g=Math.max(0,g-amount); b=Math.max(0,b-amount); }
     else                  { r=Math.min(255,r+amount); g=Math.min(255,g+amount); b=Math.min(255,b+amount); }
-    return '#' + [r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+    return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
 }
 
 function changeBannerColor(color1, color2) {
-    const brightness = hex => { const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return (r*299+g*587+b*114)/1000; };
+    const brightness = hex => {
+        const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+        return (r*299+g*587+b*114)/1000;
+    };
     const dark  = brightness(color1) < brightness(color2) ? color1 : color2;
     const light = brightness(color1) < brightness(color2) ? color2 : color1;
     document.querySelector(".banner-bottom").style.background = `linear-gradient(to right, ${dark}, ${light})`;
@@ -91,23 +98,20 @@ function openCropper(file, target, aspectRatio) {
     reader.onload = function(e) {
         if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
         cropModal.classList.add("active");
-cropImage.src = e.target.result;
+        cropImage.src = e.target.result;
 
-setTimeout(() => {
-    if (cropperInstance) {
-        cropperInstance.destroy();
-    }
-
-    cropperInstance = new Cropper(cropImage, {
-        aspectRatio,
-        viewMode: 1,
-        movable: true,
-        zoomable: true,
-        scalable: false,
-        cropBoxResizable: true,
-        background: false,
-    });
-}, 50);
+        setTimeout(() => {
+            if (cropperInstance) { cropperInstance.destroy(); }
+            cropperInstance = new Cropper(cropImage, {
+                aspectRatio,
+                viewMode: 1,
+                movable: true,
+                zoomable: true,
+                scalable: false,
+                cropBoxResizable: true,
+                background: false,
+            });
+        }, 50);
     };
     reader.readAsDataURL(file);
 }
@@ -157,20 +161,73 @@ document.getElementById("bannerInput").addEventListener("change", function() {
 });
 
 // ========================
+// CONVERSION BASE64 → BLOB
+// ========================
+function base64ToBlob(dataUrl) {
+    const [header, data] = dataUrl.split(',');
+    const mime = header.match(/:(.*?);/)[1];
+    const binary = atob(data);
+    const array  = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
+    return new Blob([array], { type: mime });
+}
+
+// ========================
 // ENVOI FINAL → BDD
 // ========================
 async function finaliserInscription() {
-    const btn = document.querySelector(".finish") || document.querySelector(".skip");
-    if (btn) { btn.disabled = true; btn.textContent = "Enregistrement..."; }
+    const btnFinish = document.querySelector(".finish");
+    const btnSkip   = document.querySelector(".skip");
+
+    // Désactiver les deux boutons
+    if (btnFinish) { btnFinish.disabled = true; btnFinish.textContent = "Enregistrement..."; }
+    if (btnSkip)   { btnSkip.disabled   = true; }
 
     try {
+        // Construire le FormData (multipart) pour envoyer les images comme fichiers
+        const formData = new FormData();
 
-        
+        if (profileBase64) {
+            formData.append("photo_profil",   base64ToBlob(profileBase64),   "profil.jpg");
+        }
+        if (banniereBase64) {
+            formData.append("photo_banniere", base64ToBlob(banniereBase64),  "banniere.jpg");
+        }
 
-        
+        const response = await fetch(COMPLETE_URL, {
+            method:      "POST",
+            credentials: "same-origin",  // envoyer les cookies de session
+            body:        formData,
+        });
+
+        // Vérifier que la réponse est bien du JSON
+        const text = await response.text();
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            console.error("Réponse PHP non-JSON :", text);
+            showNotification("Erreur serveur. Vérifiez la console.");
+            if (btnFinish) { btnFinish.disabled = false; btnFinish.textContent = "Terminez"; }
+            if (btnSkip)   { btnSkip.disabled   = false; }
+            return;
+        }
+
+        if (data.success) {
+            // Inscription terminée → redirection
+            window.location.href = "/plateforme-univ/view/UI/homepage/home-page.html";
+        } else {
+            // Erreur PHP → afficher le message
+            showNotification(data.message || "Erreur lors de l'enregistrement.");
+            if (btnFinish) { btnFinish.disabled = false; btnFinish.textContent = "Terminez"; }
+            if (btnSkip)   { btnSkip.disabled   = false; }
+        }
+
     } catch (err) {
+        console.error("Erreur réseau :", err);
         showNotification("Erreur réseau : " + err.message);
-        if (btn) { btn.disabled = false; }
+        if (btnFinish) { btnFinish.disabled = false; btnFinish.textContent = "Terminez"; }
+        if (btnSkip)   { btnSkip.disabled   = false; }
     }
 }
 
@@ -195,7 +252,11 @@ function animateProgress(from, to, duration = 600) {
     style.innerHTML = `@keyframes ${animName} { from { width: ${from}; } to { width: ${to}; } }`;
     document.head.appendChild(style);
     progressBar.style.animation = `${animName} ${duration}ms ease-out forwards`;
-    setTimeout(() => { progressBar.style.width = to; progressBar.style.animation = ""; style.remove(); }, duration);
+    setTimeout(() => {
+        progressBar.style.width = to;
+        progressBar.style.animation = "";
+        style.remove();
+    }, duration);
 }
 
 if (progressBar) animateProgress("75%", "98%");

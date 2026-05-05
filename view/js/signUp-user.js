@@ -15,7 +15,15 @@ function validatePassword(password) {
         special:   /[^A-Za-z0-9]/.test(password),
     };
 }
-
+// ── AJOUT : Validation email universitaire côté client ──
+function validateUniversityEmail(email) {
+    const facultes = ['se', 'snv', 'shs', 'eco', 'droit', 'st'];
+    const pattern  = new RegExp(
+        '^[^@]+@((' + facultes.join('|') + ')\\.)?univ-bejaia\\.dz$',
+        'i'
+    );
+    return pattern.test(email);
+}
 // ── Notifications ──
 function showNotification(message) {
     const notif = document.getElementById("notification");
@@ -75,7 +83,7 @@ form.addEventListener("submit", async function (e) {
 // ── Remember me ──
 const emailInput    = form.querySelector("input[type='email']");
 // BUG CORRIGÉ : l'HTML n'avait pas id="check" sur la checkbox
-// Assurez-vous que votre HTML a : <input type="checkbox" id="check">
+
 const rememberCheck = document.getElementById("check");
 
 window.addEventListener("load", () => {
