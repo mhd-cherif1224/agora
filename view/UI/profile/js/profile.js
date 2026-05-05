@@ -20,7 +20,7 @@ let lastConv = null;
 function buildPhotoUrl(path) {
   if (!path) return null;
   if (path.startsWith('/') || path.startsWith('http')) return path;
-  return `/Mini-Projet - Copy/${path}`;
+  return `/Mini-Projet/${path}`;
 }
 
 
@@ -32,7 +32,7 @@ async function loadUserProfile() {
     const res = await fetch('../../../api/get-profile.php');
 
     if (res.status === 401) {
-      window.location.href = '/Mini-Projet - Copy/view/html/login.html';
+      window.location.href = '/Mini-Projet/view/html/login.html';
       return;
     }
 
