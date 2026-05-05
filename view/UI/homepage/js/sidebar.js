@@ -44,7 +44,6 @@ async function loadAllUsers() {
 
   try {
     const res = await fetch('/Mini-Projet%20-%20Copy/api/get-all-users.php');
-    console.log('Fetch response status:', res.status);
 
     if (!res.ok) {
       list.innerHTML = 'Erreur serveur: ' + res.status;
@@ -52,8 +51,6 @@ async function loadAllUsers() {
     }
 
     const users = await res.json();
-    console.log('Users loaded:', users);
-
     if (!Array.isArray(users)) {
       list.innerHTML = 'Données invalides';
       console.error('Expected array, got:', users);

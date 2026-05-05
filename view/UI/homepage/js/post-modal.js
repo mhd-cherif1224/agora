@@ -10,6 +10,7 @@
 // ════════════════════════════════════════
 // HIDDEN POSTS PANEL
 // ════════════════════════════════════════
+let attachedPhotos = [];
 const hiddenPostsOverlay = document.createElement('div');
 hiddenPostsOverlay.className = 'hidden-posts-overlay';
 hiddenPostsOverlay.id = 'hiddenPostsOverlay';
@@ -150,25 +151,13 @@ function showNotification(msg) {
 // MAKE A POST MODAL
 // ════════════════════════════════════════
 (function () {
-  const CATEGORIES = [
-    { id: 'freelance', label: 'Freelance',    color: '#7c3aed', bg: '#f5f3ff' },
-    { id: 'html',      label: 'HTML/CSS',     color: '#d97706', bg: '#fef3e2' },
-    { id: 'react',     label: 'React.js',     color: '#059669', bg: '#ecfdf5' },
-    { id: 'js',        label: 'JavaScript',   color: '#ca8a04', bg: '#fefce8' },
-    { id: 'python',    label: 'Python',       color: '#16a34a', bg: '#f0fdf4' },
-    { id: 'design',    label: 'UI/UX',        color: '#9d174d', bg: '#fdf2f8' },
-    { id: 'mobile',    label: 'Mobile',       color: '#0891b2', bg: '#ecfeff' },
-    { id: 'data',      label: 'Data Science', color: '#2563eb', bg: '#eff6ff' },
-    { id: 'emploi',    label: 'Emploi',       color: '#c2410c', bg: '#fff7ed' },
-    { id: 'article',   label: 'Article',      color: '#6d28d9', bg: '#f5f3ff' },
-  ];
+  
 
   let attachedPhotos = [], selectedCats = new Set(), scheduledAt = null, locationValue = '';
   let pollActive = false, pollOptions = ['', ''], pollDuration = '1';
 
   const overlay        = document.getElementById('postModalOverlay');
   const closeBtn       = document.getElementById('postModalClose');
-  const textarea       = document.getElementById('postTextarea');
   const preview        = document.getElementById('postPreview');
   const publishBtn     = document.getElementById('postPublishBtn');
   const pmPhotoBtn     = document.getElementById('pmPhotoBtn');
@@ -210,40 +199,18 @@ function showNotification(msg) {
   }
 
   // ── Build category dropdown ──
-  catDropdown.innerHTML = '<div class="cat-dropdown-title">Catégorie</div>';
-  CATEGORIES.forEach(cat => {
-    const opt = document.createElement('div');
-    opt.className = 'cat-option'; opt.dataset.id = cat.id;
-    opt.innerHTML = `<span class="cat-dot" style="background:${cat.color}"></span><span>${cat.label}</span><i class="fa-solid fa-check cat-check"></i>`;
-    opt.addEventListener('click', e => {
-      e.stopPropagation();
-      opt.classList.toggle('selected');
-      if (selectedCats.has(cat.id)) selectedCats.delete(cat.id); else selectedCats.add(cat.id);
-      renderCatChips();
-    });
-    catDropdown.appendChild(opt);
-  });
+  
 
-  function renderCatChips() {
-    catChipsBox.innerHTML = '';
-    selectedCats.forEach(id => {
-      const cat = CATEGORIES.find(c => c.id === id); if (!cat) return;
-      const chip = document.createElement('span'); chip.className = 'cat-chip';
-      chip.style.cssText = `color:${cat.color};background:${cat.bg};border-color:${cat.color}`;
-      chip.textContent = cat.label; catChipsBox.appendChild(chip);
-    });
-    catChipsBox.classList.toggle('visible', selectedCats.size > 0);
-  }
 
   function openModal(focusOnPhoto) {
     const tmr = new Date(Date.now() + 86400000);
     timerDate.value = tmr.toISOString().split('T')[0]; timerTime.value = '10:00';
     overlay.classList.add('active'); document.body.style.overflow = 'hidden';
-    setTimeout(() => { if (focusOnPhoto) pmPhotoInput.click(); else textarea.focus(); }, 80);
+    setTimeout(() => { if (focusOnPhoto) pmPhotoInput.click(); }, 80);
   }
   function closeModal() { overlay.classList.remove('active'); document.body.style.overflow = ''; }
   function resetModal() {
-    textarea.value = ''; attachedPhotos = []; selectedCats.clear(); scheduledAt = null; locationValue = '';
+    ; attachedPhotos = []; selectedCats.clear(); scheduledAt = null; locationValue = '';
     pollActive = false; pollOptions = ['', '']; pollDuration = '1';
     renderPreview(); renderCatChips();
     [scheduledChip, locationChip].forEach(c => c.classList.remove('visible'));
@@ -276,7 +243,7 @@ function showNotification(msg) {
     Array.from(this.files).forEach(file => {
       if (file.type === 'image/gif') { showNotification('⚠️ Les GIFs animés ne sont pas acceptés'); return; }
       const reader = new FileReader();
-      reader.onload = e => { attachedPhotos.push({ url: e.target.result }); renderPreview(); };
+      reader.onload = e => { attachedPhotos.push({ url: e.target.result, file: file }); renderPreview(); };
       reader.readAsDataURL(file);
     });
     this.value = '';
@@ -395,8 +362,8 @@ function showNotification(msg) {
 
   // Publish
   publishBtn.addEventListener('click', () => {
-    const text = textarea.value.trim();
-    if (!text && attachedPhotos.length === 0 && !pollActive) { showNotification('⚠️ Écrivez quelque chose avant de publier'); return; }
+    const text = ""
+    
     if (pollActive && pollOptions.filter(o => o.trim()).length < 2) { showNotification('⚠️ Ajoutez au moins 2 options'); return; }
     const snapPhotos = [...attachedPhotos], snapCats = new Set(selectedCats), snapLoc = locationValue;
     const snapPoll = pollActive ? { options: pollOptions.filter(o => o.trim()), duration: pollDuration } : null;
@@ -473,19 +440,7 @@ function showNotification(msg) {
 // ════════════════════════════════════════
 (function () {
 
-  const CATEGORIES = [
-    { id: 'freelance', label: 'Freelance',    color: '#7c3aed', bg: 'transparent' },
-    { id: 'html',      label: 'HTML/CSS',     color: '#d97706', bg: 'transparent' },
-    { id: 'react',     label: 'React.js',     color: '#059669', bg: 'transparent' },
-    { id: 'js',        label: 'JavaScript',   color: '#ca8a04', bg: 'transparent' },
-    { id: 'python',    label: 'Python',       color: '#16a34a', bg: 'transparent' },
-    { id: 'design',    label: 'UI/UX',        color: '#9d174d', bg: 'transparent' },
-    { id: 'mobile',    label: 'Mobile',       color: '#0891b2', bg: 'transparent' },
-    { id: 'data',      label: 'Data Science', color: '#2563eb', bg: 'transparent' },
-    { id: 'emploi',    label: 'Emploi',       color: '#c2410c', bg: 'transparent' },
-    { id: 'article',   label: 'Article',      color: '#6d28d9', bg: 'transparent' },
-  ];
-
+  
   // Add pin badges to all existing cards
   document.querySelectorAll('.post-card').forEach(card => {
     if (!card.querySelector('.post-pin-badge')) {
@@ -586,18 +541,7 @@ async function loadSessionUser() {
   let editTargetCard = null, editNewPhotos = [], editKeptPhotos = [], editSelectedCats = new Set(), editLocation = '';
 
   // Build edit cat dropdown
-  const editCatDD = document.getElementById('editCatDropdown');
-  editCatDD.innerHTML = '<div class="cat-dropdown-title">Catégorie</div>';
-  CATEGORIES.forEach(cat => {
-    const opt = document.createElement('div'); opt.className = 'cat-option'; opt.dataset.id = cat.id;
-    opt.innerHTML = `<span class="cat-dot" style="background:${cat.color}"></span><span>${cat.label}</span><i class="fa-solid fa-check cat-check"></i>`;
-    opt.addEventListener('click', e => {
-      e.stopPropagation(); opt.classList.toggle('selected');
-      if (editSelectedCats.has(cat.id)) editSelectedCats.delete(cat.id); else editSelectedCats.add(cat.id);
-      renderEditCatChips();
-    });
-    editCatDD.appendChild(opt);
-  });
+  
 
   function renderEditCatChips() {
     const box = document.getElementById('editCatChips'); box.innerHTML = '';
@@ -922,11 +866,7 @@ if (pmCatBtn) {
 }
 
 // close when clicking outside
-document.addEventListener('click', (e) => {
-  if (!catDropdown.contains(e.target) && e.target !== pmCatBtn) {
-    catDropdown.classList.remove('open');
-  }
-});
+
 const selectedCategories = [];
 
 function addCategoryChip(cat) {
@@ -967,84 +907,56 @@ function addCategoryChip(cat) {
 
 const postPublishBtn = document.getElementById('postPublishBtn');
 
-if (postPublishBtn) {
-  postPublishBtn.addEventListener('click', async () => {
 
-    const text = document.getElementById('postTextarea').value;
+  postPublishBtn.addEventListener('click',publierService );
 
-    const categoryIds = selectedCategories.map(c => c.ID);
-
-    console.log('POST DATA:', {
-      text,
-      categories: categoryIds
-    });
-
-    // Example send to backend
-    await fetch('/api/create-post.php', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-        titre,
-        description,
-        prix,
-        categories: selectedCategories.map(c => c.ID)
-    })
-});
-
-  });
-}
 
 // Call function (for testing / auto run)
-publierService();
+
 
 // ======================================
 // Fonction pour publier un service
 // ======================================
 async function publierService() {
+    console.log("publierService is called");
 
     try {
-
-        // Get inputs
-        const titre = document.getElementById("postTitle").value.trim();
-        const prix = document.getElementById("postPrice").value.trim();
-        const description = document.getElementById("postTextarea").value.trim();
+        const titre       = document.getElementById("postTitle").value.trim();
+        const prix        = document.getElementById("postPrice").value.trim();
+        const description = document.getElementById("postDesc").value.trim();
 
         // Validation
-        if (!titre && !description) {
-            console.log("veuillez remplir tous les champs obligatoires");
+        if (!titre) {
+            showNotification('⚠️ Le titre est obligatoire');
             return;
         }
 
         // Create form data
         const formData = new FormData();
-
         formData.append("titre", titre);
         formData.append("prix", prix);
         formData.append("description", description);
 
-        // Add selected categories
-        if (selectedCategories.length > 0) {
-
-            selectedCategories.forEach(category => {
-
-                formData.append(
-                    "categories[]",
-                    category.ID
-                );
-
+        // Add photos
+        const photoInput = document.getElementById('pmPhotoInput');
+        if (photoInput && photoInput.files.length > 0) {
+            Array.from(photoInput.files).forEach(file => {
+                formData.append('photos[]', file);
             });
         }
+
+        // Add selected categories
+        selectedCategories.forEach(category => {
+            formData.append("categories[]", category.ID);
+        });
 
         // Debug
         for (let pair of formData.entries()) {
             console.log(pair[0], pair[1]);
         }
 
-        // Send to backend
         const response = await fetch(
-            "../../../api/create-service.php",
+            '/Mini-Projet%20-%20Copy/api/update-service.php',
             {
                 method: "POST",
                 credentials: "include",
@@ -1053,13 +965,10 @@ async function publierService() {
         );
 
         const result = await response.json();
-
         console.log("Server response:", result);
 
     } catch (error) {
-
         console.error("Publish error:", error);
-
     }
 }
 
