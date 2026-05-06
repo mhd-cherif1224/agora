@@ -24,6 +24,78 @@ function buildPhotoUrl(path) {
 }
 
 
+  // ─────────────────────────────────────────
+  // 4. WEBSOCKET — fetch & receive history
+  // ─────────────────────────────────────────
+  function initWebSocket() {
+    if (!currentUser?.id || !lastConv) return;
+
+    // Avoid double-connecting
+    if (socket) return;
+
+    socket = io('http://localhost:3000', {
+      query: { userId: currentUser.id }
+    });
+
+    socket.on('connect', () => {
+      // Request message history for the most recent conversation
+      socket.emit('get_history', { otherUserId: lastConv.id });
+    });
+
+    socket.on('conversation_history', ({ otherUserId, messages: msgs }) => {
+      if (!lastConv || otherUserId !== lastConv.id) return;
+
+      lastConv.messages = msgs.map(m => ({
+        text: m.contenue,
+        time: m.DateEnvoie,
+        sent: m.ID_Expediteur === currentUser.id
+      }));
+
+      renderMessages();
+    });
+
+    // Live incoming messages
+    socket.on(`msg_${currentUser.id}`, msg => {
+      if (!lastConv) return;
+      const otherId =
+        msg.ID_Expediteur === currentUser.id
+          ? msg.ID_Destinataire
+          : msg.ID_Expediteur;
+
+      if (otherId !== lastConv.id) return;
+
+      lastConv.messages.push({
+        text: msg.contenue,
+        time: msg.DateEnvoie,
+        sent: msg.ID_Expediteur === currentUser.id
+      });
+      renderMessages();
+    });
+  }
+
+  // ─────────────────────────────────────────
+  // 5. RENDER MESSAGES IN CHAT PANEL
+  // ─────────────────────────────────────────
+  function renderMessages() {
+    if (!lastConv || !messages) return;
+
+    messages.innerHTML = '';
+
+    lastConv.messages.forEach(msg => {
+      const div = document.createElement('div');
+      div.className = `chat-msg ${msg.sent ? 'sent' : 'received'}`;
+      div.innerHTML = `
+        <div class="msg-bubble">${escapeHtml(msg.text)}</div>
+        <span class="msg-time">${formatTime(msg.time)}</span>
+      `;
+      messages.appendChild(div);
+    });
+
+    scrollToBottom();
+
+  }
+
+
 // ─────────────────────────────────────────
 // LOAD USER PROFILE
 // ─────────────────────────────────────────
@@ -32,7 +104,7 @@ async function loadUserProfile() {
     const res = await fetch('../../../api/get-profile.php');
 
     if (res.status === 401) {
-      window.location.href = '/Mini-Projet - Copy/view/html/login.html';
+      window.location.href = '../../../html/login.html';
       return;
     }
 
@@ -140,6 +212,7 @@ async function loadProfile() {
     }
 
     const messageBtn = document.getElementById('messageBtn');
+    
 
 if (messageBtn && user.ID) {
   messageBtn.dataset.userId = user.ID;
@@ -361,7 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const fabChatBtn = document.getElementById('fabMsgBtn');
   const navChatBtn = document.getElementById('navChat');
   const input      = document.getElementById('chatInput');
-  const sendBtn    = document.getElementById('chatSend');
+  const sendBtn    = document.getElementById('chatSendBtn');
   const messages   = document.getElementById('chatMessages');
 
   const botPanel    = document.getElementById('chatbotPanel');
@@ -403,7 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─────────────────────────────────────────
   async function loadLastConversation() {
     try {
-      const res  = await fetch('/../../../api/get-conversations.php');
+      const res  = await fetch('../../../api/get-conversations.php');
       if (!res.ok) return;
       const data = await res.json();
       if (!Array.isArray(data) || data.length === 0) return;
@@ -441,12 +514,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const user = data.user || data;
 
+    if (!lastConv) {
+      lastConv = { id: null, name: '', avatar: null, initials: '', gradient: '', messages: [] };
+    }
+
     // ✅ ONLY update lastConv (no socket reset)
     lastConv.id = user.ID;
     lastConv.name = `${user.prenom} ${user.nom}`;
     lastConv.avatar = user.photo_profil || null;
     lastConv.initials = (user.prenom[0] + user.nom[0]).toUpperCase();
     lastConv.messages = [];
+
+    console.log(lastConv)
 
 
     updateChatPanelHeader();
@@ -507,76 +586,6 @@ if (messageBtn) {
 
   
 
-  // ─────────────────────────────────────────
-  // 4. WEBSOCKET — fetch & receive history
-  // ─────────────────────────────────────────
-  function initWebSocket() {
-    if (!currentUser?.id || !lastConv) return;
-
-    // Avoid double-connecting
-    if (socket) return;
-
-    socket = io('http://localhost:3000', {
-      query: { userId: currentUser.id }
-    });
-
-    socket.on('connect', () => {
-      // Request message history for the most recent conversation
-      socket.emit('get_history', { otherUserId: lastConv.id });
-    });
-
-    socket.on('conversation_history', ({ otherUserId, messages: msgs }) => {
-      if (!lastConv || otherUserId !== lastConv.id) return;
-
-      lastConv.messages = msgs.map(m => ({
-        text: m.contenue,
-        time: m.DateEnvoie,
-        sent: m.ID_Expediteur === currentUser.id
-      }));
-
-      renderMessages();
-    });
-
-    // Live incoming messages
-    socket.on(`msg_${currentUser.id}`, msg => {
-      if (!lastConv) return;
-      const otherId =
-        msg.ID_Expediteur === currentUser.id
-          ? msg.ID_Destinataire
-          : msg.ID_Expediteur;
-
-      if (otherId !== lastConv.id) return;
-
-      lastConv.messages.push({
-        text: msg.contenue,
-        time: msg.DateEnvoie,
-        sent: msg.ID_Expediteur === currentUser.id
-      });
-      renderMessages();
-    });
-  }
-
-  // ─────────────────────────────────────────
-  // 5. RENDER MESSAGES IN CHAT PANEL
-  // ─────────────────────────────────────────
-  function renderMessages() {
-    if (!lastConv || !messages) return;
-
-    messages.innerHTML = '';
-
-    lastConv.messages.forEach(msg => {
-      const div = document.createElement('div');
-      div.className = `chat-msg ${msg.sent ? 'sent' : 'received'}`;
-      div.innerHTML = `
-        <div class="msg-bubble">${escapeHtml(msg.text)}</div>
-        <span class="msg-time">${formatTime(msg.time)}</span>
-      `;
-      messages.appendChild(div);
-    });
-
-    scrollToBottom();
-
-  }
 
 
 
@@ -584,29 +593,42 @@ if (messageBtn) {
   // 6. SEND MESSAGE (human chat panel)
   // ─────────────────────────────────────────
   function sendMessage() {
-    const text = input.value.trim();
-    if (!text) return;
+  const text = input.value.trim();
+  if (!text) return;
 
-    // Optimistic render
-    const div = document.createElement('div');
-    div.className = 'chat-msg sent';
-    div.innerHTML = `
-      <div class="msg-bubble">${escapeHtml(text)}</div>
-      <span class="msg-time">${formatTime(new Date().toISOString())}</span>
-    `;
-    messages.appendChild(div);
-    input.value = '';
-    messages.scrollTop = messages.scrollHeight;
-
-    // Send via socket if connected
-    if (socket && lastConv && currentUser) {
-      socket.emit('send_message', {
-        ID_Expediteur:   currentUser.id,
-        ID_Destinataire: lastConv.id,
-        contenue:        text
-      });
-    }
+  if (!lastConv?.id || !currentUser?.id) {
+    showNotification('Conversation non initialisée.');
+    return;
   }
+
+  // Optimistic render
+  const div = document.createElement('div');
+  div.className = 'chat-msg sent';
+  div.innerHTML = `
+    <div class="msg-bubble">${escapeHtml(text)}</div>
+    <span class="msg-time">${formatTime(new Date().toISOString())}</span>
+  `;
+  messages.appendChild(div);
+  input.value = '';
+  messages.scrollTop = messages.scrollHeight;
+
+  const payload = {
+    ID_Expediteur:   currentUser.id,
+    ID_Destinataire: lastConv.id,
+    contenue:        text
+  };
+
+  if (socket?.connected) {
+    // Socket ready — send immediately
+    socket.emit('send_message', payload);
+  } else {
+    // Socket not ready — wait for connection then send
+    if (!socket) initWebSocket();
+    socket.once('connect', () => {
+      socket.emit('send_message', payload);
+    });
+  }
+}
 
   // ─────────────────────────────────────────
   // 7. CHATBOT
