@@ -166,7 +166,7 @@ return `
         <div class="post-body">
             ${service.description}
             <br>
-            prix : ${service.prix} DZD
+            Prix : ${service.prix} DZD
         </div>
         <div class="post-body">${service.status}</div>
 

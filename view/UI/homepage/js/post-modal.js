@@ -221,11 +221,7 @@ function showNotification(msg) {
     [pmTimerBtn, pmCatBtn, pmLocBtn].forEach(b => b.classList.remove('active'));
     publishBtn.classList.remove('scheduled'); publishBtn.innerHTML = 'publier';
     catDropdown.querySelectorAll('.cat-option').forEach(o => o.classList.remove('selected'));
-    locInput.value = '';
-    const pollChip = document.getElementById('pollChip'), pollBuilder = document.getElementById('pollBuilder'), pmPollBtn = document.getElementById('pmPollBtn');
-    if (pollChip) pollChip.classList.remove('visible');
-    if (pollBuilder) { pollBuilder.classList.remove('visible'); renderPollBuilder(); }
-    if (pmPollBtn) pmPollBtn.classList.remove('active');
+
 
     console.log("resetModal called");
 console.log("Before reset:", attachedPhotos);
@@ -323,13 +319,7 @@ pmPhotoInput.addEventListener('change', function () {
   // Poll button in footer
   const modalFooter = document.querySelector('.post-modal-footer');
   const sep = modalFooter?.querySelector('.post-tool-sep');
-  if (sep) {
-    const pmPollBtnEl = document.createElement('button');
-    pmPollBtnEl.className = 'post-tool-btn'; pmPollBtnEl.id = 'pmPollBtn'; pmPollBtnEl.title = 'Créer un sondage';
-    pmPollBtnEl.innerHTML = '<i class="fa-solid fa-chart-bar"></i>';
-    modalFooter.insertBefore(pmPollBtnEl, sep);
-    pmPollBtnEl.addEventListener('click', e => { e.stopPropagation(); if (pollActive) deactivatePoll(); else activatePoll(); });
-  }
+  
 
   // Poll chip + builder injected into scroll area
   setTimeout(() => {
@@ -346,128 +336,30 @@ pmPhotoInput.addEventListener('change', function () {
     }
   }, 0);
 
-  function activatePoll() {
-    pollActive = true; pollOptions = ['', '']; pollDuration = '1';
-    document.getElementById('pmPollBtn')?.classList.add('active');
-    document.getElementById('pollChip')?.classList.add('visible');
-    const pb = document.getElementById('pollBuilder'); if (pb) { pb.classList.add('visible'); renderPollBuilder(); }
-  }
-  function deactivatePoll() {
-    pollActive = false;
-    document.getElementById('pmPollBtn')?.classList.remove('active');
-    document.getElementById('pollChip')?.classList.remove('visible');
-    document.getElementById('pollBuilder')?.classList.remove('visible');
-  }
-  function renderPollBuilder() {
-    const container = document.getElementById('pollBuilder'); if (!container) return;
-    container.innerHTML = `<div class="poll-builder-title">Options du sondage</div>`;
-    pollOptions.forEach((val, idx) => {
-      const row = document.createElement('div'); row.className = 'poll-option-row';
-      const input = document.createElement('input'); input.type = 'text'; input.className = 'poll-option-input';
-      input.placeholder = `Option ${idx + 1}`; input.value = val;
-      input.addEventListener('input', () => { pollOptions[idx] = input.value; });
-      const rmBtn = document.createElement('button'); rmBtn.className = 'poll-option-remove';
-      rmBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>'; rmBtn.style.display = pollOptions.length <= 2 ? 'none' : 'flex';
-      rmBtn.addEventListener('click', () => { pollOptions.splice(idx, 1); renderPollBuilder(); });
-      row.appendChild(input); row.appendChild(rmBtn); container.appendChild(row);
-    });
-    if (pollOptions.length < 5) {
-      const addBtn = document.createElement('button'); addBtn.className = 'poll-add-option-btn';
-      addBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Ajouter une option';
-      addBtn.addEventListener('click', () => { if (pollOptions.length >= 5) return; pollOptions.push(''); renderPollBuilder(); });
-      container.appendChild(addBtn);
-    }
-    const durRow = document.createElement('div'); durRow.className = 'poll-duration-row';
-    durRow.innerHTML = `<span class="poll-duration-label">Durée :</span>
-      <select class="poll-duration-select" id="pollDurationSelect">
-        <option value="1" ${pollDuration==='1'?'selected':''}>1 jour</option>
-        <option value="3" ${pollDuration==='3'?'selected':''}>3 jours</option>
-        <option value="7" ${pollDuration==='7'?'selected':''}>1 semaine</option>
-        <option value="14" ${pollDuration==='14'?'selected':''}>2 semaines</option>
-      </select>`;
-    container.appendChild(durRow);
-    document.getElementById('pollDurationSelect').addEventListener('change', e => { pollDuration = e.target.value; });
-  }
+ 
 
   // Close sub-popups on outside click
   document.addEventListener('click', e => {
     if (!catDropdown.contains(e.target) && e.target !== pmCatBtn) catDropdown.classList.remove('open');
     if (!timerModal.contains(e.target) && e.target !== pmTimerBtn) timerModal.classList.remove('open');
-    if (!locModal.contains(e.target) && e.target !== pmLocBtn) locModal.classList.remove('open');
   });
 
   // Publish
   publishBtn.addEventListener('click', () => {
     const text = ""
     
-    if (pollActive && pollOptions.filter(o => o.trim()).length < 2) { showNotification('⚠️ Ajoutez au moins 2 options'); return; }
-    const snapPhotos = [...attachedPhotos], snapCats = new Set(selectedCats), snapLoc = locationValue;
-    const snapPoll = pollActive ? { options: pollOptions.filter(o => o.trim()), duration: pollDuration } : null;
+    
     if (scheduledAt) {
       const delay = scheduledAt - Date.now();
       const fmt = scheduledAt.toLocaleString('fr-FR', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
       showNotification(`🕐 Post programmé · ${fmt}`);
-      setTimeout(() => { createPost(text, snapPhotos, snapCats, snapLoc, snapPoll); showNotification('✓ Post publié automatiquement !'); }, delay);
+      setTimeout(() => {  showNotification('✓ Post publié automatiquement !'); }, delay);
     } else {
-      createPost(text, snapPhotos, snapCats, snapLoc, snapPoll);
       showNotification('✓ Post publié avec succès !');
     }
     closeModal(); resetModal();
   });
 
-  function createPost(text, photos, cats, loc, poll) {
-    const classMap = { freelance:'green', html:'orange', react:'green', js:'orange', python:'green', design:'pink', mobile:'blue', data:'blue', emploi:'orange', article:'purple' };
-    const tagHtml = Array.from(cats).map(id => { const cat = CATEGORIES.find(c => c.id === id); return cat ? `<span class="post-tag ${classMap[id]||''}" style="color:${cat.color};background:${cat.bg};">${cat.label}</span>` : ''; }).join('');
-    const photosHtml = photos.map(p => `<img class="post-image" src="${p.url}" alt="" style="display:block;">`).join('');
-    const locHtml = loc ? `<div class="post-loc-chip" data-loc="${loc}" style="padding:0 18px 10px;font-size:11px;color:#8c8580;display:flex;align-items:center;gap:5px;"><i class="fa-solid fa-location-dot" style="color:#e8734a;font-size:10px;"></i>${loc}</div>` : '';
-    let pollHtml = '';
-    if (poll) {
-      const uid = 'poll' + Date.now();
-      const opts = poll.options.map((opt, i) => `<label class="poll-vote-option" data-idx="${i}"><input type="radio" name="${uid}" value="${i}"><div class="poll-vote-bar-wrap"><div class="poll-vote-fill"></div><span class="poll-vote-text">${opt}</span><span class="poll-vote-pct">0%</span></div></label>`).join('');
-      const dur = poll.duration==='1'?'1 jour':poll.duration==='7'?'1 semaine':poll.duration==='14'?'2 semaines':poll.duration+' jours';
-      pollHtml = `<div class="poll-card"><div class="poll-votes-wrap">${opts}</div><div class="poll-meta">0 vote · ${dur}</div></div>`;
-    }
-    const article = document.createElement('article');
-    article.className = 'post-card new-feed-post'; article.dataset.serviceId = 'new-' + Date.now(); article.dataset.owner = 'me';
-    article.innerHTML = `
-      <div class="post-pin-badge"><i class="fa-solid fa-thumbtack"></i> Épinglé</div>
-      <div class="post-header">
-        <div class="post-avatar" style="background:linear-gradient(135deg,#e44,#f97316);">MC</div>
-        <div class="post-meta">
-          <div class="post-name">mehdi cherif</div>
-          <div class="post-role">etudiant a l univ d abderrahmane mira</div>
-          <div class="post-time-row"><span class="post-time">À l'instant</span><span class="post-globe"><i class="fa-solid fa-earth-africa"></i></span></div>
-        </div>
-        <button class="post-more"><i class="fa-solid fa-ellipsis"></i></button>
-      </div>
-      ${tagHtml ? `<div class="post-tags" style="padding:0 18px 14px;">${tagHtml}</div>` : ''}
-      ${locHtml}
-      ${poll ? (text ? `<div class="post-body" style="padding:0 18px 8px;font-weight:700;">${text.replace(/\n/g,'<br>')}</div>` : '') + pollHtml : (text ? `<div class="post-body" style="padding:0 18px 14px;">${text.replace(/\n/g,'<br>')}</div>` : '')}
-      ${photosHtml}
-      <div class="post-rating-summary"><div class="rating-stars-display"><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i></div><span class="rating-score">—</span><span class="rating-count">(0 évaluations)</span></div>
-      <div class="post-actions"><button class="post-action-btn" data-action="rate"><i class="fa-regular fa-star"></i> Évaluer</button></div>
-      <div class="rating-panel" hidden><div class="rating-panel-inner"><p class="rating-panel-label">Votre évaluation</p><div class="star-picker"><i class="fa-regular fa-star" data-star="1"></i><i class="fa-regular fa-star" data-star="2"></i><i class="fa-regular fa-star" data-star="3"></i><i class="fa-regular fa-star" data-star="4"></i><i class="fa-regular fa-star" data-star="5"></i></div><textarea class="rating-comment-input" placeholder="Laissez un commentaire (optionnel)..."></textarea><div class="rating-panel-actions"><button class="rating-cancel-btn">Annuler</button><button class="rating-submit-btn">Soumettre</button></div></div></div>
-      <div class="comments-list" hidden></div>`;
-
-    if (poll) {
-      const votes = new Array(poll.options.length).fill(0);
-      let totalVotes = 0, hasVoted = false;
-      article.querySelectorAll('.poll-vote-option').forEach((opt, i) => {
-        opt.addEventListener('click', () => {
-          if (hasVoted) return; hasVoted = true; votes[i]++; totalVotes++;
-          article.querySelector('.poll-votes-wrap').classList.add('poll-revealed');
-          article.querySelectorAll('.poll-vote-option').forEach((o, j) => {
-            const pct = Math.round((votes[j] / totalVotes) * 100);
-            o.querySelector('.poll-vote-fill').style.width = pct + '%';
-            o.querySelector('.poll-vote-pct').textContent = pct + '%';
-            if (j === i) o.classList.add('voted'); o.style.cursor = 'default';
-          });
-          const meta = article.querySelector('.poll-meta'); if (meta) meta.textContent = `${totalVotes} vote${totalVotes>1?'s':''} · Sondage actif`;
-        });
-      });
-    }
-    document.querySelector('.feed').insertBefore(article, document.querySelector('.feed').firstChild);
-  }
 })();
 
 
