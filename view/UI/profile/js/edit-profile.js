@@ -8,6 +8,14 @@ const cropImage     = document.getElementById('cropImage');
 // ════════════════════════════════════════
 // stores sends the colors to update_profile.php
 // ════════════════════════════════════════
+
+function buildPhotoUrl(path) {
+  if (!path) return null;
+  if (path.startsWith('/') || path.startsWith('http')) return path;
+  return `../../../${path}`;
+}
+
+
 async function saveBannerColor(dark, light) {
   try {
     const res = await fetch('../../../api/Update profile.php', {
@@ -40,7 +48,7 @@ let currentUser = null;
 async function loadProfile() {
   try {
     const res  = await fetch('../../../api/get-profile.php');
-    if (res.status === 401) { window.location.href = '../../html/login.html'; return; }
+    if (res.status === 401) { window.location.href = '../../../html/login-user.html'; return; }
 
     const text = await res.text();
     let data;
@@ -63,8 +71,8 @@ async function loadProfile() {
     const navImg    = document.getElementById('navAvatarImg');
     const navLetter = document.getElementById('navAvatarLetter');
     if (data.avatar) {
-      document.getElementById('profilePreview').src = data.avatar;
-      navImg.src = data.avatar; navImg.style.display = 'block';
+      document.getElementById('profilePreview').src = buildPhotoUrl(data.avatar);
+      navImg.src = buildPhotoUrl(data.avatar); navImg.style.display = 'block';
       navLetter.style.display = 'none';
     } else {
       navLetter.textContent = ((data.prenom?.[0] || '') + (data.nom?.[0] || '')).toUpperCase()[0] || '?';
@@ -73,7 +81,7 @@ async function loadProfile() {
     // ── Banner ──
     if (data.banner) {
       const t = document.getElementById('bannerTop');
-      t.style.backgroundImage    = `url('${data.banner}')`;
+      t.style.backgroundImage    = `url('${buildPhotoUrl(data.banner)}')`;
       t.style.backgroundSize     = 'cover';
       t.style.backgroundPosition = 'center';
     }
@@ -472,6 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gradient: randomGradient(u.ID),
         messages: []
       };
+      
 
       updateChatPanelHeader();
       initWebSocket();
@@ -494,7 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (avatarEl) {
       if (lastConv.avatar) {
-        avatarEl.innerHTML = `<img src="${lastConv.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+        avatarEl.innerHTML = `<img src="${buildPhotoUrl(lastConv.avatar)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
         avatarEl.style.background = 'none';
       } else {
         avatarEl.textContent = lastConv.initials;
@@ -799,7 +808,7 @@ async function loadAllUsers() {
 
       if (user.photo_profil) {
         const img = document.createElement('img');
-        img.src = user.photo_profil;
+        img.src = buildPhotoUrl(user.photo_profil);
         img.alt = user.prenom;
         img.onerror = () => {
           avatarDiv.textContent = (user.prenom[0] + user.nom[0]).toUpperCase();

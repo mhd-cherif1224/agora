@@ -9,6 +9,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
+function buildPhotoUrl(path) {
+  if (!path) return null;
+  if (path.startsWith('/') || path.startsWith('http')) return path;
+  return `../../../${path}`;
+}
+
+
 function toggleFollow(btn) {
   const isFollowing = btn.classList.toggle('following');
   btn.textContent = isFollowing ? '✓ Suivi' : '+ Suivre';
@@ -68,7 +75,7 @@ async function loadAllUsers() {
 
       if (user.photo_profil) {
         const img = document.createElement('img');
-        img.src = user.photo_profil;
+        img.src = buildPhotoUrl(user.photo_profil);
         img.alt = user.prenom;
         img.onerror = () => {
           avatarDiv.textContent = (user.prenom[0] + user.nom[0]).toUpperCase();

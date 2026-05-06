@@ -11,7 +11,7 @@
 
 </head>
 <body>
-<script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
+
 <!-- ══════════ NAV ══════════ -->
 <nav>
   <div class="nav-logo" onclick="window.location.href='../homepage/home-page.html'">
@@ -78,84 +78,15 @@
     <!-- ── Section: Aujourd'hui ── -->
     <div class="section-label" data-section="today">Aujourd'hui</div>
 
-    <!-- NOTIF 1 — Evaluation ⭐ unread -->
-    <div class="notif-card unread" data-type="eval" data-id="1">
-      <div class="notif-inner">
-        <div class="notif-avatar-wrap">
-          <div class="notif-avatar" style="background:linear-gradient(135deg,#059669,#34d399);">NS</div>
-          <div class="notif-type-icon eval"><i class="fa-solid fa-star"></i></div>
-        </div>
-        <div class="notif-body">
-          <div class="notif-text">
-            <strong>Na Sfia</strong> a évalué votre post <span class="notif-highlight">« Recherche développeur web freelance »</span>
-          </div>
-          <div class="notif-stars">
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
-            <span>4 / 5</span>
-          </div>
-          <div class="notif-preview">« Très bonne offre, profil sérieux et réactif ! »</div>
-          <div class="notif-time"><i class="fa-regular fa-clock"></i> Il y a 12 minutes</div>
-        </div>
-        <div class="notif-aside">
-          
-          <button class="notif-menu-btn" data-id="1"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-        </div>
-      </div>
-    </div>
-
     
-
-    <!-- NOTIF 3 — Comment 💬 unread -->
-    <div class="notif-card unread" data-type="comment" data-id="3">
-      <div class="notif-inner">
-        <div class="notif-avatar-wrap">
-          <div class="notif-avatar" style="background:linear-gradient(135deg,#4ecdc4,#2ab5ab);">CO</div>
-          <div class="notif-type-icon comment"><i class="fa-solid fa-comment"></i></div>
-        </div>
-        <div class="notif-body">
-          <div class="notif-text">
-            <strong>Chaima Ouk</strong> a commenté votre post <span class="notif-highlight">« Refonte d'une app mobile »</span>
-          </div>
-          <div class="notif-preview">« J'adore le concept, tu as utilisé Figma pour le prototype ? »</div>
-          <div class="notif-time"><i class="fa-regular fa-clock"></i> Il y a 1 heure</div>
-         
-        </div>
-        <div class="notif-aside">
-          <button class="notif-menu-btn" data-id="3"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-        </div>
-      </div>
-    </div>
+    
 
     
 
     <!-- ── Section: Cette semaine ── -->
     <div class="section-label" data-section="week">Cette semaine</div>
 
-    <!-- NOTIF 5 — Evaluation ⭐ read -->
-    <div class="notif-card read" data-type="eval" data-id="5">
-      <div class="notif-inner">
-        <div class="notif-avatar-wrap">
-          <div class="notif-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706);">YB</div>
-          <div class="notif-type-icon eval"><i class="fa-solid fa-star"></i></div>
-        </div>
-        <div class="notif-body">
-          <div class="notif-text">
-            <strong>Yacine Boudali</strong> a évalué votre post <span class="notif-highlight">« Algorithmes de tri »</span>
-          </div>
-          <div class="notif-stars">
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            <span>5 / 5</span>
-          </div>
-          <div class="notif-time"><i class="fa-regular fa-clock"></i> Hier à 16:30</div>
-        </div>
-        <div class="notif-aside">
-          <button class="notif-menu-btn" data-id="5"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-        </div>
-      </div>
-    </div>
-
+    
     
 
     <!-- Empty state (hidden by default) -->
@@ -290,6 +221,7 @@
 
 <!-- ══════════ SCRIPTS ══════════ -->
 <script src="../notification/js/notification.js"></script>
+<script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
 
 </body>
 </html>

@@ -20,7 +20,7 @@ let lastConv = null;
 function buildPhotoUrl(path) {
   if (!path) return null;
   if (path.startsWith('/') || path.startsWith('http')) return path;
-  return `/Mini-Projet - Copy/${path}`;
+  return `../../../${path}`;
 }
 
 
@@ -127,7 +127,7 @@ async function loadUserProfile() {
     const navLetter = document.getElementById('navAvatarLetter');
 
     if (data.avatar) {
-      navImg.src = data.avatar;
+      navImg.src = buildPhotoUrl(data.avatar);
       navImg.style.display = 'block';
       navLetter.style.display = 'none';
     } else {
@@ -158,7 +158,7 @@ async function loadProfile() {
     const res = await fetch(url);
     
     if (res.status === 401) {
-      window.location.href = '../html/login.html';
+      window.location.href = '../../../html/login-user.html';
       return;
     }
 

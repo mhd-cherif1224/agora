@@ -4,7 +4,11 @@
 // ════════════════════════════════════════
 
 // ── Inject all required CSS ──
-
+function buildPhotoUrl(path) {
+  if (!path) return null;
+  if (path.startsWith('/') || path.startsWith('http')) return path;
+  return `../../../${path}`;
+}
 
 
 // ════════════════════════════════════════
@@ -79,7 +83,7 @@ async function loadUserProfile() {
     const res = await fetch('../../../api/get-profile.php');
 
     if (res.status === 401) {
-      window.location.href = '/Mini-Projet/view/html/login.html';
+      window.location.href = '../../../html/login.html';
       return;
     }
 
@@ -95,7 +99,7 @@ async function loadUserProfile() {
       nom: data.nom,
       prenom: data.prenom,
       role : data.role,
-      avatar: data.avatar
+      avatar:buildPhotoUrl(data.avatar)
     };
 
     // NAV avatar
@@ -119,7 +123,7 @@ async function loadUserProfile() {
     console.log(pmAvatar)
 
     if (data.avatar) {
-      pmAvatar.src = data.avatar;
+      pmAvatar.src = buildPhotoUrl(data.avatar);
       pmAvatar.style.display = 'block';
       
       
@@ -252,7 +256,7 @@ function showNotification(msg) {
     preview.innerHTML = '';
     attachedPhotos.forEach((photo, idx) => {
       const div = document.createElement('div'); div.className = 'preview-item';
-      div.innerHTML = `<img src="${photo.url}" alt="">`;
+      div.innerHTML = `<img src="${buildPhotoUrl(photo.url)}" alt="">`;
       const rm = document.createElement('button'); rm.className = 'preview-remove'; rm.innerHTML = '×';
       rm.addEventListener('click', () => { attachedPhotos.splice(idx, 1); renderPreview(); });
       div.appendChild(rm); preview.appendChild(div);
@@ -473,9 +477,7 @@ async function loadSessionUser() {
 
         const user = data.user;
 
-        const profileImage = user.photo_profil
-            ? `../../../${user.photo_profil}`
-            : "";
+        const profileImage = buildPhotoUrl(user.photo_profil);
 
         document.getElementById("postModalAvatar").src =
             profileImage;

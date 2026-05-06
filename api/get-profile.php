@@ -36,8 +36,8 @@ try {
     'niveau'       => $row['niveau']         ?? '',
     'specialite'   => $row['specialite']     ?? '',
     'numTel'       => $row['NumTel']         ?? '',
-    'avatar'       => $row['photo_profil']   ? '/Mini-Projet/' . $row['photo_profil'] : null,
-    'banner'       => $row['photo_banniere'] ? '/Mini-Projet/' . $row['photo_banniere'] : null,
+    'avatar'       => $row['photo_profil'],
+    'banner'       => $row['photo_banniere'],
     'banner_color_dark'  => $row['banner_color_dark']  ?? null,
     'banner_color_light' => $row['banner_color_light'] ?? null
 ]);

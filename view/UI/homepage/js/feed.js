@@ -20,7 +20,7 @@ async function loadUserProfile() {
     const res = await fetch('../../../api/get-profile.php');
 
     if (res.status === 401) {
-      window.location.href = '/Mini-Projet/view/html/login.html';
+      window.location.href = '../../../html/login.html';
       return;
     }
 
@@ -44,11 +44,11 @@ async function loadUserProfile() {
     const composetImg = document.querySelector("#composerAvatar");
 
     if (data.avatar) {
-      navImg.src = data.avatar;
+      navImg.src = buildPhotoUrl(data.avatar);
       navImg.style.display = 'block';
       navLetter.style.display = 'none';
 
-      composetImg.src = data.avatar;
+      composetImg.src = buildPhotoUrl(data.avatar);
       composetImg.style.display = 'block';
       
     } else {

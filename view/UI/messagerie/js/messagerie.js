@@ -9,6 +9,13 @@ let socket = null;
 // ─────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────
+
+function buildPhotoUrl(path) {
+  if (!path) return null;
+  if (path.startsWith('/') || path.startsWith('http')) return path;
+  return `../../../${path}`;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   await loadUserProfile();     // must be first
   await loadConversations();   // depends on session
@@ -33,7 +40,7 @@ async function loadUserProfile() {
     const res = await fetch('../../../api/get-profile.php');
 
     if (res.status === 401) {
-      window.location.href = '/Mini-Projet/view/html/login.html';
+      window.location.href = '../../../html/login.html';
       return;
     }
 
@@ -48,7 +55,7 @@ async function loadUserProfile() {
       id: data.id,
       nom: data.nom,
       prenom: data.prenom,
-      avatar: data.avatar
+      avatar: buildPhotoUrl(data.avatar)
     };
 
     // NAV avatar
@@ -56,7 +63,7 @@ async function loadUserProfile() {
     const navLetter = document.getElementById('navAvatarLetter');
 
     if (data.avatar) {
-      navImg.src = data.avatar;
+      navImg.src = buildPhotoUrl(data.avatar);
       navImg.style.display = 'block';
       navLetter.style.display = 'none';
     } else {
@@ -101,7 +108,7 @@ async function loadConversations() {
       preview: u.last_message || '',
       time: formatTime(u.last_message_time),
       unread: 0,
-      avatar: u.photo_profil,
+      avatar: buildPhotoUrl(u.photo_profil),
       initials: getInitials(u.nom, u.prenom),
       messages: []
     }));

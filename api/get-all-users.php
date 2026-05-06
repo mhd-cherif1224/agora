@@ -44,7 +44,7 @@ try {
             'ID' => $row['ID'],
             'nom' => $row['nom'],
             'prenom' => $row['prenom'],
-            'photo_profil' => $row['photo_profil'] ? '/Mini-Projet/' . $row['photo_profil'] : null,
+            'photo_profil' => $row['photo_profil'],
             'specialite' => $row['specialite'],
             'niveau' => $row['niveau'],
             'role' => $row['role'],

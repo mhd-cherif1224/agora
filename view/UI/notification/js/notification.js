@@ -17,6 +17,12 @@ let currentUser = {
 let socket = null;
 let lastConv = null;
 
+function buildPhotoUrl(path) {
+  if (!path) return null;
+  if (path.startsWith('/') || path.startsWith('http')) return path;
+  return `../../../${path}`;
+}
+
 /* ─────────────────────────────────────────────
    INIT
 ───────────────────────────────────────────── */
@@ -27,53 +33,27 @@ document.addEventListener('DOMContentLoaded', () => {
   setupMarkAll();
 });
 
-/* ─────────────────────────────────────────────
-   FETCH FROM API
-───────────────────────────────────────────── */
+// ─────────────────────────────────────────
+  // 1. LOAD CURRENT USER PROFILE
+  // ─────────────────────────────────────────
+  async function loadUserProfile() {
+    try {
+      const res  = await fetch('../../../api/get-profile.php');
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data.success || !data.id) return;
 
-async function loadUserProfile() {
-  try {
-    const res = await fetch('../../../api/get-profile.php');
-
-    if (res.status === 401) {
-      window.location.href = '/Mini-Projet/view/html/login.html';
-      return;
+      currentUser = {
+        id:     data.id,
+        nom:    data.nom,
+        prenom: data.prenom,
+        avatar:  buildPhotoUrl(data.avatar)
+      };
+    } catch (err) {
+      console.warn('chat.js: could not load profile', err);
     }
-
-    const data = await res.json();
-
-    if (!data.success || !data.id) {
-      console.error('Invalid profile response', data);
-      return;
-    }
-
-    currentUser = {
-      id: data.id,
-      nom: data.nom,
-      prenom: data.prenom,
-      avatar: data.avatar
-    };
-
-    // NAV avatar
-    const navImg = document.getElementById('navAvatarImg');
-    const navLetter = document.getElementById('navAvatarLetter');
-
-    if (data.avatar) {
-      navImg.src = data.avatar;
-      navImg.style.display = 'block';
-      navLetter.style.display = 'none';
-    } else {
-      navLetter.textContent = (data.prenom[0] + data.nom[0]).toUpperCase();
-      navImg.style.display = 'none';
-      navLetter.style.display = 'block';
-    }
-
-    initWebSocket();
-
-  } catch (err) {
-    console.error('Profile error:', err);
   }
-}
+
 
 async function loadNotifications() {
   try {
@@ -114,7 +94,7 @@ function renderNotifications() {
     <div class="notif-avatar-wrap">
       <div class="notif-avatar">${
     n.photo_profil
-      ? `<img src="${n.photo_profil}" alt="${escapeHtml(n.title)}">`
+      ? `<img src="${ buildPhotoUrl(n.photo_profil)}" alt="${escapeHtml(n.title)}">`
       : getInitials(n.title)
   }</div>
       <div class="notif-type-icon ${n.type}">
@@ -322,85 +302,17 @@ document.addEventListener('DOMContentLoaded', () => {
     await loadLastConversation();
   }
 
-  // ─────────────────────────────────────────
-  // 1. LOAD CURRENT USER PROFILE
-  // ─────────────────────────────────────────
-  async function loadUserProfile() {
-    try {
-      const res  = await fetch('../../../api/get-profile.php');
-      if (!res.ok) return;
-      const data = await res.json();
-      if (!data.success || !data.id) return;
-
-      currentUser = {
-        id:     data.id,
-        nom:    data.nom,
-        prenom: data.prenom,
-        avatar: data.avatar
-      };
-    } catch (err) {
-      console.warn('chat.js: could not load profile', err);
-    }
-  }
-
+  
+/* ─────────────────────────────────────────────
+   FETCH FROM API
+───────────────────────────────────────────── */
+ 
   //scroll to bottom of chat func
   function scrollToBottom() {
   if (!messages) return;
   messages.scrollTop = messages.scrollHeight;
 }
-
-  // ─────────────────────────────────────────
-  // 2. LOAD LAST CONVERSATION
-  // ─────────────────────────────────────────
-  async function loadLastConversation() {
-    try {
-      const res  = await fetch('../../../api/get-conversations.php');
-      if (!res.ok) return;
-      const data = await res.json();
-      if (!Array.isArray(data) || data.length === 0) return;
-
-      // API returns convos sorted by last_message_time — first = most recent
-      const u = data[0];
-      lastConv = {
-        id:       u.ID,
-        name:     `${u.prenom} ${u.nom}`,
-        avatar:   u.photo_profil || null,
-        initials: getInitials(u.nom, u.prenom),
-        gradient: randomGradient(u.ID),
-        messages: []
-      };
-
-      updateChatPanelHeader();
-      initWebSocket();
-
-    } catch (err) {
-      console.warn('chat.js: could not load conversations', err);
-    }
-  }
-
-  // ─────────────────────────────────────────
-  // 3. UPDATE CHAT PANEL HEADER
-  // ─────────────────────────────────────────
-  function updateChatPanelHeader() {
-    if (!lastConv) return;
-
-    const nameEl   = panel.querySelector('.chat-panel-name');
-    const avatarEl = panel.querySelector('.chat-panel-avatar');
-
-    if (nameEl) nameEl.textContent = lastConv.name;
-
-    if (avatarEl) {
-      if (lastConv.avatar) {
-        avatarEl.innerHTML = `<img src="${lastConv.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-        avatarEl.style.background = 'none';
-      } else {
-        avatarEl.textContent = lastConv.initials;
-        avatarEl.style.background = lastConv.gradient;
-      }
-    }
-  }
-
-  // ─────────────────────────────────────────
+// ─────────────────────────────────────────
   // 4. WEBSOCKET — fetch & receive history
   // ─────────────────────────────────────────
   function initWebSocket() {
@@ -471,6 +383,119 @@ document.addEventListener('DOMContentLoaded', () => {
 
   }
 
+
+  
+  // ─────────────────────────────────────────
+  // 2. LOAD LAST CONVERSATION
+  // ─────────────────────────────────────────
+  async function loadLastConversation() {
+    try {
+      const res  = await fetch('../../../api/get-conversations.php');
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) return;
+
+      // API returns convos sorted by last_message_time — first = most recent
+      const u = data[0];
+      lastConv = {
+        id:       u.ID,
+        name:     `${u.prenom} ${u.nom}`,
+        avatar:    buildPhotoUrl(u.photo_profil) || null,
+        initials: getInitials(u.nom, u.prenom),
+        gradient: randomGradient(u.ID),
+        messages: []
+      };
+
+      updateChatPanelHeader();
+      initWebSocket();
+
+    } catch (err) {
+      console.warn('chat.js: could not load conversations', err);
+    }
+  }
+
+  // ─────────────────────────────────────────
+  // 3. UPDATE CHAT PANEL HEADER
+  // ─────────────────────────────────────────
+  function updateChatPanelHeader() {
+    if (!lastConv) return;
+    const panel      = document.getElementById('chatPanel');
+    const nameEl   = panel.querySelector('.chat-panel-name');
+    const avatarEl = panel.querySelector('.chat-panel-avatar');
+
+    if (nameEl) nameEl.textContent = lastConv.name;
+
+    if (avatarEl) {
+      if (lastConv.avatar) {
+        avatarEl.innerHTML = `<img src="${ lastConv.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+        avatarEl.style.background = 'none';
+      } else {
+        avatarEl.textContent = lastConv.initials;
+        avatarEl.style.background = lastConv.gradient;
+      }
+    }
+  }
+
+  function randomGradient(seed) {
+    const gradients = [
+      'linear-gradient(135deg,#e44,#f97316)',
+      'linear-gradient(135deg,#059669,#34d399)',
+      'linear-gradient(135deg,#7c3aed,#a78bfa)',
+      'linear-gradient(135deg,#0ea5e9,#38bdf8)',
+      'linear-gradient(135deg,#db2777,#f472b6)',
+    ];
+    return gradients[(seed || 0) % gradients.length];
+  }
+
+
+  
+
+
+async function loadUserProfile() {
+  try {
+    const res = await fetch('../../../api/get-profile.php');
+
+    if (res.status === 401) {
+      window.location.href = '/Mini-Projet/view/html/login.html';
+      return;
+    }
+
+    const data = await res.json();
+
+    if (!data.success || !data.id) {
+      console.error('Invalid profile response', data);
+      return;
+    }
+
+    currentUser = {
+      id: data.id,
+      nom: data.nom,
+      prenom: data.prenom,
+      avatar : buildPhotoUrl(data.avatar)
+    };
+
+    // NAV avatar
+    const navImg = document.getElementById('navAvatarImg');
+    const navLetter = document.getElementById('navAvatarLetter');
+
+    if (data.avatar) {
+      navImg.src =  buildPhotoUrl(data.avatar);
+      navImg.style.display = 'block';
+      navLetter.style.display = 'none';
+    } else {
+      navLetter.textContent = (data.prenom[0] + data.nom[0]).toUpperCase();
+      navImg.style.display = 'none';
+      navLetter.style.display = 'block';
+    }
+
+    initWebSocket();
+
+  } catch (err) {
+    console.error('Profile error:', err);
+  }
+}
+
+ 
 
 
   // ─────────────────────────────────────────
@@ -572,17 +597,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return new Date(d).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
-  function randomGradient(seed) {
-    const gradients = [
-      'linear-gradient(135deg,#e44,#f97316)',
-      'linear-gradient(135deg,#059669,#34d399)',
-      'linear-gradient(135deg,#7c3aed,#a78bfa)',
-      'linear-gradient(135deg,#0ea5e9,#38bdf8)',
-      'linear-gradient(135deg,#db2777,#f472b6)',
-    ];
-    return gradients[(seed || 0) % gradients.length];
-  }
-
+  
 });
 
 

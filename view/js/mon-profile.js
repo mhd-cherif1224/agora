@@ -14,6 +14,13 @@ let currentUser = {
 
 let socket = null;
 let lastConv = null;
+
+function buildPhotoUrl(path) {
+  if (!path) return null;
+  if (path.startsWith('/') || path.startsWith('http')) return path;
+  return `../../${path}`;
+}
+
 // ════════════════════════════════════════
 // LOAD PROFILE FROM SESSION (PHP API)
 // ════════════════════════════════════════
@@ -22,7 +29,7 @@ async function loadProfile() {
     const res = await fetch('../../api/get-profile.php');
 
     if (res.status === 401) {
-      window.location.href = '../html/login.html';
+      window.location.href = '../html/login-user.html';
       return;
     }
 
@@ -59,7 +66,7 @@ async function loadProfile() {
 
     if (data.avatar) {
       currentProfileSrc = data.avatar;
-      if (img)    { img.src = data.avatar; img.style.display = 'block'; }
+      if (img)    { img.src = buildPhotoUrl(data.avatar); img.style.display = 'block'; }
       if (letter) letter.style.display = 'none';
       updateAllPostAvatars(data.avatar);
     } else {
@@ -67,12 +74,12 @@ async function loadProfile() {
     }
 
     const profilePreview = document.getElementById('profilePreview');
-    if (profilePreview && data.avatar) profilePreview.src = data.avatar;
+    if (profilePreview && data.avatar) profilePreview.src = buildPhotoUrl(data.avatar);
 
     // ✅ Banner
     const bannerTop = document.getElementById('bannerTop');
     if (bannerTop && data.banner) {
-      bannerTop.style.backgroundImage    = `url('${data.banner}')`;
+      bannerTop.style.backgroundImage    = `url('${buildPhotoUrl(data.banner)}')`;
       bannerTop.style.backgroundSize     = 'cover';
       bannerTop.style.backgroundPosition = 'center';
       bannerTop.style.backgroundRepeat   = 'no-repeat';
@@ -330,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
       lastConv = {
         id:       u.ID,
         name:     `${u.prenom} ${u.nom}`,
-        avatar:   u.photo_profil || null,
+        avatar:   buildPhotoUrl(u.photo_profil),
         initials: getInitials(u.nom, u.prenom),
         gradient: randomGradient(u.ID),
         messages: []
@@ -695,7 +702,7 @@ async function loadAllUsers() {
 
       if (user.photo_profil) {
         const img = document.createElement('img');
-        img.src = user.photo_profil;
+        img.src = buildPhotoUrl(user.photo_profil);
         img.alt = user.prenom;
         img.onerror = () => {
           avatarDiv.textContent = (user.prenom[0] + user.nom[0]).toUpperCase();

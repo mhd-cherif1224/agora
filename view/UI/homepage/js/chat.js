@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
       lastConv = {
         id:       u.ID,
         name:     `${u.prenom} ${u.nom}`,
-        avatar:   u.photo_profil || null,
+        avatar:   `../../../`+u.photo_profil || null,
         initials: getInitials(u.nom, u.prenom),
         gradient: randomGradient(u.ID),
         messages: []
