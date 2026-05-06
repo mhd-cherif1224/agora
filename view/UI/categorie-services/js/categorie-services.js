@@ -1,0 +1,351 @@
+// ── Utilitaires ──
+
+function getTimeAgo(dateString) {
+    const now = new Date();
+    const diffMs = now - new Date(dateString);
+    const minutes = Math.floor(diffMs / 60000);
+    const hours   = Math.floor(diffMs / 3600000);
+    const days    = Math.floor(diffMs / 86400000);
+    const months  = Math.floor(days / 30);
+    const years   = Math.floor(months / 12);
+
+    if (minutes < 60)  return `il y a ${minutes} min`;
+    if (hours < 24)    return `il y a ${hours} h`;
+    if (days < 30)     return `il y a ${days} jours`;
+    if (months < 12)   return `il y a ${months} mois`;
+    return `il y a ${years} an(s)`;
+}
+
+function generateStars(note) {
+    note = parseFloat(note);
+    const full = Math.floor(note);
+    return Array.from({ length: 5 }, (_, i) =>
+        `<i class="${i < full ? 'fa-solid' : 'fa-regular'} fa-star"></i>`
+    ).join('');
+}
+
+function createServiceCard(service) {
+    const profileImage = service.photo_profil
+        ? `../../../${service.photo_profil}`
+        : null;
+
+    const serviceImage = service.service_photo
+        ? `../../../${service.service_photo}`
+        : null;
+
+    const categories = service.categorie
+        ? service.categorie.split(",")
+        : [];
+
+    const timeAgo = getTimeAgo(service.DateDePublication);
+
+    return `
+<article class="post-card" data-service-id="${service.ID}">
+
+    <div class="post-header">
+        <div class="post-avatar">
+            <img src="${profileImage}"
+                 style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+        </div>
+        <div class="post-meta">
+            <div class="post-name">${service.nom} ${service.prenom}</div>
+            <div class="post-time-row">
+                <span class="post-time">${timeAgo}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-title">${service.titre}</div>
+
+    <div class="post-tags">
+        ${categories.map(cat => `
+            <span class="category-pill green" style="cursor:pointer"
+                  onclick="window.location.href='../categorie-services/categorie-services.html?cat=${encodeURIComponent(cat.trim())}'">
+                ${cat.trim()}
+            </span>
+        `).join("")}
+    </div>
+
+    <div class="post-body">
+        ${service.description}
+        <br>
+        prix : ${service.prix} DZD
+    </div>
+
+    <div class="post-body">${service.status}</div>
+
+    ${serviceImage ? `<img class="post-image" src="${serviceImage}">` : ""}
+
+    <div class="post-rating-summary">
+        <div class="rating-stars-display">${generateStars(service.note_moyenne)}</div>
+        <span class="rating-score">${service.note_moyenne}</span>
+        <span class="rating-count">(${service.nb_avis} évaluations)</span>
+    </div>
+
+    <div class="post-actions">
+        <button class="post-action-btn" data-action="rate">
+            <i class="fa-regular fa-star"></i> Évaluer
+        </button>
+    </div>
+
+    <div class="rating-panel" hidden>
+        <div class="rating-panel-inner">
+            <p class="rating-panel-label">Votre évaluation</p>
+            <div class="star-picker">
+                <i class="fa-regular fa-star" data-star="1"></i>
+                <i class="fa-regular fa-star" data-star="2"></i>
+                <i class="fa-regular fa-star" data-star="3"></i>
+                <i class="fa-regular fa-star" data-star="4"></i>
+                <i class="fa-regular fa-star" data-star="5"></i>
+            </div>
+            <textarea class="rating-comment-input" placeholder="Commentaire..."></textarea>
+            <div class="rating-panel-actions">
+                <button class="rating-cancel-btn">Annuler</button>
+                <button class="rating-submit-btn">Soumettre</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="comments-list" hidden></div>
+
+</article>`;
+}
+
+
+// ── Page catégorie ──
+
+document.addEventListener("DOMContentLoaded", async () => {
+
+    const params    = new URLSearchParams(window.location.search);
+    const categorie = params.get("cat");
+    const sortSelect = document.getElementById("sortSelect");
+
+    const icons = {
+        "Sport":           "⚽",
+        "Musique":         "🎵",
+        "Informatique":    "💻",
+        "Cuisine":         "🍳",
+        "Art":             "🎨",
+        "Education":       "📚",
+        "Médecine":        "🩺",
+        "Santé":           "💊",
+        "Aide aux cours":  "✏️",
+        "Tuteur":          "🎓",
+        "Langues":         "🌍",
+        "Mathématiques":   "📐",
+        "Physique":        "⚛️",
+        "Chimie":          "🧪",
+        "Histoire":        "🏛️",
+        "Droit":           "⚖️",
+        "Comptabilité":    "🧾",
+        "Finance":         "💰",
+        "Marketing":       "📣",
+        "Design":          "🎨",
+        "Photographie":    "📷",
+        "Vidéo":           "🎬",
+        "Rédaction":       "✍️",
+        "Traduction":      "🔤",
+        "Jardinage":       "🌱",
+        "Bricolage":       "🔧",
+        "Électricité":     "⚡",
+        "Plomberie":       "🚿",
+        "Nettoyage":       "🧹",
+        "Garde d'enfants": "👶",
+        "Coiffure":        "💇",
+        "Beauté":          "💄",
+        "Fitness":         "🏋️",
+        "Yoga":            "🧘",
+        "Livraison":       "🚚",
+        "Transport":       "🚗",
+        "Vétérinaire":     "🐾",
+        "Psychologie":     "🧠",
+        "Architecture":    "🏗️",
+        "Couture":         "🧵",
+    };
+
+    document.getElementById("pageTitle").textContent =
+        categorie ?? "Tous les services";
+
+    document.getElementById("categoryIcon").textContent =
+        icons[categorie] ?? "🏷️";
+
+    // Écouter le changement de tri
+    sortSelect.addEventListener("change", () => loadServices(sortSelect.value));
+
+    await loadServices(sortSelect.value);
+
+    async function loadServices(sort = "recent") {
+        const container = document.getElementById("servicesContainer");
+        container.innerHTML = `<div class="posts-header">
+            <h3>${categorie ? `Services — ${categorie}` : "Tous les services"}</h3>
+        </div>`;
+
+        try {
+            let url = `/Mini-Projet/api/get-services.php?sort=${sort}`;
+            if (categorie) url += `&categorie=${encodeURIComponent(categorie)}`;
+
+            const response = await fetch(url);
+            const data     = await response.json();
+
+            if (!data.success || data.services.length === 0) {
+                container.innerHTML += `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" stroke-width="1.5">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <p>Aucun service trouvé pour cette catégorie.</p>
+                    </div>`;
+                document.getElementById("postsCount").textContent = "0 service";
+                return;
+            }
+
+            document.getElementById("postsCount").textContent =
+                `${data.services.length} service${data.services.length > 1 ? "s" : ""}`;
+
+            container.innerHTML += data.services
+                .map(s => createServiceCard(s))
+                .join("");
+
+            attachRatingEvents(container);
+
+        } catch (err) {
+            console.error("Erreur:", err);
+            container.innerHTML += `<p style="color:var(--color-muted);padding:20px;text-align:center">Erreur de chargement.</p>`;
+        }
+    }
+
+});
+
+
+// ── Attacher les événements rating sur un conteneur ──
+function attachRatingEvents(container) {
+
+    container.addEventListener('click', (e) => {
+
+        if (e.target.closest('.post-action-btn[data-action="rate"]')) {
+            const card  = e.target.closest('.post-card');
+            const panel = card.querySelector('.rating-panel');
+            panel.hidden = !panel.hidden;
+            return;
+        }
+
+        if (e.target.closest('.star-picker')) {
+            const star = e.target.closest('[data-star]');
+            if (!star) return;
+            const picker = star.closest('.star-picker');
+            picker.dataset.selected = star.dataset.star;
+            renderPickerStars(picker, parseInt(star.dataset.star));
+            return;
+        }
+
+        if (e.target.closest('.rating-cancel-btn')) {
+            closeRatingPanel(e.target.closest('.post-card'));
+            return;
+        }
+
+        if (e.target.closest('.rating-submit-btn')) {
+            submitRating(e.target.closest('.post-card'));
+            return;
+        }
+    });
+
+    container.addEventListener('mouseover', (e) => {
+        const star = e.target.closest('.star-picker [data-star]');
+        if (!star) return;
+        renderPickerStars(star.closest('.star-picker'), parseInt(star.dataset.star), true);
+    });
+
+    container.addEventListener('mouseout', (e) => {
+        const star = e.target.closest('.star-picker [data-star]');
+        if (!star) return;
+        const picker = star.closest('.star-picker');
+        renderPickerStars(picker, parseInt(picker.dataset.selected || 0));
+    });
+}
+
+
+// ── Helpers rating ──
+
+function renderPickerStars(picker, upTo, isHover = false) {
+    picker.querySelectorAll('[data-star]').forEach(s => {
+        const n = parseInt(s.dataset.star);
+        s.className = n <= upTo
+            ? (isHover ? 'fa-regular fa-star hovered' : 'fa-solid fa-star selected')
+            : 'fa-regular fa-star';
+    });
+}
+
+function closeRatingPanel(card) {
+    const panel    = card.querySelector('.rating-panel');
+    const picker   = card.querySelector('.star-picker');
+    const textarea = card.querySelector('.rating-comment-input');
+    panel.hidden = true;
+    picker.dataset.selected = 0;
+    renderPickerStars(picker, 0);
+    textarea.value = '';
+}
+
+function submitRating(card) {
+    const picker   = card.querySelector('.star-picker');
+    const textarea = card.querySelector('.rating-comment-input');
+    const note     = parseInt(picker.dataset.selected || 0);
+
+    if (note === 0) {
+        textarea.placeholder = '⚠ Choisissez une note avant de soumettre...';
+        textarea.classList.add('input-error');
+        setTimeout(() => {
+            textarea.placeholder = 'Commentaire...';
+            textarea.classList.remove('input-error');
+        }, 2000);
+        return;
+    }
+
+    const commentaire = textarea.value.trim();
+    const dateEval    = new Date().toLocaleDateString('fr-FR');
+
+    const commentsList = card.querySelector('.comments-list');
+    if (commentaire) {
+        const item = document.createElement('div');
+        item.className = 'comment-item';
+        const starsHtml = Array.from({ length: 5 }, (_, i) =>
+            `<i class="${i < note ? 'fa-solid' : 'fa-regular'} fa-star"></i>`
+        ).join('');
+        item.innerHTML = `
+            <div class="comment-avatar" style="background:linear-gradient(135deg,#4b48ec,#7299f4);">Moi</div>
+            <div class="comment-body">
+                <div class="comment-header">
+                    <span class="comment-name">Moi</span>
+                    <div class="comment-stars">${starsHtml}</div>
+                    <span class="comment-date">${dateEval}</span>
+                </div>
+                <p class="comment-text">${commentaire}</p>
+            </div>`;
+        commentsList.appendChild(item);
+        commentsList.hidden = false;
+    }
+
+    // Mettre à jour le résumé
+    const summary  = card.querySelector('.post-rating-summary');
+    const scoreEl  = summary.querySelector('.rating-score');
+    const countEl  = summary.querySelector('.rating-count');
+    const starsEl  = summary.querySelector('.rating-stars-display');
+    const oldScore = parseFloat(scoreEl.textContent);
+    const oldCount = parseInt(countEl.textContent.match(/\d+/)[0]);
+    const newCount = oldCount + 1;
+    const rounded  = Math.round(((oldScore * oldCount) + note) / newCount * 10) / 10;
+    scoreEl.textContent = rounded.toFixed(1);
+    countEl.textContent = `(${newCount} évaluations)`;
+    const full = Math.floor(rounded);
+    const half = rounded - full >= 0.5;
+    starsEl.innerHTML = Array.from({ length: 5 }, (_, i) => {
+        if (i < full) return '<i class="fa-solid fa-star"></i>';
+        if (i === full && half) return '<i class="fa-solid fa-star-half-stroke"></i>';
+        return '<i class="fa-regular fa-star"></i>';
+    }).join('');
+
+    closeRatingPanel(card);
+
+    const rateBtn = card.querySelector('.post-action-btn[data-action="rate"]');
+    rateBtn.classList.add('rated');
+    rateBtn.innerHTML = `<i class="fa-solid fa-star"></i> Évalué`;
+}
