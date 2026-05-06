@@ -1355,13 +1355,12 @@ function createServiceCard(service) {
 
         <div class="post-tags">
           <span class="post-tag ">
-            ${
-                categories.map(cat => `
-                    <span class="category-pill green">
-                        ${cat.trim()}
-                    </span>
-                `).join("")
-            }
+            ${categories.map(cat => `
+                <span class="category-pill green" style="cursor:pointer"
+                      onclick="window.location.href='../categorie-services/categorie-services.html?cat=${encodeURIComponent(cat.trim())}'">
+                    ${cat.trim()}
+                </span>
+            `).join("")}
           </span>
         </div>
 
