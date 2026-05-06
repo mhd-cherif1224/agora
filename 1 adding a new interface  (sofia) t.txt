@@ -1,0 +1,23 @@
+1 adding a new interface : (sofia) time constraint : 1 day
+l affichage des services de chaque categories, example :
+
+<div class="categorie-pill" onclick="window.location.href='categorie-services.html'">arte</div>
+
+2 limiting the evaluation to any user but himself in the home page: (sofia) time constraint : 1 day
+ as you can see in mon-profil, the user in current session cant make evaluations
+
+
+
+
+3 publication d un service (cherif) time constraint : 1 day
+4 notifications statistics : (cherif) time constraint : 4 hours 
+5 making evaluations : (cherif) time constraint : 4 hours
+6 limiting the posting to only the proposeur : (cherif) time constraint : 1 hour
+
+
+7 create the php file in the api folder "get-search-result.php"which sends a json result, this file includes  sql statment for searching, combining the tables : service, utilisateur, and maybe categorie (chaima) time constraint : 1 day
+for example : when searching for "design", the search result shows all the users with name of "design", even tho the design is a categorie
+example2 : when searching for "hamid", the search result shows all the users with name of "hamid"
+
+
+

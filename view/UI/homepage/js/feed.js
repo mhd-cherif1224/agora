@@ -1,3 +1,4 @@
+
 // ── feed.js ──
 // Handles star rating + comment system on post cards
 
@@ -16,10 +17,10 @@ await loadUserProfile();
 
 async function loadUserProfile() {
   try {
-    const res = await fetch('/Mini-Projet%20-%20Copy/api/get-profile.php');
+    const res = await fetch('../../../api/get-profile.php');
 
     if (res.status === 401) {
-      window.location.href = '/Mini-Projet - Copy/view/html/login.html';
+      window.location.href = '/Mini-Projet/view/html/login.html';
       return;
     }
 
@@ -41,7 +42,6 @@ async function loadUserProfile() {
     const navImg = document.getElementById('navAvatarImg');
     const navLetter = document.getElementById('navAvatarLetter');
     const composetImg = document.querySelector("#composerAvatar");
-    console.log(composetImg)
 
     if (data.avatar) {
       navImg.src = data.avatar;
@@ -105,11 +105,11 @@ function createServiceCard(service) {
     (service.prenom?.charAt(0) || "");
 
 const profileImage = service.photo_profil
-    ? `/Mini-Projet%20-%20Copy/${service.photo_profil}`
+    ? `../../../${service.photo_profil}`
     : null;
 
 const serviceImage = service.service_photo
-    ? `/Mini-Projet%20-%20Copy/${service.service_photo}`
+    ? `../../../${service.service_photo}`
     : null;
 
 const categories = service.categorie
@@ -121,78 +121,65 @@ const timeAgo = getTimeAgo(service.DateDePublication);
 return `
 
 <article class="post-card" data-service-id="${service.ID}">
-    
-    <div class="post-header">
+        
+        <div class="post-header">
 
-        <div class="post-avatar">
+            <div class="post-avatar">
+                <img 
+                    src="${profileImage}" 
+                    style="width:100%;height:100%;object-fit:cover;border-radius:50%;"
+                >
+            </div>
+
+            <div class="post-meta">
+
+                <div class="post-name">
+                    ${service.nom} ${service.prenom}
+                </div>
+
+                <div class="post-time-row">
+                    <span class="post-time">
+                        ${getTimeAgo(service.DateDePublication)}
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="post-title">
+            ${service.titre}
+        </div>
+
+        <div class="post-tags">
+          <span class="post-tag ">
             ${
-                profileImage
-                ? `
-                    <img 
-                        src="${profileImage}" 
-                        style="width:100%;height:100%;object-fit:cover;border-radius:50%;"
-                    >
-                  `
-                : initials
+                categories.map(cat => `
+                    <span class="category-pill green">
+                        ${cat.trim()}
+                    </span>
+                `).join("")
             }
+          </span>
         </div>
 
-        <div class="post-meta">
-
-            <div class="post-name">
-                ${service.nom} ${service.prenom}
-            </div>
-
-            <div class="post-role">
-                ${service.specialite || ""}
-                ${service.niveau || ""}
-            </div>
-
-            <div class="post-time-row">
-                <span class="post-time">
-                    ${timeAgo}
-                </span>
-            </div>
-
+        <div class="post-body">
+            ${service.description}
+            <br>
+            prix : ${service.prix} DZD
         </div>
+        <div class="post-body">${service.status}</div>
 
-    </div>
-
-    <div class="post-title">
-        ${service.titre}
-    </div>
-
-    <div class="post-tags">
-    
-          <span class="post-tag blue">
         ${
-            categories.map(cat => `
-                
-                    ${cat.trim()}
-               
-            `).join("")
+            serviceImage
+            ? `
+                <img 
+                    class="post-image"
+                    src="${serviceImage}"
+                >
+            `
+            : ""
         }
-
-        <span>
-    </div>
-    <div class="post-body">
-        ${service.description}
-    </div>
-
-    ${
-        serviceImage
-        ? `
-            <img 
-                class="post-image"
-                src="${serviceImage}"
-                style="width:100%;object-fit:cover;"
-            >
-        `
-        : ""
-    }
-
-    
-
     <div class="post-rating-summary">
 
         <div class="rating-stars-display">
