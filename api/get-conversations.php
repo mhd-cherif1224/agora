@@ -57,7 +57,7 @@ ORDER BY m.DateEnvoie DESC;
         'ID' => $row['ID'],
         'nom' => $row['nom'],
         'prenom' => $row['prenom'],
-        'photo_profil' => $row['photo_profil'] ? '/Mini-Projet%20-%20Copy/' . $row['photo_profil'] : null,
+        'photo_profil' => $row['photo_profil'] ? '/Mini-Projet/' . $row['photo_profil'] : null,
 
         // ✅ KEEP REAL DATA
         'last_message' => $row['last_message'] ?? null,

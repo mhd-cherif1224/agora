@@ -1,3 +1,4 @@
+
 // ── feed.js ──
 // Handles star rating + comment system on post cards
 
@@ -19,7 +20,7 @@ async function loadUserProfile() {
     const res = await fetch('../../../api/get-profile.php');
 
     if (res.status === 401) {
-      window.location.href = '/Mini-Projet - Copy/view/html/login.html';
+      window.location.href = '/Mini-Projet/view/html/login.html';
       return;
     }
 

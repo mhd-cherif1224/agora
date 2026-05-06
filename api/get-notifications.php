@@ -57,7 +57,7 @@ try {
 
             // 👇 THIS is what your UI will show
             'title' => $fullname,
-            'photo_profil' => $row['photo_profil'] ? '/Mini-Projet%20-%20Copy/' . $row['photo_profil'] : null,
+            'photo_profil' => $row['photo_profil'] ? '/Mini-Projet/' . $row['photo_profil'] : null,
 
             'message' => $row['commentaire'] ?: 'Vous avez reçu une évaluation',
             'note' => (int)$row['note'],
