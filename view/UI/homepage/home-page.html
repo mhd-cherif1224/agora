@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="css/sidebar.css">
   <link rel="stylesheet" href="css/chat.css">
   <link rel="stylesheet" href="css/post-modal.css">
-   <script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
+   
 </head>
 <body>
 
@@ -227,7 +227,7 @@
     </div>
     <div class="post-modal-preview" id="postPreview"></div>
     <div class="post-modal-footer">
-      <input type="file" id="pmPhotoInput" hidden accept="image/jpeg,image/png,image/jpg,image/gif" multiple>
+      <input type="file" id="pmPhotoInput" hidden accept="image/jpeg,image/png,image/jpg,image/gif">
       <button class="post-tool-btn" id="pmPhotoBtn" title="Ajouter une photo"><i class="fa-regular fa-image"></i></button>
       <div style="position:relative;">
         <button class="post-tool-btn" id="pmLocBtn" title="Ajouter une localisation"><i class="fa-solid fa-location-dot"></i></button>
@@ -254,7 +254,6 @@
           <button class="timer-confirm-btn" id="timerConfirm">Confirmer</button>
         </div>
       </div>
-      <div class="cat-dropdown" id="catDropdown"></div>
       <button class="post-publish-btn" id="postPublishBtn">publier</button>
     </div>
   </div>
@@ -268,6 +267,7 @@
 <script src="js/sidebar.js"></script>
 <script src="js/chat.js"></script>
 <script src="js/post-modal.js"></script>
+<script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
 
 </body>
 </html>

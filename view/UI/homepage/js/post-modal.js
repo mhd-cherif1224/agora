@@ -157,7 +157,7 @@ function showNotification(msg) {
 (function () {
   
 
-  let attachedPhotos = [], selectedCats = new Set(), scheduledAt = null, locationValue = '';
+  let selectedCats = new Set(), scheduledAt = null, locationValue = '';
   let pollActive = false, pollOptions = ['', ''], pollDuration = '1';
 
   const overlay        = document.getElementById('postModalOverlay');
@@ -214,9 +214,9 @@ function showNotification(msg) {
   }
   function closeModal() { overlay.classList.remove('active'); document.body.style.overflow = ''; }
   function resetModal() {
-    ; attachedPhotos = []; selectedCats.clear(); scheduledAt = null; locationValue = '';
+    selectedCats.clear(); scheduledAt = null; locationValue = '';
     pollActive = false; pollOptions = ['', '']; pollDuration = '1';
-    renderPreview(); renderCatChips();
+    renderPreview();
     [scheduledChip, locationChip].forEach(c => c.classList.remove('visible'));
     [pmTimerBtn, pmCatBtn, pmLocBtn].forEach(b => b.classList.remove('active'));
     publishBtn.classList.remove('scheduled'); publishBtn.innerHTML = 'publier';
@@ -226,6 +226,9 @@ function showNotification(msg) {
     if (pollChip) pollChip.classList.remove('visible');
     if (pollBuilder) { pollBuilder.classList.remove('visible'); renderPollBuilder(); }
     if (pmPollBtn) pmPollBtn.classList.remove('active');
+
+    console.log("resetModal called");
+console.log("Before reset:", attachedPhotos);
   }
 
   // Composer triggers
@@ -242,21 +245,50 @@ function showNotification(msg) {
   overlay.addEventListener('click', e => { if (e.target === overlay) { closeModal(); resetModal(); } });
 
   // Photo
-  pmPhotoBtn.addEventListener('click', () => pmPhotoInput.click());
-  pmPhotoInput.addEventListener('change', function () {
+  // Photo
+console.log("pmPhotoBtn:", pmPhotoBtn);
+console.log("pmPhotoInput:", pmPhotoInput);
+
+pmPhotoBtn.addEventListener('click', () => {
+    console.log("Photo button clicked");
+    pmPhotoInput.click();
+});
+
+pmPhotoInput.addEventListener('change', function () {
+
+    console.log("Files selected:", this.files);
+
     Array.from(this.files).forEach(file => {
-      if (file.type === 'image/gif') { showNotification('⚠️ Les GIFs animés ne sont pas acceptés'); return; }
-      const reader = new FileReader();
-      reader.onload = e => { attachedPhotos.push({ url: e.target.result, file: file }); renderPreview(); };
-      reader.readAsDataURL(file);
+
+        if (file.type === 'image/gif') {
+            showNotification('⚠️ Les GIFs animés ne sont pas acceptés');
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+
+            attachedPhotos.push({
+                url: e.target.result,
+                file: file
+            });
+
+            console.log("After push:", attachedPhotos);
+
+            renderPreview();
+        };
+
+        reader.readAsDataURL(file);
     });
+
     this.value = '';
-  });
+});
   function renderPreview() {
     preview.innerHTML = '';
     attachedPhotos.forEach((photo, idx) => {
       const div = document.createElement('div'); div.className = 'preview-item';
-      div.innerHTML = `<img src="${buildPhotoUrl(photo.url)}" alt="">`;
+      div.innerHTML = `<img src="${photo.url}" alt="">`;
       const rm = document.createElement('button'); rm.className = 'preview-remove'; rm.innerHTML = '×';
       rm.addEventListener('click', () => { attachedPhotos.splice(idx, 1); renderPreview(); });
       div.appendChild(rm); preview.appendChild(div);
@@ -810,45 +842,124 @@ async function loadSessionUser() {
     }
     document.querySelectorAll('.post-more-menu').forEach(m => m.remove());
   });
+const catBtn = document.getElementById('pmCatBtn');
+const catDropdown = document.getElementById('catDropdown');
 
-  async function loadCategories() {
-  const dropdown = document.getElementById('catDropdown');
-  if (!dropdown) return;
+let categories = [];
+let selectedCategories = [];
 
-  try {
-    const res = await fetch('../../../api/get-all-categories.php');
+// Load categories from PHP
+async function loadCategories() {
 
-    if (!res.ok) throw new Error('HTTP error ' + res.status);
-
-    const result = await res.json();
-    console.log('categories:', result);
-
-    // ✅ FIX HERE
-    const categories = result.data;
-
-    if (!Array.isArray(categories)) {
-      console.error('Not an array:', result);
-      return;
+    if (categories.length > 0) {
+        renderCategoryDropdown();
+        return;
     }
 
-    dropdown.innerHTML = '';
+    try {
 
-    categories.forEach(cat => {
-      const div = document.createElement('div');
-      div.className = 'cat-item';
-      div.textContent = cat.titre;
+        const response = await fetch('../../../api/get-all-categories.php');
 
-      div.addEventListener('click', () => {
-        addCategoryChip(cat); // your existing function
-      });
+        const result = await response.json();
 
-      dropdown.appendChild(div);
-    });
+        console.log("categories:", result);
 
-  } catch (err) {
-    console.error('Error loading categories:', err);
-  }
+        if (result.success) {
+            categories = result.data;
+            renderCategoryDropdown();
+        }
+
+    } catch (error) {
+        console.error("Category loading error:", error);
+    }
 }
+
+function renderCategoryDropdown() {
+
+    catDropdown.innerHTML = '';
+
+    categories.forEach(category => {
+
+        const item = document.createElement('div');
+
+        item.className = 'cat-option';
+
+        item.textContent = category.titre;
+
+        item.addEventListener('click', () => {
+            selectCategory(category);
+        });
+
+        catDropdown.appendChild(item);
+    });
+}
+
+function selectCategory(category) {
+
+    const exists = selectedCategories.some(
+        c => c.ID == category.ID
+    );
+
+    if (exists) {
+        showNotification("⚠️ Catégorie déjà ajoutée");
+        return;
+    }
+
+    selectedCategories.push(category);
+
+    renderCatChips();
+
+    catDropdown.classList.remove('open');
+}
+
+function renderCatChips() {
+
+    const container = document.getElementById('categoryChips');
+
+    container.innerHTML = '';
+
+    selectedCategories.forEach(category => {
+
+        const chip = document.createElement('div');
+
+        chip.className = 'category-chip';
+
+        chip.innerHTML = `
+            <span>${category.titre}</span>
+            <button>x</button>
+        `;
+
+        chip.querySelector('button').addEventListener('click', () => {
+            removeCategory(category.ID);
+        });
+
+        container.appendChild(chip);
+    });
+}
+
+function removeCategory(categoryId) {
+
+    selectedCategories =
+        selectedCategories.filter(
+            cat => cat.ID != categoryId
+        );
+
+    renderCatChips();
+}
+
+catBtn.addEventListener('click', (e) => {
+
+    e.stopPropagation();
+
+    catDropdown.classList.toggle('open');
+
+    loadCategories();
+});
+
+document.addEventListener('click', () => {
+    catDropdown.classList.remove('open');
+});
+
 
 loadCategories();
 
@@ -867,45 +978,6 @@ if (pmCatBtn) {
   });
 }
 
-// close when clicking outside
-
-const selectedCategories = [];
-
-function addCategoryChip(cat) {
-  const container = document.getElementById('categoryChips');
-  if (!container) return;
-
-  // avoid duplicates
-  if (selectedCategories.find(c => c.ID === cat.ID)) return;
-
-  selectedCategories.push(cat);
-
-  const chip = document.createElement('div');
-  chip.className = 'category-chip';
-  chip.dataset.id = cat.ID;
-
-  chip.innerHTML = `
-    <span>${cat.titre}</span>
-    <button class="chip-remove">
-      <i class="fa-solid fa-xmark"></i>
-    </button>
-  `;
-
-  chip.querySelector('.chip-remove').addEventListener('click', () => {
-    removeCategoryChip(cat.ID, chip);
-  });
-
-  container.appendChild(chip);
-}
-
-  function removeCategoryChip(id, element) {
-  const index = selectedCategories.findIndex(c => c.ID === id);
-  if (index !== -1) {
-    selectedCategories.splice(index, 1);
-  }
-
-  element.remove();
-}
 
 const postPublishBtn = document.getElementById('postPublishBtn');
 
@@ -919,6 +991,34 @@ const postPublishBtn = document.getElementById('postPublishBtn');
 // ======================================
 // Fonction pour publier un service
 // ======================================
+// ════════════════════════════════════════
+// CONVERT a File to a JPEG Blob via canvas
+// (mirrors edit-profile.js uploadImage pattern, no cropper)
+// ════════════════════════════════════════
+function fileToBlob(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('FileReader failed'));
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onerror = () => reject(new Error('Image load failed'));
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width  = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                canvas.getContext('2d').drawImage(img, 0, 0);
+                canvas.toBlob(
+                    (blob) => blob ? resolve(blob) : reject(new Error('toBlob failed')),
+                    'image/jpeg',
+                    0.92          // same quality as edit-profile.js
+                );
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
 async function publierService() {
     console.log("publierService is called");
 
@@ -933,19 +1033,37 @@ async function publierService() {
             return;
         }
 
-        // Create form data
+        console.log("attachedPhotos:", attachedPhotos);
+        console.log("attachedPhotos length:", attachedPhotos.length);
+
+        // ── Convert every attached photo to a JPEG blob ──
+        // attachedPhotos is populated by the FileReader preview flow above.
+        // We convert each File through a canvas (like edit-profile.js uploadImage)
+        // so the server always receives clean JPEG data.
+        let photoBlobs = [];
+        if (attachedPhotos.length > 0) {
+          console.log("attached is read")
+            try {
+                photoBlobs = await Promise.all(
+                    attachedPhotos.map(photo => fileToBlob(photo.file))
+                );
+            } catch (imgErr) {
+                console.error('Image conversion error:', imgErr);
+                showNotification('❌ Erreur lors du traitement des images');
+                return;
+            }
+        }
+
+        // ── Build FormData ──
         const formData = new FormData();
         formData.append("titre", titre);
         formData.append("prix", prix);
         formData.append("description", description);
 
-        // Add photos
-        const photoInput = document.getElementById('pmPhotoInput');
-        if (photoInput && photoInput.files.length > 0) {
-            Array.from(photoInput.files).forEach(file => {
-                formData.append('photos[]', file);
-            });
-        }
+        // Append each converted blob with an indexed filename
+        photoBlobs.forEach((blob, i) => {
+            formData.append('photos[]', blob, `photo_${i + 1}.jpg`);
+        });
 
         // Add selected categories
         selectedCategories.forEach(category => {
@@ -969,28 +1087,20 @@ async function publierService() {
         const result = await response.json();
         console.log("Server response:", result);
 
+        if (result.success) {
+            showNotification('✓ Service publié !');
+        } else {
+            showNotification('❌ ' + (result.message || 'Erreur lors de la publication'));
+        }
+
     } catch (error) {
         console.error("Publish error:", error);
+        showNotification('❌ Erreur réseau');
     }
 }
 
 
-// Exécuter la fonction au clic sur publier
-document
-    .getElementById("postPublishBtn")
-    .addEventListener("click", publierService);
 
-
-
-// ===============================
-// Publish button click event
-// ===============================
-document
-    .getElementById("postPublishBtn")
-    .addEventListener(
-        "click",
-        publierService
-    );
 
 
 
