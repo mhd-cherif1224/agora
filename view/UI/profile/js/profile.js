@@ -24,124 +24,7 @@ function buildPhotoUrl(path) {
 }
 
 
-  // ─────────────────────────────────────────
-  // 4. WEBSOCKET — fetch & receive history
-  // ─────────────────────────────────────────
-  function initWebSocket() {
-    if (!currentUser?.id || !lastConv) return;
-
-    // Avoid double-connecting
-    if (socket) return;
-
-    socket = io('http://localhost:3000', {
-      query: { userId: currentUser.id }
-    });
-
-    socket.on('connect', () => {
-      // Request message history for the most recent conversation
-      socket.emit('get_history', { otherUserId: lastConv.id });
-    });
-
-    socket.on('conversation_history', ({ otherUserId, messages: msgs }) => {
-      if (!lastConv || otherUserId !== lastConv.id) return;
-
-      lastConv.messages = msgs.map(m => ({
-        text: m.contenue,
-        time: m.DateEnvoie,
-        sent: m.ID_Expediteur === currentUser.id
-      }));
-
-      renderMessages();
-    });
-
-    // Live incoming messages
-    socket.on(`msg_${currentUser.id}`, msg => {
-      if (!lastConv) return;
-      const otherId =
-        msg.ID_Expediteur === currentUser.id
-          ? msg.ID_Destinataire
-          : msg.ID_Expediteur;
-
-      if (otherId !== lastConv.id) return;
-
-      lastConv.messages.push({
-        text: msg.contenue,
-        time: msg.DateEnvoie,
-        sent: msg.ID_Expediteur === currentUser.id
-      });
-      renderMessages();
-    });
-  }
-
-  // ─────────────────────────────────────────
-  // 5. RENDER MESSAGES IN CHAT PANEL
-  // ─────────────────────────────────────────
-  function renderMessages() {
-    if (!lastConv || !messages) return;
-
-    messages.innerHTML = '';
-
-    lastConv.messages.forEach(msg => {
-      const div = document.createElement('div');
-      div.className = `chat-msg ${msg.sent ? 'sent' : 'received'}`;
-      div.innerHTML = `
-        <div class="msg-bubble">${escapeHtml(msg.text)}</div>
-        <span class="msg-time">${formatTime(msg.time)}</span>
-      `;
-      messages.appendChild(div);
-    });
-
-    scrollToBottom();
-
-  }
-
-
-// ─────────────────────────────────────────
-// LOAD USER PROFILE
-// ─────────────────────────────────────────
-async function loadUserProfile() {
-  try {
-    const res = await fetch('../../../api/get-profile.php');
-
-    if (res.status === 401) {
-      window.location.href = '../../../html/login.html';
-      return;
-    }
-
-    const data = await res.json();
-
-    if (!data.success || !data.id) {
-      console.error('Invalid profile response', data);
-      return;
-    }
-
-    currentUser = {
-      id: data.id,
-      nom: data.nom,
-      prenom: data.prenom,
-      avatar: data.avatar
-    };
-
-    // NAV avatar
-    const navImg = document.getElementById('navAvatarImg');
-    const navLetter = document.getElementById('navAvatarLetter');
-
-    if (data.avatar) {
-      navImg.src = buildPhotoUrl(data.avatar);
-      navImg.style.display = 'block';
-      navLetter.style.display = 'none';
-    } else {
-      navLetter.textContent = (data.prenom[0] + data.nom[0]).toUpperCase();
-      navImg.style.display = 'none';
-      navLetter.style.display = 'block';
-    }
-
-    initWebSocket();
-
-  } catch (err) {
-    console.error('Profile error:', err);
-  }
-}
+// Chat socket helpers are initialized inside DOMContentLoaded so they can access the page elements.
 
 // ════════════════════════════════════════
 // LOAD PROFILE FROM SESSION (PHP API)
@@ -442,8 +325,109 @@ document.addEventListener('DOMContentLoaded', () => {
   const botInput    = document.getElementById('chatbotInput');
   const botSendBtn  = document.getElementById('chatbotSend');
   const botMessages = document.getElementById('chatbotMessages');
+  const messageBtn  = document.getElementById('messageBtn');
+  const fabHelpBtn  = document.getElementById('fabHelpBtn');
 
- 
+  async function loadUserProfile() {
+    try {
+      const res = await fetch('../../../api/get-profile.php');
+
+      if (res.status === 401) {
+        window.location.href = '../../../html/login.html';
+        return;
+      }
+
+      const data = await res.json();
+      if (!data.success || !data.id) {
+        console.error('Invalid profile response', data);
+        return;
+      }
+
+      currentUser = {
+        id: data.id,
+        nom: data.nom,
+        prenom: data.prenom,
+        avatar: data.avatar
+      };
+
+      const navImg = document.getElementById('navAvatarImg');
+      const navLetter = document.getElementById('navAvatarLetter');
+
+      if (data.avatar) {
+        if (navImg) {
+          navImg.src = buildPhotoUrl(data.avatar);
+          navImg.style.display = 'block';
+        }
+        if (navLetter) navLetter.style.display = 'none';
+      } else {
+        if (navLetter) {
+          navLetter.textContent = ((data.prenom?.[0] || '') + (data.nom?.[0] || '')).toUpperCase();
+          navLetter.style.display = 'block';
+        }
+        if (navImg) navImg.style.display = 'none';
+      }
+    } catch (err) {
+      console.error('Profile error:', err);
+    }
+  }
+
+  function initWebSocket() {
+    if (!currentUser?.id || !lastConv) return;
+    if (socket) return;
+
+    socket = io('http://localhost:3000', {
+      query: { userId: currentUser.id }
+    });
+
+    socket.on('connect', () => {
+      socket.emit('get_history', { otherUserId: lastConv.id });
+    });
+
+    socket.on('conversation_history', ({ otherUserId, messages: msgs }) => {
+      if (!lastConv || otherUserId !== lastConv.id) return;
+
+      lastConv.messages = msgs.map(m => ({
+        text: m.contenue,
+        time: m.DateEnvoie,
+        sent: m.ID_Expediteur === currentUser.id
+      }));
+
+      renderMessages();
+    });
+
+    socket.on(`msg_${currentUser.id}`, msg => {
+      if (!lastConv) return;
+      const otherId = msg.ID_Expediteur === currentUser.id
+        ? msg.ID_Destinataire
+        : msg.ID_Expediteur;
+
+      if (otherId !== lastConv.id) return;
+
+      lastConv.messages.push({
+        text: msg.contenue,
+        time: msg.DateEnvoie,
+        sent: msg.ID_Expediteur === currentUser.id
+      });
+      renderMessages();
+    });
+  }
+
+  function renderMessages() {
+    if (!lastConv || !messages) return;
+
+    messages.innerHTML = '';
+    lastConv.messages.forEach(msg => {
+      const div = document.createElement('div');
+      div.className = `chat-msg ${msg.sent ? 'sent' : 'received'}`;
+      div.innerHTML = `
+        <div class="msg-bubble">${escapeHtml(msg.text)}</div>
+        <span class="msg-time">${formatTime(msg.time)}</span>
+      `;
+      messages.appendChild(div);
+    });
+
+    scrollToBottom();
+  }
 
   // ── Open / Close ──
   function openChat()    { panel.classList.add('active'); }
