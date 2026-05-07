@@ -1451,7 +1451,8 @@ async function loadServices() {
         container.innerHTML = "";
 
         data.services.forEach(service => {
-            container.innerHTML += createServiceCard(service);
+            // Pass userId to createServiceCard so it can decide whether to show the eval button
+            container.innerHTML += createServiceCard(service, userId);
         });
 
         container.querySelectorAll('.post-card').forEach(enrichCard);

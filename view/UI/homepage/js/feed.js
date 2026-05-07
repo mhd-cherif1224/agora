@@ -1,5 +1,6 @@
 // ── feed.js ──
 let socket = []
+let currentUser = {}
 
 document.addEventListener("DOMContentLoaded", async () => {
 
@@ -25,7 +26,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const res = await fetch('../../../api/get-profile.php');
 
             if (res.status === 401) {
-                window.location.href = '/Mini-Projet/view/html/login.html';
+                window.location.href = '../../html/login-user.html';
                 return;
             }
 
@@ -40,12 +41,21 @@ document.addEventListener("DOMContentLoaded", async () => {
                 id: data.id,
                 nom: data.nom,
                 prenom: data.prenom,
-                avatar: data.avatar
+                avatar: data.avatar,
+                role: data.role
             };
 
             const navImg      = document.getElementById('navAvatarImg');
             const navLetter   = document.getElementById('navAvatarLetter');
             const composetImg = document.querySelector("#composerAvatar");
+            const composerCard = document.querySelector(".composer-card");
+
+            // ── Hide composer for Chercheur users ──
+            if (data.status === 'Chercheur' && composerCard) {
+                composerCard.style.display = 'none';
+            }
+
+            console.log("le role,",data.status )
 
             if (data.avatar) {
                 navImg.src             = buildPhotoUrl(data.avatar);
@@ -183,9 +193,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     </div>
 
     <div class="post-actions">
+        ${currentUser.id !== (service.ID_Utilisateur || service.utilisateur_id || service.user_id) ? `
         <button class="post-action-btn" data-action="rate">
             <i class="fa-regular fa-star"></i> Évaluer
         </button>
+        ` : ''}
     </div>
 
     <div class="rating-panel" hidden>

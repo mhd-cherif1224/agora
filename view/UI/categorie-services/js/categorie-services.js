@@ -102,9 +102,11 @@ function createServiceCard(service) {
     </div>
 
     <div class="post-actions">
+        ${currentUser.id !== (service.ID_Utilisateur || service.utilisateur_id || service.user_id) ? `
         <button class="post-action-btn" data-action="rate">
             <i class="fa-regular fa-star"></i> Évaluer
         </button>
+        ` : ''}
     </div>
 
     <div class="rating-panel" hidden>
