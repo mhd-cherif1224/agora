@@ -331,7 +331,7 @@ function closeRatingPanel(card) {
     textarea.value = '';
 }
 
-function submitRating(card) {
+async function submitRating(card) {
     const picker   = card.querySelector('.star-picker');
     const textarea = card.querySelector('.rating-comment-input');
     const note     = parseInt(picker.dataset.selected || 0);
@@ -358,16 +358,49 @@ function submitRating(card) {
         ID_Service: serviceId
     };
 
-    console.log('Évaluation soumise :', evaluation);
+    try {
+        // Send to backend
+        const response = await fetch('../../../api/submit-rating.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(evaluation)
+        });
 
-    const commentsList = card.querySelector('.comments-list');
-    if (commentaire) {
-        commentsList.appendChild(buildCommentItem('Moi', note, commentaire, dateEval));
-        commentsList.hidden = false;
+        const result = await response.json();
+
+        if (!result.success) {
+            console.error('Erreur:', result.message);
+            textarea.placeholder = '⚠ Erreur lors de la soumission...';
+            textarea.classList.add('input-error');
+            setTimeout(() => {
+                textarea.placeholder = 'Laissez un commentaire (optionnel)...';
+                textarea.classList.remove('input-error');
+            }, 2000);
+            return;
+        }
+
+        console.log('Évaluation soumise avec succès :', evaluation);
+
+        const commentsList = card.querySelector('.comments-list');
+        if (commentaire) {
+            commentsList.appendChild(buildCommentItem('Moi', note, commentaire, dateEval));
+            commentsList.hidden = false;
+        }
+
+        updateRatingSummary(card, note);
+        closeRatingPanel(card);
+
+    } catch (err) {
+        console.error('Erreur lors de la soumission:', err);
+        textarea.placeholder = '⚠ Erreur réseau...';
+        textarea.classList.add('input-error');
+        setTimeout(() => {
+            textarea.placeholder = 'Laissez un commentaire (optionnel)...';
+            textarea.classList.remove('input-error');
+        }, 2000);
     }
-
-    updateRatingSummary(card, note);
-    closeRatingPanel(card);
 
     const rateBtn = card.querySelector('.post-action-btn[data-action="rate"]');
     rateBtn.classList.add('rated');
