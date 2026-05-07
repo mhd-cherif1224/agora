@@ -138,9 +138,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         const timeAgo = getTimeAgo(service.DateDePublication);
 
         return `
-<article class="post-card" data-service-id="${service.ID}">
+<article class="post-card" data-service-id="${service.ID}" data-owner-id="${service.ID_Utilisateur || service.utilisateur_id || service.user_id || ''}">
 
-    <div class="post-header">
+    <div class="post-header post-owner" data-owner-id="${service.ID_Utilisateur || service.utilisateur_id || service.user_id || ''}" style="cursor:pointer">
         <div class="post-avatar">
             <img src="${profileImage}"
                  style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
@@ -214,6 +214,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // ── Events du feed ──
     document.querySelector('.feed').addEventListener('click', (e) => {
+
+        const ownerClick = e.target.closest('.post-owner');
+        if (ownerClick) {
+            const userId = ownerClick.dataset.ownerId;
+            if (userId) {
+                window.location.href = '../profile/profile.html?id=' + encodeURIComponent(userId);
+            }
+            return;
+        }
 
         if (e.target.closest('.post-action-btn[data-action="rate"]')) {
             const card = e.target.closest('.post-card');
@@ -298,6 +307,11 @@ function generateStars(note) {
     return Array.from({ length: 5 }, (_, i) =>
         `<i class="${i < full ? 'fa-solid' : 'fa-regular'} fa-star"></i>`
     ).join('');
+}
+
+function goToUserProfile(userId) {
+    if (!userId) return;
+    window.location.href = '../profile/profile.html?id=' + encodeURIComponent(userId);
 }
 
 async function refreshService(serviceId) {

@@ -34,6 +34,7 @@ try {
             s.status,
             s.DateDePublication,
 
+            u.ID AS ID_Utilisateur,
             u.nom,
             u.prenom,
             u.photo_profil,
