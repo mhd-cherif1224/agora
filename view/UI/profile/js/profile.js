@@ -1125,6 +1125,129 @@ function buildCommentSection(card) {
   return sec;
 }
 
+function renderPickerStars(picker, upTo, isHover = false) {
+  picker.querySelectorAll('[data-star]').forEach(s => {
+    const n = parseInt(s.dataset.star);
+    s.className = n <= upTo
+      ? (isHover ? 'fa-regular fa-star hovered' : 'fa-solid fa-star selected')
+      : 'fa-regular fa-star';
+  });
+}
+
+function closeRatingPanel(card) {
+  const panel    = card.querySelector('.rating-panel');
+  const picker   = card.querySelector('.star-picker');
+  const textarea = card.querySelector('.rating-comment-input');
+  if (!panel || !picker || !textarea) return;
+  panel.hidden = true;
+  picker.dataset.selected = 0;
+  renderPickerStars(picker, 0);
+  textarea.value = '';
+}
+
+async function submitRating(card) {
+  const picker   = card.querySelector('.star-picker');
+  const textarea = card.querySelector('.rating-comment-input');
+  const note     = parseInt(picker?.dataset.selected || 0);
+
+  if (note === 0) {
+    textarea.placeholder = '⚠ Choisissez une note avant de soumettre...';
+    textarea.classList.add('input-error');
+    setTimeout(() => {
+      textarea.placeholder = 'Commentaire...';
+      textarea.classList.remove('input-error');
+    }, 2000);
+    return;
+  }
+
+  const commentaire = textarea.value.trim();
+  const dateEval    = new Date().toLocaleDateString('fr-FR');
+  const serviceId   = card.dataset.serviceId;
+
+  const payload = {
+    note,
+    commentaire: commentaire || null,
+    DateEval: dateEval,
+    ID_Service: serviceId
+  };
+
+  try {
+    const response = await fetch('../../../api/submit-rating.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+    if (!result.success) {
+      throw new Error(result.message || 'Erreur lors de la soumission');
+    }
+
+    const commentsList = card.querySelector('.comments-list');
+    if (commentaire && commentsList) {
+      const item = document.createElement('div');
+      item.className = 'comment-item';
+      const starsHtml = Array.from({ length: 5 }, (_, i) =>
+        `<i class="${i < note ? 'fa-solid' : 'fa-regular'} fa-star"></i>`
+      ).join('');
+      item.innerHTML = `
+        <div class="comment-avatar" style="background:linear-gradient(135deg,#4b48ec,#7299f4);">Moi</div>
+        <div class="comment-body">
+          <div class="comment-header">
+            <span class="comment-name">Moi</span>
+            <div class="comment-stars">${starsHtml}</div>
+            <span class="comment-date">${dateEval}</span>
+          </div>
+          <p class="comment-text">${commentaire}</p>
+        </div>`;
+      commentsList.appendChild(item);
+      commentsList.hidden = false;
+    }
+
+    updateRatingSummary(card, note);
+    closeRatingPanel(card);
+
+    const rateBtn = card.querySelector('.post-action-btn[data-action="rate"]');
+    if (rateBtn) {
+      rateBtn.classList.add('rated');
+      rateBtn.innerHTML = `<i class="fa-solid fa-star"></i> Évalué`;
+    }
+
+    showNotification('Évaluation soumise avec succès !');
+  } catch (err) {
+    console.error('Erreur lors de la soumission :', err);
+    textarea.placeholder = '⚠ Erreur lors de la soumission...';
+    textarea.classList.add('input-error');
+    setTimeout(() => {
+      textarea.placeholder = 'Commentaire...';
+      textarea.classList.remove('input-error');
+    }, 2000);
+  }
+}
+
+function updateRatingSummary(card, newNote) {
+  const summary  = card.querySelector('.post-rating-summary');
+  if (!summary) return;
+  const scoreEl  = summary.querySelector('.rating-score');
+  const countEl  = summary.querySelector('.rating-count');
+  const starsEl  = summary.querySelector('.rating-stars-display');
+  const oldScore = parseFloat(scoreEl.textContent) || 0;
+  const oldCount = parseInt(countEl.textContent.match(/\d+/)?.[0] || '0');
+  const newCount = oldCount + 1;
+  const rounded  = Math.round(((oldScore * oldCount) + newNote) / newCount * 10) / 10;
+  scoreEl.textContent = rounded.toFixed(1);
+  countEl.textContent = `(${newCount} évaluations)`;
+  const full = Math.floor(rounded);
+  const half = rounded - full >= 0.5;
+  starsEl.innerHTML = Array.from({ length: 5 }, (_, i) => {
+    if (i < full) return '<i class="fa-solid fa-star"></i>';
+    if (i === full && half) return '<i class="fa-solid fa-star-half-stroke"></i>';
+    return '<i class="fa-regular fa-star"></i>';
+  }).join('');
+}
+
 // ════════════════════════════════════════
 // BIND POST INTERACTIONS
 // ════════════════════════════════════════
@@ -1254,7 +1377,40 @@ function enrichCard(card) {
     });
   }
 
-  
+  const rateBtn = card.querySelector('.post-action-btn[data-action="rate"]');
+  const ratingPanel = card.querySelector('.rating-panel');
+  const starPicker = card.querySelector('.star-picker');
+  const cancelBtn = card.querySelector('.rating-cancel-btn');
+  const submitBtn = card.querySelector('.rating-submit-btn');
+
+  if (rateBtn && !rateBtn._bound) {
+    rateBtn._bound = true;
+    rateBtn.addEventListener('click', () => {
+      if (!ratingPanel) return;
+      ratingPanel.hidden = !ratingPanel.hidden;
+    });
+  }
+
+  if (starPicker && !starPicker._bound) {
+    starPicker._bound = true;
+    starPicker.addEventListener('click', (e) => {
+      const star = e.target.closest('[data-star]');
+      if (!star) return;
+      starPicker.dataset.selected = star.dataset.star;
+      renderPickerStars(starPicker, parseInt(star.dataset.star));
+    });
+  }
+
+  if (cancelBtn && !cancelBtn._bound) {
+    cancelBtn._bound = true;
+    cancelBtn.addEventListener('click', () => closeRatingPanel(card));
+  }
+
+  if (submitBtn && !submitBtn._bound) {
+    submitBtn._bound = true;
+    submitBtn.addEventListener('click', () => submitRating(card));
+  }
+
   const messageBtn = document.getElementById('messageBtn');
 
 
@@ -1297,6 +1453,8 @@ async function loadServices() {
         data.services.forEach(service => {
             container.innerHTML += createServiceCard(service);
         });
+
+        container.querySelectorAll('.post-card').forEach(enrichCard);
 
     } catch (error) {
         console.error(error);

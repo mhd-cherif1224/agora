@@ -6,6 +6,18 @@ function buildPhotoUrl(path) {
   return `../../../${path}`;
 }
 
+// ════════════════════════════════════════
+// NOTIFICATION helper
+// ════════════════════════════════════════
+function showNotification(msg) {
+  const el = document.getElementById('notification');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = 'flex';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.display = 'none'; }, 3500);
+}
+
 
 function getTimeAgo(dateString) {
     const now = new Date();
@@ -414,7 +426,7 @@ function closeRatingPanel(card) {
     textarea.value = '';
 }
 
-function submitRating(card) {
+async function submitRating(card) {
     const picker   = card.querySelector('.star-picker');
     const textarea = card.querySelector('.rating-comment-input');
     const note     = parseInt(picker.dataset.selected || 0);
@@ -431,37 +443,81 @@ function submitRating(card) {
 
     const commentaire = textarea.value.trim();
     const dateEval    = new Date().toLocaleDateString('fr-FR');
+    const serviceId   = card.dataset.serviceId;
 
-    const commentsList = card.querySelector('.comments-list');
-    if (commentaire) {
-        const item = document.createElement('div');
-        item.className = 'comment-item';
-        const starsHtml = Array.from({ length: 5 }, (_, i) =>
-            `<i class="${i < note ? 'fa-solid' : 'fa-regular'} fa-star"></i>`
-        ).join('');
-        item.innerHTML = `
-            <div class="comment-avatar" style="background:linear-gradient(135deg,#4b48ec,#7299f4);">Moi</div>
-            <div class="comment-body">
-                <div class="comment-header">
-                    <span class="comment-name">Moi</span>
-                    <div class="comment-stars">${starsHtml}</div>
-                    <span class="comment-date">${dateEval}</span>
-                </div>
-                <p class="comment-text">${commentaire}</p>
-            </div>`;
-        commentsList.appendChild(item);
-        commentsList.hidden = false;
+    const payload = {
+        note,
+        commentaire: commentaire || null,
+        DateEval: dateEval,
+        ID_Service: serviceId
+    };
+
+    try {
+        const response = await fetch('../../../api/submit-rating.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        if (!result.success) {
+            throw new Error(result.message || 'Erreur lors de la soumission');
+        }
+
+        const commentsList = card.querySelector('.comments-list');
+        if (commentaire && commentsList) {
+            const item = document.createElement('div');
+            item.className = 'comment-item';
+            const starsHtml = Array.from({ length: 5 }, (_, i) =>
+                `<i class="${i < note ? 'fa-solid' : 'fa-regular'} fa-star"></i>`
+            ).join('');
+            item.innerHTML = `
+                <div class="comment-avatar" style="background:linear-gradient(135deg,#4b48ec,#7299f4);">Moi</div>
+                <div class="comment-body">
+                    <div class="comment-header">
+                        <span class="comment-name">Moi</span>
+                        <div class="comment-stars">${starsHtml}</div>
+                        <span class="comment-date">${dateEval}</span>
+                    </div>
+                    <p class="comment-text">${commentaire}</p>
+                </div>`;
+            commentsList.appendChild(item);
+            commentsList.hidden = false;
+        }
+
+        updateRatingSummary(card, note);
+        closeRatingPanel(card);
+
+        const rateBtn = card.querySelector('.post-action-btn[data-action="rate"]');
+        if (rateBtn) {
+            rateBtn.classList.add('rated');
+            rateBtn.innerHTML = `<i class="fa-solid fa-star"></i> Évalué`;
+        }
+
+        showNotification('Évaluation soumise avec succès !');
+    } catch (err) {
+        console.error('Erreur lors de la soumission :', err);
+        textarea.placeholder = '⚠ Erreur lors de la soumission...';
+        textarea.classList.add('input-error');
+        setTimeout(() => {
+            textarea.placeholder = 'Commentaire...';
+            textarea.classList.remove('input-error');
+        }, 2000);
     }
+}
 
-    // Mettre à jour le résumé
+function updateRatingSummary(card, newNote) {
     const summary  = card.querySelector('.post-rating-summary');
+    if (!summary) return;
     const scoreEl  = summary.querySelector('.rating-score');
     const countEl  = summary.querySelector('.rating-count');
     const starsEl  = summary.querySelector('.rating-stars-display');
-    const oldScore = parseFloat(scoreEl.textContent);
-    const oldCount = parseInt(countEl.textContent.match(/\d+/)[0]);
+    const oldScore = parseFloat(scoreEl.textContent) || 0;
+    const oldCount = parseInt(countEl.textContent.match(/\d+/)?.[0] || '0');
     const newCount = oldCount + 1;
-    const rounded  = Math.round(((oldScore * oldCount) + note) / newCount * 10) / 10;
+    const rounded  = Math.round(((oldScore * oldCount) + newNote) / newCount * 10) / 10;
     scoreEl.textContent = rounded.toFixed(1);
     countEl.textContent = `(${newCount} évaluations)`;
     const full = Math.floor(rounded);
@@ -471,10 +527,4 @@ function submitRating(card) {
         if (i === full && half) return '<i class="fa-solid fa-star-half-stroke"></i>';
         return '<i class="fa-regular fa-star"></i>';
     }).join('');
-
-    closeRatingPanel(card);
-
-    const rateBtn = card.querySelector('.post-action-btn[data-action="rate"]');
-    rateBtn.classList.add('rated');
-    rateBtn.innerHTML = `<i class="fa-solid fa-star"></i> Évalué`;
 }
