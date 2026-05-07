@@ -1,5 +1,12 @@
 // ── Utilitaires ──
 
+function buildPhotoUrl(path) {
+  if (!path) return null;
+  if (path.startsWith('/') || path.startsWith('http')) return path;
+  return `../../../${path}`;
+}
+
+
 function getTimeAgo(dateString) {
     const now = new Date();
     const diffMs = now - new Date(dateString);
@@ -163,6 +170,51 @@ document.addEventListener("DOMContentLoaded", async () => {
         "Couture":         "🧵",
     };
 
+    await loadUserProfile();
+
+    async function loadUserProfile() {
+        try {
+            const res = await fetch('../../../api/get-profile.php');
+
+            if (res.status === 401) {
+                window.location.href = '../../view/html/login-user.html';
+                return;
+            }
+
+            const data = await res.json();
+
+            if (!data.success || !data.id) {
+                console.error('Invalid profile response', data);
+                return;
+            }
+
+            currentUser = {
+                id: data.id,
+                nom: data.nom,
+                prenom: data.prenom,
+                avatar: data.avatar
+            };
+
+            const navImg      = document.getElementById('navAvatarImg');
+            const navLetter   = document.getElementById('navAvatarLetter');
+            
+
+            if (data.avatar) {
+                navImg.src             = buildPhotoUrl(data.avatar);
+                navImg.style.display   = 'block';
+                navLetter.style.display = 'none'
+            } else {
+                navLetter.textContent     = (data.prenom[0] + data.nom[0]).toUpperCase();
+                navImg.style.display      = 'none';
+                navLetter.style.display   = 'block'
+            }
+
+        } catch (err) {
+            console.error('Profile error:', err);
+        }
+    }
+
+
     document.getElementById("pageTitle").textContent =
         categorie ?? "Tous les services";
 
@@ -175,44 +227,65 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadServices(sortSelect.value);
 
     async function loadServices(sort = "recent") {
-        const container = document.getElementById("servicesContainer");
-        container.innerHTML = `<div class="posts-header">
+    const container = document.getElementById("servicesContainer");
+
+    container.innerHTML = `
+        <div class="posts-header">
             <h3>${categorie ? `Services — ${categorie}` : "Tous les services"}</h3>
-        </div>`;
+        </div>
+    `;
 
-        try {
-            let url = `/Mini-Projet/api/get-services.php?sort=${sort}`;
-            if (categorie) url += `&categorie=${encodeURIComponent(categorie)}`;
+    try {
 
-            const response = await fetch(url);
-            const data     = await response.json();
+        // Goes up from current JS/page location to api folder
+        let url = "../../../api/get-services.php?sort=" + sort;
 
-            if (!data.success || data.services.length === 0) {
-                container.innerHTML += `
-                    <div class="empty-state">
-                        <svg viewBox="0 0 24 24" stroke-width="1.5">
-                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                        </svg>
-                        <p>Aucun service trouvé pour cette catégorie.</p>
-                    </div>`;
-                document.getElementById("postsCount").textContent = "0 service";
-                return;
-            }
-
-            document.getElementById("postsCount").textContent =
-                `${data.services.length} service${data.services.length > 1 ? "s" : ""}`;
-
-            container.innerHTML += data.services
-                .map(s => createServiceCard(s))
-                .join("");
-
-            attachRatingEvents(container);
-
-        } catch (err) {
-            console.error("Erreur:", err);
-            container.innerHTML += `<p style="color:var(--color-muted);padding:20px;text-align:center">Erreur de chargement.</p>`;
+        if (categorie) {
+            url += "&categorie=" + encodeURIComponent(categorie);
         }
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!data.success || data.services.length === 0) {
+            container.innerHTML += `
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" stroke-width="1.5">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <p>Aucun service trouvé pour cette catégorie.</p>
+                </div>
+            `;
+
+            document.getElementById("postsCount").textContent = "0 service";
+            return;
+        }
+
+        document.getElementById("postsCount").textContent =
+            `${data.services.length} service${data.services.length > 1 ? "s" : ""}`;
+
+        container.innerHTML += data.services
+            .map(service => createServiceCard(service))
+            .join("");
+
+        attachRatingEvents(container);
+
+    } catch (err) {
+        console.error("Erreur:", err);
+
+        container.innerHTML += `
+            <p style="color:var(--color-muted);padding:20px;text-align:center">
+                Erreur de chargement.
+            </p>
+        `;
     }
+}
 
 });
 

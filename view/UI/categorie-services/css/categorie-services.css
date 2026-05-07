@@ -123,6 +123,37 @@ nav {
 .category-back-btn svg   { width: 14px; height: 14px; stroke: currentColor; fill: none; }
 
 
+
+/* ── POST TAGS ── */
+.post-tags { display: flex; flex-wrap: wrap; gap: 7px; padding: 0 18px 14px; }
+.post-tag {
+  display: inline-flex; align-items: center;
+  
+  font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+  gap: 10px;
+}
+.category-pill{
+  border: 1.5px solid; cursor: pointer; transition: background .2s, transform .15s;
+  padding: 4px 13px; 
+  border-radius: 20px;
+
+}
+
+.post-tag:hover { transform: translateY(-1px); }
+.post-tag.pink   { color: #f472b6; border-color: rgba(244,114,182,0.35); background: rgba(244,114,182,0.08); }
+.post-tag.pink:hover { background: rgba(244,114,182,0.18); }
+.post-tag.blue   { color: #60a5fa; border-color: rgba(96,165,250,0.35); background: rgba(96,165,250,0.08); }
+.post-tag.blue:hover { background: rgba(96,165,250,0.18); }
+.category-pill.green  { color: #34d399; border-color: rgba(52,211,153,0.35); background: rgba(52,211,153,0.08); }
+.category-pill.green:hover { background: rgba(52,211,153,0.18); }
+.post-tag.purple { color: #a78bfa; border-color: rgba(167,139,250,0.35); background: rgba(167,139,250,0.08); }
+.post-tag.purple:hover { background: rgba(167,139,250,0.18); }
+.post-tag.orange { color: #fb923c; border-color: rgba(251,146,60,0.35); background: rgba(251,146,60,0.08); }
+.post-tag.orange:hover { background: rgba(251,146,60,0.18); }
+.post-tag.indigo { color: #818cf8; border-color: rgba(129,140,248,0.35); background: rgba(129,140,248,0.08); }
+.post-tag.indigo:hover { background: rgba(129,140,248,0.18); }
+
+
 /* ── POSTS SECTION ── */
 .posts-section { display: flex; flex-direction: column; gap: 16px; }
 
