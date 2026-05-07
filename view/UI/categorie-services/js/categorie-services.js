@@ -123,9 +123,10 @@ function createServiceCard(service) {
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-    const params    = new URLSearchParams(window.location.search);
-    const categorie = params.get("cat");
-    const sortSelect = document.getElementById("sortSelect");
+    const params        = new URLSearchParams(window.location.search);
+    const initialCategory = params.get("cat");
+    const categorySelect  = document.getElementById("categorySelect");
+    const sortSelect      = document.getElementById("sortSelect");
 
     const icons = {
         "Sport":           "⚽",
@@ -214,35 +215,90 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
+    function updateCategoryHeader(selectedCategory) {
+        document.getElementById("pageTitle").textContent =
+            selectedCategory || "Tous les services";
 
-    document.getElementById("pageTitle").textContent =
-        categorie ?? "Tous les services";
+        document.getElementById("categoryIcon").textContent =
+            icons[selectedCategory] || "🏷️";
+    }
 
-    document.getElementById("categoryIcon").textContent =
-        icons[categorie] ?? "🏷️";
+    categorySelect.addEventListener("change", () => {
+        const selected = categorySelect.value;
+        const url = new URL(window.location.href);
+
+        if (selected) {
+            url.searchParams.set("cat", selected);
+        } else {
+            url.searchParams.delete("cat");
+        }
+
+        window.history.replaceState(null, "", url);
+        updateCategoryHeader(selected);
+        loadServices(sortSelect.value, selected);
+    });
 
     // Écouter le changement de tri
-    sortSelect.addEventListener("change", () => loadServices(sortSelect.value));
+    sortSelect.addEventListener("change", () => loadServices(sortSelect.value, categorySelect.value));
 
-    await loadServices(sortSelect.value);
+    await loadCategories(initialCategory);
+    updateCategoryHeader(initialCategory);
+    await loadServices(sortSelect.value, initialCategory);
 
-    async function loadServices(sort = "recent") {
-    const container = document.getElementById("servicesContainer");
+    async function loadCategories(selectedCategory = "") {
+        try {
+            const response = await fetch('../../../api/get-all-categories.php');
+            if (response.status === 401) {
+                window.location.href = '../../view/html/login-user.html';
+                return;
+            }
 
-    container.innerHTML = `
-        <div class="posts-header">
-            <h3>${categorie ? `Services — ${categorie}` : "Tous les services"}</h3>
-        </div>
-    `;
+            const data = await response.json();
+            if (!data.success || !Array.isArray(data.data)) {
+                throw new Error('Invalid categories response');
+            }
 
-    try {
+            categorySelect.innerHTML = '';
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Toutes les catégories';
+            categorySelect.appendChild(defaultOption);
 
-        // Goes up from current JS/page location to api folder
-        let url = "../../../api/get-services.php?sort=" + sort;
+            data.data.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.titre;
+                option.textContent = cat.titre;
+                categorySelect.appendChild(option);
+            });
 
-        if (categorie) {
-            url += "&categorie=" + encodeURIComponent(categorie);
+            if (selectedCategory && data.data.some(cat => cat.titre === selectedCategory)) {
+                categorySelect.value = selectedCategory;
+            } else {
+                categorySelect.value = '';
+            }
+        } catch (err) {
+            console.error('Categories error:', err);
         }
+    }
+
+    async function loadServices(sort = "recent", category = undefined) {
+        const container = document.getElementById("servicesContainer");
+        const currentCategory = category !== undefined ? category : initialCategory;
+
+        container.innerHTML = `
+            <div class="posts-header">
+                <h3>${currentCategory ? `Services — ${currentCategory}` : "Tous les services"}</h3>
+            </div>
+        `;
+
+        try {
+
+            // Goes up from current JS/page location to api folder
+            let url = "../../../api/get-services.php?sort=" + sort;
+
+            if (currentCategory) {
+                url += "&categorie=" + encodeURIComponent(currentCategory);
+            }
 
         const response = await fetch(url);
 
