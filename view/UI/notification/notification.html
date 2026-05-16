@@ -8,15 +8,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="../notification/css/notification.css">
-
 </head>
 <body>
 
 <!-- ══════════ NAV ══════════ -->
 <nav>
   <div class="nav-logo" onclick="window.location.href='../homepage/home-page.html'">
-      <img src="../../images/logo.svg" width="100px" alt="">
-    </div>
+    <img src="../../images/logo.svg" width="100px" alt="AGORA">
+  </div>
 
   <div class="nav-search">
     <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -38,7 +37,7 @@
       <span class="notif-dot"></span>
     </button>
 
-    <button class="nav-icon-btn" title="Catégories"  onclick="window.location.href='../categorie-services/categorie-services.html'">
+    <button class="nav-icon-btn" title="Catégories" onclick="window.location.href='../categorie-services/categorie-services.html'">
       <svg viewBox="0 0 24 24" stroke-width="2">
         <path d="M20 13L11 22L2 13V4h9l9 9z"/>
         <circle cx="15" cy="8" r="1"/>
@@ -48,10 +47,10 @@
     <div class="nav-divider"></div>
 
     <div class="nav-avatar" id="navAvatar" onclick="window.location.href='../../html/mon-profil.html'" title="Mon Profil">
-        <img id="navAvatarImg" src="../../images/person.png" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;">
-        <span id="navAvatarLetter">M</span>
-      </div>
-      <button class="nav-menu-btn"><span></span><span></span><span></span></button>
+      <img id="navAvatarImg" src="../../images/person.png" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;">
+      <span id="navAvatarLetter">M</span>
+    </div>
+    <button class="nav-menu-btn" aria-label="Menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
@@ -66,7 +65,7 @@
     <div class="page-header">
       <div class="page-header-left">
         <h1 class="page-title">Notifications</h1>
-        <span class="unread-badge" id="unreadBadge">6</span>
+        <span class="unread-badge" id="unreadBadge" style="display:none;">0</span>
       </div>
       <button class="mark-all-btn" id="markAllBtn">
         <i class="fa-solid fa-check-double"></i> Tout marquer lu
@@ -77,26 +76,16 @@
     <div class="filter-tabs" id="filterTabs">
       <button class="filter-tab active" data-filter="all">Tout</button>
       <button class="filter-tab" data-filter="eval">Évaluations</button>
-      
       <button class="filter-tab" data-filter="comment">Commentaires</button>
-      
     </div>
 
-    <!-- ── Section: Aujourd'hui ── -->
-    <div class="section-label" data-section="today">Aujourd'hui</div>
+    <!-- Section : Aujourd'hui -->
+    <div class="section-label" data-section="today" style="display:none;">Aujourd'hui</div>
 
-    
-    
+    <!-- Section : Cette semaine -->
+    <div class="section-label" data-section="week" style="display:none;">Cette semaine</div>
 
-    
-
-    <!-- ── Section: Cette semaine ── -->
-    <div class="section-label" data-section="week">Cette semaine</div>
-
-    
-    
-
-    <!-- Empty state (hidden by default) -->
+    <!-- Empty state -->
     <div class="empty-state" id="emptyState">
       <div class="empty-icon"><i class="fa-regular fa-bell-slash"></i></div>
       <p>Aucune notification dans cette catégorie</p>
@@ -107,58 +96,82 @@
   <!-- ══ SIDEBAR ══ -->
   <div class="sidebar">
 
-    <!-- Summary stats -->
+    <!-- ── Summary stats : aujourd'hui ── -->
     <div class="summary-card">
-      <h3>Vue d'ensemble</h3>
+      <h3>Vue d'ensemble <span class="summary-period">— aujourd'hui</span></h3>
       <div class="summary-grid">
+
         <div class="summary-stat">
-          
-          <div class="stat-value" id="statEval">7</div>
-          <div class="stat-label">Évaluations</div>
+          <div class="stat-icon-row">
+            <span class="stat-type-dot eval"></span>
+            <span class="stat-label">Évaluations</span>
+          </div>
+          <div class="stat-value" id="statEval">—</div>
+          <div class="stat-sub" id="statEvalTotal"></div>
         </div>
-        
+
         <div class="summary-stat">
-          
-          <div class="stat-value" id="statComment">3</div>
-          <div class="stat-label">Commentaires</div>
+          <div class="stat-icon-row">
+            <span class="stat-type-dot comment"></span>
+            <span class="stat-label">Commentaires</span>
+          </div>
+          <div class="stat-value" id="statComment">—</div>
+          <div class="stat-sub" id="statCommentTotal"></div>
         </div>
-        
+
       </div>
     </div>
 
-    <!-- Activity sparkline -->
+    <!-- ── Activity chart ── -->
     <div class="activity-card">
-      <h3>Activité (7 jours)</h3>
-      <div class="sparkline-wrap" id="sparkline"></div>
-      <div class="sparkline-labels">
-        <span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Auj.</span>
+      <h3>Activité <span class="summary-period">— 7 jours</span></h3>
+
+      <!-- Légende -->
+      <div class="sparkline-legend">
+        <span class="legend-item">
+          <span class="legend-dot" style="background: rgba(75,72,236,0.85);"></span>
+          Évaluations
+        </span>
+        <span class="legend-item">
+          <span class="legend-dot" style="background: rgba(52,211,153,0.75);"></span>
+          Commentaires
+        </span>
+      </div>
+
+      <!-- Chart.js canvas -->
+      <div class="sparkline-chart-wrap">
+        <canvas
+          id="sparklineCanvas"
+          role="img"
+          aria-label="Graphique en barres des évaluations et commentaires sur les 7 derniers jours">
+          Activité sur 7 jours.
+        </canvas>
       </div>
     </div>
 
-    <!-- Notification settings -->
-    
   </div><!-- /sidebar -->
 
 </div><!-- /page-layout -->
 
-<!-- FAB -->
-<!-- ══ FLOATING ACTION BAR (right side) ══ -->
-  <div class="fab-bar">
-    <button class="fab-btn" title="Messagerie" id="fabMsgBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-      </svg>
-    </button>
-    <button class="fab-btn" title="Aide" id="fabHelpBtn">
-      <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
-        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/>
-        <path d="M12 17.5v.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M12 14c0-1.5 1.5-2 2.2-3.2a2.8 2.8 0 10-4.9-1.9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
-  </div>
 
-<!-- CHAT PANEL -->
+<!-- ══ FAB ══ -->
+<div class="fab-bar">
+  <button class="fab-btn" title="Messagerie" id="fabMsgBtn" aria-label="Ouvrir la messagerie">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+    </svg>
+  </button>
+  <button class="fab-btn" title="Aide" id="fabHelpBtn" aria-label="Ouvrir l'assistant">
+    <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M12 17.5v.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M12 14c0-1.5 1.5-2 2.2-3.2a2.8 2.8 0 10-4.9-1.9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+</div>
+
+
+<!-- ══ CHAT PANEL ══ -->
 <div class="chat-panel" id="chatPanel">
   <div class="chat-panel-header">
     <div class="chat-panel-user">
@@ -168,7 +181,7 @@
         <div class="chat-panel-status"><span class="online-dot"></span> En ligne</div>
       </div>
     </div>
-    <button class="chat-panel-close" id="chatClose"><i class="fa-solid fa-xmark"></i></button>
+    <button class="chat-panel-close" id="chatClose" aria-label="Fermer"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <div class="chat-messages" id="chatMessages">
     <div class="chat-msg received">
@@ -186,9 +199,13 @@
   </div>
   <div class="chat-input-row">
     <input type="text" id="chatInput" placeholder="Écrivez un message...">
-    <button class="chat-send-btn" id="chatSend"><i class="fa-solid fa-paper-plane"></i></button>
+    <button class="chat-send-btn" id="chatSend" aria-label="Envoyer">
+      <i class="fa-solid fa-paper-plane"></i>
+    </button>
   </div>
 </div>
+
+
 <!-- ══ CHATBOT PANEL ══ -->
 <div class="chat-panel" id="chatbotPanel">
   <div class="chat-panel-header">
@@ -201,7 +218,7 @@
         <div class="chat-panel-status"><span class="online-dot"></span> En ligne</div>
       </div>
     </div>
-    <button class="chat-panel-close" id="chatbotClose"><i class="fa-solid fa-xmark"></i></button>
+    <button class="chat-panel-close" id="chatbotClose" aria-label="Fermer"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <div class="chat-messages" id="chatbotMessages">
     <div class="chat-msg received">
@@ -211,24 +228,33 @@
   </div>
   <div class="chat-input-row">
     <input type="text" id="chatbotInput" placeholder="Posez votre question...">
-    <button class="chat-send-btn" id="chatbotSend"><i class="fa-solid fa-paper-plane"></i></button>
+    <button class="chat-send-btn" id="chatbotSend" aria-label="Envoyer">
+      <i class="fa-solid fa-paper-plane"></i>
+    </button>
   </div>
 </div>
 
-<!-- Context menu -->
-<div class="ctx-menu" id="ctxMenu">
-  <div class="ctx-item" id="ctxMarkRead"><i class="fa-solid fa-check"></i> Marquer comme lu</div>
-  <div class="ctx-item" id="ctxMute"><i class="fa-solid fa-bell-slash"></i> Désactiver ce type</div>
+
+<!-- ══ CONTEXT MENU ══ -->
+<div class="ctx-menu" id="ctxMenu" role="menu">
+  <div class="ctx-item" id="ctxMarkRead" role="menuitem"><i class="fa-solid fa-check"></i> Marquer comme lu</div>
+  <div class="ctx-item" id="ctxMute"     role="menuitem"><i class="fa-solid fa-bell-slash"></i> Désactiver ce type</div>
   <div class="ctx-sep"></div>
-  <div class="ctx-item danger" id="ctxDelete"><i class="fa-solid fa-trash"></i> Supprimer</div>
+  <div class="ctx-item danger" id="ctxDelete" role="menuitem"><i class="fa-solid fa-trash"></i> Supprimer</div>
 </div>
 
-<!-- Toast -->
-<div class="toast" id="toast"><i class="fa-solid fa-check-circle"></i> <span id="toastMsg"></span></div>
 
-<!-- ══════════ SCRIPTS ══════════ -->
-<script src="../notification/js/notification.js"></script>
+<!-- ══ TOAST ══ -->
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <i class="fa-solid fa-check-circle"></i>
+  <span id="toastMsg"></span>
+</div>
+
+
+<!-- ══ SCRIPTS ══ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
+<script src="../notification/js/notification.js"></script>
 
 </body>
 </html>
