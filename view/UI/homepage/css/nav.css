@@ -86,3 +86,155 @@ nav {
   display: flex; flex-direction: column; gap: 4px; padding: 4px;
 }
 .nav-menu-btn span { display: block; width: 18px; height: 2px; background: var(--color-muted); border-radius: 2px; }
+
+/* ── Nav Dropdown ── */
+.nav-icons {
+  position: relative; /* pour positionner le dropdown */
+}
+
+.nav-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 6px;
+  min-width: 200px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  z-index: 300;
+  animation: dropdownFadeIn .15s ease;
+}
+
+@keyframes dropdownFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.nav-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background .15s;
+  text-decoration: none;
+}
+
+.nav-dropdown-item svg {
+  width: 16px; height: 16px;
+  stroke: var(--color-muted);
+  flex-shrink: 0;
+}
+
+.nav-dropdown-item:hover {
+  background: rgba(255,255,255,0.07);
+}
+
+.nav-dropdown-item.danger {
+  color: #f87171;
+}
+
+.nav-dropdown-item.danger svg {
+  stroke: #f87171;
+}
+
+.nav-dropdown-item.danger:hover {
+  background: rgba(248,113,113,0.1);
+}
+
+/* ── Modal suppression ── */
+#modalSupprimer {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#modalSupprimer[hidden] { display: none; }
+
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+}
+
+.modal-box {
+  position: relative;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 32px 28px;
+  max-width: 360px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  animation: modalIn .2s ease;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.modal-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+
+.modal-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px;
+  color: var(--color-text);
+  margin: 0 0 10px;
+}
+
+.modal-text {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--color-muted);
+  line-height: 1.6;
+  margin: 0 0 24px;
+}
+
+.modal-text strong {
+  color: #f87171;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.modal-btn {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: 10px;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+
+.modal-btn:hover { opacity: 0.85; }
+
+.modal-btn.cancel {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.modal-btn.confirm {
+  background: #b91c1c;
+  color: white;
+}

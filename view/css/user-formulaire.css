@@ -96,7 +96,7 @@ input {
     transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
-select {
+/* select {
     font-size: 14px; font-family: 'Outfit', sans-serif;
     display: block; width: 60%; padding: 9px 12px;
     border-radius: 10px;
@@ -106,6 +106,50 @@ select {
     margin-top: 3px;
     transition: border-color 0.2s, box-shadow 0.2s;
     cursor: pointer;
+} */
+
+/* ── Fix autofill navigateur ── */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 999px rgba(25, 20, 40, 0.95) inset !important;
+    box-shadow: 0 0 0 999px rgba(25, 20, 40, 0.95) inset !important;
+    -webkit-text-fill-color: #f1f0f5 !important;
+    caret-color: #f1f0f5;
+    border-color: rgba(99, 72, 236, 0.5) !important;
+    transition: background-color 9999s ease-in-out 0s;
+}
+
+/* ── Select dropdown sombre ── */
+select {
+    font-size: 14px; font-family: 'Outfit', sans-serif;
+    display: block; width: 60%; padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(25, 20, 40, 0.95);
+    color: #f1f0f5; outline: none;
+    margin-top: 3px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+
+    /* Flèche custom sombre */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b8a99' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+}
+
+option {
+    background: #13101f;
+    color: #f1f0f5;
+}
+
+option:hover {
+    background: linear-gradient(135deg, #4b48ec, #7299f4);
+    color: #13101f;
 }
 
 input::placeholder { color: rgba(139,138,153,0.4); }

@@ -12,10 +12,10 @@ if (!isset($_SESSION['utilisateur_id'])) {
 $userId = intval($_SESSION['utilisateur_id']);
 $data   = json_decode(file_get_contents("php://input"), true);
 
-$note        = intval($data['note']        ?? 0);
-$commentaire = trim($data['commentaire']   ?? '');
-$dateEval    = $data['DateEval']           ?? date('Y-m-d');
-$serviceId   = intval($data['ID_Service']  ?? 0);
+$note        = intval($data['note']       ?? 0);
+$commentaire = trim($data['commentaire']  ?? '');
+$dateEval    = $data['DateEval']          ?? date('Y-m-d');
+$serviceId   = intval($data['ID_Service'] ?? 0);
 
 // Convertir format fr (d/m/Y) → Y-m-d
 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateEval)) {
@@ -47,9 +47,15 @@ try {
         exit;
     }
 
-    $serviceOwnerUserId = $service['ID_Utilisateur'];
+    $serviceOwnerUserId = intval($service['ID_Utilisateur']);
 
-    // Un seul INSERT en BDD
+    // ── Bloquer l'auto-évaluation ──
+    if ($userId === $serviceOwnerUserId) {
+        echo json_encode(['success' => false, 'message' => 'Vous ne pouvez pas évaluer votre propre service.']);
+        exit;
+    }
+
+    // INSERT évaluation
     $stmt = $pdo->prepare("
         INSERT INTO evaluation (note, commentaire, DateEval, ID_Evaluateur, ID_Utilisateur, ID_Service)
         VALUES (:note, :commentaire, :dateEval, :evaluatorId, :userId, :serviceId)
@@ -65,7 +71,7 @@ try {
 
     $evalId = $pdo->lastInsertId();
 
-    // Récupérer les infos de l'évaluateur pour les notifications
+    // Infos de l'évaluateur
     $stmtUser = $pdo->prepare("SELECT nom, prenom, photo_profil FROM utilisateur WHERE ID = :id");
     $stmtUser->execute([':id' => $userId]);
     $evaluateur = $stmtUser->fetch(PDO::FETCH_ASSOC);
@@ -73,12 +79,6 @@ try {
     $fullname = trim(($evaluateur['prenom'] ?? '') . ' ' . ($evaluateur['nom'] ?? ''));
     if ($fullname === '') $fullname = 'Utilisateur inconnu';
 
-    /* ══════════════════════════════════════════
-       Construire les notifications séparées
-       (logique PHP uniquement, pas de BDD supplémentaire)
-    ══════════════════════════════════════════ */
-
-    // Notification 1 — toujours présente : la note
     $notifications = [
         [
             'id'           => $evalId . '_eval',
@@ -91,7 +91,6 @@ try {
         ]
     ];
 
-    // Notification 2 — uniquement si commentaire non vide
     if ($commentaire !== '') {
         $notifications[] = [
             'id'           => $evalId . '_comment',
@@ -108,7 +107,7 @@ try {
         'success'       => true,
         'message'       => 'Évaluation soumise avec succès',
         'evaluation_id' => $evalId,
-        'notifications' => $notifications,   // retourné au JS pour affichage immédiat
+        'notifications' => $notifications,
     ]);
 
 } catch (Exception $e) {

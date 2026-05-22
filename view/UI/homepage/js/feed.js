@@ -474,3 +474,55 @@ function updateRatingSummary(card, newNote) {
         return '<i class="fa-regular fa-star"></i>';
     }).join('');
 }
+
+// ── Nav dropdown (menu burger) ──
+const navMenuBtn  = document.getElementById('navMenuBtn');
+const navDropdown = document.getElementById('navDropdown');
+
+navMenuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    navDropdown.hidden = !navDropdown.hidden;
+});
+
+// Fermer si on clique ailleurs
+document.addEventListener('click', () => {
+    navDropdown.hidden = true;
+});
+
+// Déconnexion
+document.getElementById('btnDeconnexion').addEventListener('click', () => {
+    window.location.href = '../../html/login-user.html';
+});
+
+// Suppression du compte
+document.getElementById('btnSupprimerCompte').addEventListener('click', () => {
+    navDropdown.hidden = true;
+    document.getElementById('modalSupprimer').hidden = false;
+});
+
+// Annuler
+document.getElementById('modalCancel').addEventListener('click', () => {
+    document.getElementById('modalSupprimer').hidden = true;
+});
+
+// Fermer en cliquant sur l'overlay
+document.getElementById('modalOverlay').addEventListener('click', () => {
+    document.getElementById('modalSupprimer').hidden = true;
+});
+
+// Confirmer suppression
+document.getElementById('modalConfirm').addEventListener('click', async () => {
+    document.getElementById('modalSupprimer').hidden = true;
+
+    const res  = await fetch('../../../api/delete-account.php', { method: 'POST' });
+    const data = await res.json();
+
+    if (data.success) {
+        showNotification('Compte supprimé. Redirection...', '#16376E');
+        setTimeout(() => {
+            window.location.href = '../../html/signUp-user.html';
+        }, 2000);
+    } else {
+        showNotification('Erreur : ' + (data.message || 'Impossible de supprimer le compte.'), '#b91c1c');
+    }
+});

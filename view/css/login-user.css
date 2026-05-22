@@ -128,14 +128,14 @@ body {
     pointer-events: none;
 }
 
-.logo {
-    width: 44px;
-    height: 44px;
-    background: linear-gradient(135deg, var(--color-logo-a), var(--color-logo-b));
-    margin-bottom: 30px;
-    border-radius: 10px;
-    box-shadow: 0 0 20px var(--color-logo-shadow);
+.nav-logo {
+  width: 155px; height: 155px;
+  display: flex; align-items: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  
 }
+.nav-logo img {  width: 100%; height: 100%; fill: white; }
 
 .left h1 {
     font-family: 'Space Grotesk', sans-serif;

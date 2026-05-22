@@ -416,8 +416,23 @@
   </div>
 </div>
 
+<!-- Modal confirmation suppression -->
+<div id="modalSupprimer" hidden>
+  <div class="modal-overlay" id="modalOverlay"></div>
+  <div class="modal-box">
+    <div class="modal-icon">🗑️</div>
+    <h3 class="modal-title">Supprimer le compte</h3>
+    <p class="modal-text">Cette action est <strong>irréversible</strong>. Tous vos services seront supprimés définitivement.</p>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" id="modalCancel">Annuler</button>
+      <button class="modal-btn confirm" id="modalConfirm">Oui, supprimer</button>
+    </div>
+  </div>
+</div>
+
 <!-- notification toast -->
 <div id="notification" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1714;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;padding:12px 24px;border-radius:30px;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:9999;align-items:center;gap:8px;"></div>
+
 
 <!-- Scripts -->
 <script src="js/feed.js"></script>
