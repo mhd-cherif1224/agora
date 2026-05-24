@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="resultat-recherche.css">
+  <link rel="stylesheet" href="../homepage/css/sidebar.css">
+  <link rel="stylesheet" href="../homepage/css/feed.css">
  
 </head>
 <body>
@@ -82,44 +84,19 @@
   </div><!-- /main-col -->
 
   <!-- ════ SIDEBAR ════ -->
-  <aside class="sidebar">
-    <div class="suggest-card">
-      <h3>Connaissez - Vous ?</h3>
-      <div class="suggest-list">
-        <div class="suggest-item">
-          <div class="suggest-avatar" style="background:linear-gradient(135deg,#e44,#f97316);">MC</div>
-          <div class="suggest-info">
-            <div class="name">mehdi cherif</div>
-            <div class="role">etudiant a l univ d abderrahmane mira</div>
-          </div>
-        </div>
-        <div class="suggest-item">
-          <div class="suggest-avatar" style="background:linear-gradient(135deg,#059669,#34d399);">NS</div>
-          <div class="suggest-info">
-            <div class="name">na sfiaaaaaaaaaa</div>
-            <div class="role">etudiante a l univ de Guelma 2</div>
-          </div>
-        </div>
-        <div class="suggest-item">
-          <div class="suggest-avatar" style="background:linear-gradient(135deg,#7c3aed,#a855f7);">CO</div>
-          <div class="suggest-info">
-            <div class="name">chaima ouk</div>
-            <div class="role">prof a l univ de USTHB</div>
-          </div>
-        </div>
-        <div class="suggest-item">
-          <div class="suggest-avatar" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa);">MK</div>
-          <div class="suggest-info">
-            <div class="name">mekhmoukh</div>
-            <div class="role">agent de securite</div>
-          </div>
+  <!-- ════════════ SIDEBAR ════════════ -->
+  <div class="sidebar">
+      <div class="suggest-card " id="suggestCard">
+        <h3>CONNAISSEZ - VOUS ?</h3>
+        <!-- LIST OF ALL USERS -->
+        <div class="suggest-list" id="usersList">
+          <!-- Populated by JS -->
         </div>
       </div>
-      <a href="#" class="see-all-link">voir tous les suggestions →</a>
-    </div>
-
-    <p class="footer-note">© 2025 AGORA . All rights reserved.</p>
-  </aside>
+        <!-- ALL LIST (hidden by default) -->
+        
+        <p class="footer-note">© 2026 AGORA . All rights reserved.</p>
+      </div>
 
 </div><!-- /layout -->
 
@@ -143,6 +120,8 @@
     </button>
   </div>
 <script src="resultat-recherche.js"></script>
+<script src="../homepage/js/feed.js"></script>
+<script src="../homepage/js/sidebar.js"></script>
 
 </body>
 </html>
