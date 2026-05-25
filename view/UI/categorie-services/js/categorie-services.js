@@ -24,16 +24,18 @@ if (navSearchIcon) {
     navSearchIcon.addEventListener('click', doSearch);
     navSearchIcon.style.cursor = 'pointer';
 }
+
 // ════════════════════════════════════════
-// NOTIFICATION helper
+// NOTIFICATIONS TOAST
 // ════════════════════════════════════════
-function showNotification(msg) {
-  const el = document.getElementById('notification');
-  if (!el) return;
-  el.textContent = msg;
-  el.style.display = 'flex';
-  clearTimeout(el._t);
-  el._t = setTimeout(() => { el.style.display = 'none'; }, 3500);
+function showNotification(message, color = '#16376E') {
+    const notif = document.getElementById('notification');
+    if (!notif) return;
+    notif.innerText = message;
+    notif.style.background = color; 
+    notif.style.display = 'flex';
+    clearTimeout(notif._t);
+    notif._t = setTimeout(() => { notif.style.display = 'none'; }, 3000); 
 }
 
 
@@ -525,7 +527,7 @@ async function submitRating(card) {
             rateBtn.innerHTML = `<i class="fa-solid fa-star"></i> Évalué`;
         }
 
-        showNotification('Évaluation soumise avec succès !');
+        showNotification('Évaluation soumise avec succès !', '#16a34a');
     } catch (err) {
         console.error('Erreur lors de la soumission :', err);
         textarea.placeholder = '⚠ Erreur lors de la soumission...';
@@ -557,3 +559,55 @@ function updateRatingSummary(card, newNote) {
         return '<i class="fa-regular fa-star"></i>';
     }).join('');
 }
+
+// ── Nav dropdown (menu burger) ──
+const navMenuBtn  = document.getElementById('navMenuBtn');
+const navDropdown = document.getElementById('navDropdown');
+
+navMenuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    navDropdown.hidden = !navDropdown.hidden;
+});
+
+// Fermer si on clique ailleurs
+document.addEventListener('click', () => {
+    navDropdown.hidden = true;
+});
+
+// Déconnexion
+document.getElementById('btnDeconnexion').addEventListener('click', () => {
+    window.location.href = '../../html/login-user.html';
+});
+
+// Suppression du compte
+document.getElementById('btnSupprimerCompte').addEventListener('click', () => {
+    navDropdown.hidden = true;
+    document.getElementById('modalSupprimer').hidden = false;
+});
+
+// Annuler
+document.getElementById('modalCancel').addEventListener('click', () => {
+    document.getElementById('modalSupprimer').hidden = true;
+});
+
+// Fermer en cliquant sur l'overlay
+document.getElementById('modalOverlay').addEventListener('click', () => {
+    document.getElementById('modalSupprimer').hidden = true;
+});
+
+// Confirmer suppression
+document.getElementById('modalConfirm').addEventListener('click', async () => {
+    document.getElementById('modalSupprimer').hidden = true;
+
+    const res  = await fetch('../../../api/delete-account.php', { method: 'POST' });
+    const data = await res.json();
+
+    if (data.success) {
+        showNotification('Compte supprimé. Redirection...', '#16376E');
+        setTimeout(() => {
+            window.location.href = '../../html/signUp-user.html';
+        }, 2000);
+    } else {
+        showNotification('Erreur : ' + (data.message || 'Impossible de supprimer le compte.'), '#b91c1c');
+    }
+});

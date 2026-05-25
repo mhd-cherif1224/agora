@@ -194,3 +194,58 @@ function generateStars(note) {
   }
   return html;
 }
+
+// ════════════════════════════════════════
+// NOTIFICATIONS TOAST
+// ════════════════════════════════════════
+function showNotification(message, color = '#16376E') {
+    const notif = document.getElementById('notification');
+    if (!notif) return;
+    notif.innerText = message;
+    notif.style.background = color; 
+    notif.style.display = 'flex';
+    clearTimeout(notif._t);
+    notif._t = setTimeout(() => { notif.style.display = 'none'; }, 3000); 
+}
+
+// ── Nav dropdown ──
+const navMenuBtn  = document.getElementById('navMenuBtn');
+const navDropdown = document.getElementById('navDropdown');
+
+navMenuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    navDropdown.hidden = !navDropdown.hidden;
+});
+
+document.addEventListener('click', () => {
+    navDropdown.hidden = true;
+});
+
+document.getElementById('btnDeconnexion').addEventListener('click', () => {
+    window.location.href = '../../html/login-user.html';
+});
+
+document.getElementById('btnSupprimerCompte').addEventListener('click', () => {
+    navDropdown.hidden = true;
+    document.getElementById('modalSupprimer').hidden = false;
+});
+
+document.getElementById('modalCancel').addEventListener('click', () => {
+    document.getElementById('modalSupprimer').hidden = true;
+});
+
+document.getElementById('modalOverlay').addEventListener('click', () => {
+    document.getElementById('modalSupprimer').hidden = true;
+});
+
+document.getElementById('modalConfirm').addEventListener('click', async () => {
+    document.getElementById('modalSupprimer').hidden = true;
+    const res  = await fetch('../../../api/delete-account.php', { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+        showNotification('Compte supprimé. Redirection...');
+        setTimeout(() => { window.location.href = '../../html/signUp-user.html'; }, 2000);
+    } else {
+        showNotification('Erreur : ' + (data.message || 'Impossible de supprimer le compte.'));
+    }
+});
