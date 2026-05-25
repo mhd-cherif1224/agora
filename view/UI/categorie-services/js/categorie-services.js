@@ -5,7 +5,25 @@ function buildPhotoUrl(path) {
   if (path.startsWith('/') || path.startsWith('http')) return path;
   return `../../../${path}`;
 }
+// ── Barre de recherche nav ──
+const navSearchInput = document.querySelector('.nav-search input');
+const navSearchIcon  = document.querySelector('.nav-search svg');
 
+function doSearch() {
+    const query = navSearchInput?.value.trim();
+    if (!query) return;
+    window.location.href = `../resultatrecherche/resultat-recherche.html?q=${encodeURIComponent(query)}`;
+}
+
+if (navSearchInput) {
+    navSearchInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') doSearch();
+    });
+}
+if (navSearchIcon) {
+    navSearchIcon.addEventListener('click', doSearch);
+    navSearchIcon.style.cursor = 'pointer';
+}
 // ════════════════════════════════════════
 // NOTIFICATION helper
 // ════════════════════════════════════════
