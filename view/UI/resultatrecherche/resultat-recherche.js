@@ -121,8 +121,8 @@ function renderServicesFeed(services) {
     article.dataset.serviceId = s.ID;
 
     const profileImg = s.photo_profil
-      ? `<img src="../../../${s.photo_profil}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.style.display='none'">`
-      : (s.utilisateur_prenom[0] + s.utilisateur_nom[0]).toUpperCase();
+        ? `<img src="../../../${s.photo_profil}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.textContent='${(s.utilisateur_prenom[0] + s.utilisateur_nom[0]).toUpperCase()}'">`
+        : `${(s.utilisateur_prenom[0] + s.utilisateur_nom[0]).toUpperCase()}`;
 
     const serviceImg = s.photo_service
       ? `<img class="post-image" src="../../../${s.photo_service}" alt="${s.titre}" onerror="this.style.display='none'">`
@@ -136,7 +136,9 @@ function renderServicesFeed(services) {
 
     article.innerHTML = `
       <div class="post-header">
-        <div class="post-avatar">${profileImg}</div>
+        <div class="post-avatar" ${!s.photo_profil ? `style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#6366f1,#4338ca);color:#fff;font-weight:700;"` : ''}>
+       ${profileImg}
+       </div>
         <div class="post-meta">
           <div class="post-name">${s.utilisateur_prenom} ${s.utilisateur_nom}</div>
           <div class="post-time-row">
