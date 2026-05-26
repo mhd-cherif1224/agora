@@ -106,7 +106,14 @@ async function loadConversations() {
       id: u.ID,
       name: `${u.nom} ${u.prenom}`,
       preview: u.last_message || '',
-      time: formatTime(u.last_message_time),
+      // APRÈS
+    time: formatTime(
+      u.last_message_time
+        ? (String(u.last_message_time).includes('Z') || String(u.last_message_time).includes('+')
+            ? u.last_message_time
+            : String(u.last_message_time).replace(' ', 'T') + 'Z')
+        : null
+    ),
       unread: 0,
       avatar: buildPhotoUrl(u.photo_profil),
       initials: getInitials(u.nom, u.prenom),
@@ -161,15 +168,19 @@ function initWebSocket() {
     if (!conv) return;
 
     conv.messages = messages.map(m => ({
-      text: m.contenue,
-      time: m.DateEnvoie,
-      sent: m.ID_Expediteur === currentUser.id
+        text: m.contenue,
+        time: m.DateEnvoie
+            ? (m.DateEnvoie.includes?.('Z') || m.DateEnvoie.includes?.('+')
+                ? m.DateEnvoie
+                : String(m.DateEnvoie).replace(' ', 'T') + 'Z')
+            : null,
+        sent: m.ID_Expediteur === currentUser.id
     }));
 
     if (activeId === otherUserId) {
-      renderMessages(otherUserId);
+        renderMessages(otherUserId);
     }
-  });
+});
 }
 
 // ─────────────────────────────────────────
@@ -315,8 +326,8 @@ function getInitials(n, p) {
 }
 
 function formatTime(d) {
-  if (!d) return '';
-  return new Date(d).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (!d) return '';
+    return new Date(d).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 

@@ -25,6 +25,11 @@ db.query('SELECT 1', (err) => {
   console.log('✅ DB connected');
 });
 
+db.query("SET time_zone = '+00:00'", (err) => {
+    if (err) console.error('timezone error:', err);
+    else console.log('✅ timezone set to UTC');
+});
+
 // ─────────────────────────────────────────
 // STATIC FILES
 // ─────────────────────────────────────────
@@ -70,7 +75,7 @@ io.on('connection', (socket) => {
 
     db.query(
       `INSERT INTO message (contenue, DateEnvoie, lue, ID_Expediteur, ID_Destinataire)
-       VALUES (?, NOW(), 0, ?, ?)`,
+      VALUES (?, UTC_TIMESTAMP(), 0, ?, ?)`,
       [contenue, ID_Expediteur, ID_Destinataire],
       (err, result) => {
 
@@ -82,7 +87,7 @@ io.on('connection', (socket) => {
         const msg = {
           ID: result.insertId,
           contenue,
-          DateEnvoie: new Date(),
+          DateEnvoie: new Date().toISOString(), 
           lue: 0,
           ID_Expediteur,
           ID_Destinataire
@@ -132,8 +137,8 @@ io.on('connection', (socket) => {
 
     db.query(
       `UPDATE message 
-       SET lue = 1, DateReception = NOW() 
-       WHERE ID = ?`,
+      SET lue = 1, DateReception = UTC_TIMESTAMP() 
+      WHERE ID = ?`,
       [messageId],
       (err) => {
 

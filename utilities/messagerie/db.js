@@ -5,6 +5,7 @@ const db = mysql.createConnection({
   user:     'root',
   password: '',
   database: 'Agora_BDD',
+  timezone: 'Z',          // ← force UTC : les colonnes DATETIME arrivent en ISO string, pas en Date locale
 });
 
 db.connect((err) => {

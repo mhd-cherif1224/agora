@@ -6,6 +6,7 @@ header('Content-Type: application/json; charset=utf-8');
 /* ══ CONNEXION BDD ══ */
 require_once __DIR__ . '/../Model/Database.php'; 
 $pdo = Database::getConnection();
+$pdo->exec("SET time_zone = '+00:00'"); 
 
 /* ══ PARAMÈTRES ══ */
 $search  = isset($_GET['q'])      ? trim($_GET['q'])           : '';

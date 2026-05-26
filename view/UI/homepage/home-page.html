@@ -240,16 +240,16 @@
     id="postTitle"
     placeholder="Titre du service">
 
-<input 
-    type="number"
+  <input 
+    type="text"
     class="post-modal-input"
     id="postPrice"
     placeholder="Prix">
 
-<input
+  <textarea
     class="post-modal-textarea" 
     id="postDesc" 
-    placeholder="Décrivez votre service..."></input>
+    placeholder="Décrivez votre service..."></textarea>
     </div>
     <div class="location-chip" id="locationChip">
       <i class="fa-solid fa-location-dot"></i>
@@ -277,7 +277,26 @@
         <button class="post-tool-btn" id="pmCatBtn" title="Choisir une catégorie"><i class="fa-solid fa-plus"></i></button>
         <div class="cat-dropdown" id="catDropdown"></div>
       </div>
+
+      <div style="position:relative;">
+        <button class="post-tool-btn" id="pmStatusBtn" title="Statut du service">
+          <i class="fa-solid fa-circle-dot"></i>
+        </button>
+        <div class="status-modal" id="statusModal">
+          <div class="status-option" data-value="disponible">
+            <i class="fa-solid fa-circle" style="color:#22c55e;font-size:9px;"></i> Disponible
+          </div>
+          <div class="status-option" data-value="en cours">
+            <i class="fa-solid fa-circle" style="color:#f59e0b;font-size:9px;"></i> En cours
+          </div>
+          <div class="status-option" data-value="terminé">
+            <i class="fa-solid fa-circle" style="color:#8c8580;font-size:9px;"></i> Terminé
+          </div>
+        </div>
+    </div>
+    
       <div class="post-tool-sep"></div>
+      
       <div class="post-footer-push"></div>
       <div style="position:relative;">
         <button class="post-tool-btn" id="pmTimerBtn" title="Programmer la publication"><i class="fa-regular fa-clock"></i></button>

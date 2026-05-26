@@ -131,29 +131,42 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function createServiceCard(service) {
 
-        const initials = (service.nom?.charAt(0) || "") + (service.prenom?.charAt(0) || "");
+    const profileImage = service.photo_profil
+        ? `../../../${service.photo_profil}`
+        : null;
 
-        const profileImage = service.photo_profil
-            ? `../../../${service.photo_profil}`
-            : null;
+    const serviceImage = service.service_photo
+        ? `../../../${service.service_photo}`
+        : null;
 
-        const serviceImage = service.service_photo
-            ? `../../../${service.service_photo}`
-            : null;
+    const categories = service.categorie
+        ? service.categorie.split(",")
+        : [];
 
-        const categories = service.categorie
-            ? service.categorie.split(",")
-            : [];
+    const timeAgo = getTimeAgo(service.DateDePublication);
 
-        const timeAgo = getTimeAgo(service.DateDePublication);
+    // Prix
+    let prixAffiche = service.prix + ' DZD';
+    const match = service.description.match(/\[prix_texte:(.+?)\]/);
+    if (match) {
+        prixAffiche = match[1];
+        service.description = service.description.replace(/\[prix_texte:.+?\]/, '').trim();
+    }
 
-        return `
+    // Status
+    const statusConfig = {
+        'disponible': { color: '#16a34a', bg: '#eaf5ee', border: '#bbf7d0', icon: 'fa-circle-check', label: 'Disponible' },
+        'en cours':   { color: '#d97706', bg: '#fef9c3', border: '#fde68a', icon: 'fa-circle-half-stroke', label: 'En cours' },
+        'terminé':    { color: '#6b7280', bg: '#f3f4f6', border: '#e5e7eb', icon: 'fa-circle-xmark', label: 'Terminé' }
+    };
+    const st = statusConfig[service.status] || statusConfig['disponible'];
+
+    return `
 <article class="post-card" data-service-id="${service.ID}" data-owner-id="${service.ID_Utilisateur || service.utilisateur_id || service.user_id || ''}">
 
     <div class="post-header post-owner" data-owner-id="${service.ID_Utilisateur || service.utilisateur_id || service.user_id || ''}" style="cursor:pointer">
         <div class="post-avatar">
-            <img src="${profileImage}"
-                 style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+            <img src="${profileImage}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
         </div>
         <div class="post-meta">
             <div class="post-name">${service.nom} ${service.prenom}</div>
@@ -177,12 +190,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     </div>
 
     <div class="post-body">
-        ${service.description}
+        ${service.description.replace(/\n/g, '<br>')}
         <br>
-        prix : ${service.prix} DZD
+        prix : ${prixAffiche}
     </div>
 
-    <div class="post-body">${service.status}</div>
+    <span style="display:inline-block;margin:0 18px 10px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;font-family:'Space Grotesk',sans-serif;background:${st.bg};color:${st.color};">
+        <i class="fa-solid fa-circle" style="font-size:7px;margin-right:4px;"></i>${st.label}
+    </span>
 
     ${serviceImage ? `<img class="post-image" src="${serviceImage}">` : ""}
 
@@ -221,7 +236,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     <div class="comments-list" hidden></div>
 
 </article>`;
-    }
+}
 
 
     // ── Events du feed ──
@@ -299,13 +314,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 function getTimeAgo(dateString) {
     const now = new Date();
-    const diffMs = now - new Date(dateString);
+    const date = new Date(
+        dateString.includes('Z') || dateString.includes('+')
+            ? dateString
+            : dateString.replace(' ', 'T') + 'Z'
+    );
+    const diffMs = now - date;
     const minutes = Math.floor(diffMs / 60000);
     const hours   = Math.floor(diffMs / 3600000);
     const days    = Math.floor(diffMs / 86400000);
     const months  = Math.floor(days / 30);
     const years   = Math.floor(months / 12);
 
+    if (minutes < 1)   return `à l'instant`;
     if (minutes < 60)  return `il y a ${minutes} min`;
     if (hours < 24)    return `il y a ${hours} h`;
     if (days < 30)     return `il y a ${days} jours`;
@@ -394,7 +415,9 @@ async function submitRating(card) {
             body: JSON.stringify(evaluation)
         });
 
-        const result = await response.json();
+        const text = await response.text();
+console.log("Raw response:", text);
+const result = JSON.parse(text);
 
         if (!result.success) {
             console.error('Erreur:', result.message);

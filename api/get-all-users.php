@@ -16,6 +16,7 @@ $userId = $_SESSION['utilisateur_id'];
 
 try {
     $pdo = Database::getConnection();
+    $pdo->exec("SET time_zone = '+00:00'"); 
 
     // Get all users except the current one
     $sql = "

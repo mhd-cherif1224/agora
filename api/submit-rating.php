@@ -14,16 +14,9 @@ $data   = json_decode(file_get_contents("php://input"), true);
 
 $note        = intval($data['note']       ?? 0);
 $commentaire = trim($data['commentaire']  ?? '');
-$dateEval    = $data['DateEval']          ?? date('Y-m-d');
 $serviceId   = intval($data['ID_Service'] ?? 0);
 
-// Convertir format fr (d/m/Y) → Y-m-d
-if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateEval)) {
-    $parts = explode('/', $dateEval);
-    if (count($parts) === 3) {
-        $dateEval = $parts[2] . '-' . $parts[1] . '-' . $parts[0];
-    }
-}
+
 
 if ($note < 1 || $note > 5) {
     echo json_encode(['success' => false, 'message' => 'Note invalide']);
@@ -36,6 +29,7 @@ if ($serviceId <= 0) {
 
 try {
     $pdo = Database::getConnection();
+    $pdo->exec("SET time_zone = '+00:00'"); 
 
     // Récupérer le propriétaire du service
     $stmt = $pdo->prepare("SELECT ID_Utilisateur FROM service WHERE ID = :serviceId");
@@ -58,12 +52,11 @@ try {
     // INSERT évaluation
     $stmt = $pdo->prepare("
         INSERT INTO evaluation (note, commentaire, DateEval, ID_Evaluateur, ID_Utilisateur, ID_Service)
-        VALUES (:note, :commentaire, :dateEval, :evaluatorId, :userId, :serviceId)
+        VALUES (:note, :commentaire, UTC_TIMESTAMP(), :evaluatorId, :userId, :serviceId)
     ");
     $stmt->execute([
         ':note'        => $note,
         ':commentaire' => $commentaire ?: null,
-        ':dateEval'    => $dateEval,
         ':evaluatorId' => $userId,
         ':userId'      => $serviceOwnerUserId,
         ':serviceId'   => $serviceId,
@@ -87,7 +80,7 @@ try {
             'photo_profil' => $evaluateur['photo_profil'] ?? null,
             'note'         => $note,
             'message'      => null,
-            'created_at'   => $dateEval,
+            'created_at' => gmdate('Y-m-d H:i:s'),
         ]
     ];
 
@@ -99,7 +92,7 @@ try {
             'photo_profil' => $evaluateur['photo_profil'] ?? null,
             'note'         => null,
             'message'      => $commentaire,
-            'created_at'   => $dateEval,
+            'created_at' => gmdate('Y-m-d H:i:s'),
         ];
     }
 

@@ -8,42 +8,42 @@ $userId = $_SESSION['utilisateur_id'];
 
 try {
     $pdo = Database::getConnection();
+    $pdo->exec("SET time_zone = '+00:00'");
 
-    // Simplified query to get users with conversations
     $sql = "
         SELECT 
-  u.ID,
-  u.nom,
-  u.prenom,
-  u.photo_profil,
+          u.ID,
+          u.nom,
+          u.prenom,
+          u.photo_profil,
 
-  m.contenue AS last_message,
-  m.DateEnvoie AS last_message_time,
+          m.contenue AS last_message,
+          DATE_FORMAT(m.DateEnvoie, '%Y-%m-%dT%H:%i:%sZ') AS last_message_time,
 
-  CASE 
-    WHEN m.ID_Expediteur = :me THEN 1
-    ELSE 0
-  END AS is_sent_by_me
+          CASE 
+            WHEN m.ID_Expediteur = :me THEN 1
+            ELSE 0
+          END AS is_sent_by_me
 
-FROM message m
+        FROM message m
 
-JOIN (
-  SELECT 
-    CASE 
-      WHEN ID_Expediteur = :me THEN ID_Destinataire
-      ELSE ID_Expediteur
-    END AS other_user,
-    MAX(ID) AS last_msg_id
-  FROM message
-  WHERE ID_Expediteur = :me OR ID_Destinataire = :me
-  GROUP BY other_user
-) t
-ON m.ID = t.last_msg_id
+        JOIN (
+          SELECT 
+            CASE 
+              WHEN ID_Expediteur = :me THEN ID_Destinataire
+              ELSE ID_Expediteur
+            END AS other_user,
+            MAX(ID) AS last_msg_id
+          FROM message
+          WHERE ID_Expediteur = :me OR ID_Destinataire = :me
+          GROUP BY other_user
+        ) t
+        ON m.ID = t.last_msg_id
 
-JOIN utilisateur u 
-  ON u.ID = t.other_user
+        JOIN utilisateur u 
+          ON u.ID = t.other_user
 
-ORDER BY m.DateEnvoie DESC;
+        ORDER BY m.DateEnvoie DESC;
     ";
 
     $stmt = $pdo->prepare($sql);
@@ -51,20 +51,17 @@ ORDER BY m.DateEnvoie DESC;
 
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Format the photo_profil paths
     $formatted = array_map(function($row) {
-    return [
-        'ID' => $row['ID'],
-        'nom' => $row['nom'],
-        'prenom' => $row['prenom'],
-        'photo_profil' => $row['photo_profil'],
-
-        // ✅ KEEP REAL DATA
-        'last_message' => $row['last_message'] ?? null,
-        'last_message_time' => $row['last_message_time'] ?? null,
-        'is_sent_by_me' => $row['is_sent_by_me'] ?? 0
-    ];
-}, $results);
+        return [
+            'ID'                => $row['ID'],
+            'nom'               => $row['nom'],
+            'prenom'            => $row['prenom'],
+            'photo_profil'      => $row['photo_profil'],
+            'last_message'      => $row['last_message']      ?? null,
+            'last_message_time' => $row['last_message_time'] ?? null,
+            'is_sent_by_me'     => $row['is_sent_by_me']     ?? 0
+        ];
+    }, $results);
 
     echo json_encode($formatted);
 

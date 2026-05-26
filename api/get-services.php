@@ -15,6 +15,7 @@ try {
     }
 
     $pdo = Database::getConnection();
+    $pdo->exec("SET time_zone = '+00:00'"); 
 
     // Filtrage par catégorie via HAVING (après GROUP_CONCAT)
     $havingClause = "";

@@ -222,6 +222,9 @@ function showNotification(msg) {
     publishBtn.classList.remove('scheduled'); publishBtn.innerHTML = 'publier';
     catDropdown.querySelectorAll('.cat-option').forEach(o => o.classList.remove('selected'));
 
+    selectedStatus = 'disponible';
+    statusModal.querySelectorAll('.status-option').forEach(o => o.classList.remove('selected'));
+    pmStatusBtn.classList.remove('active');
 
     console.log("resetModal called");
 console.log("Before reset:", attachedPhotos);
@@ -396,6 +399,7 @@ async function loadSessionUser() {
         );
 
         const data = await response.json();
+        
 
         if (!data.success) return;
 
@@ -575,6 +579,7 @@ async function loadSessionUser() {
     if (editOverlay.classList.contains('active')) {
       if (!editCatDD.contains(e.target) && e.target !== editCatBtn) editCatDD.classList.remove('open');
       if (!editLocModal.contains(e.target) && e.target !== editLocBtn) editLocModal.classList.remove('open');
+      if (!statusModal.contains(e.target) && e.target !== pmStatusBtn) statusModal.classList.remove('open');
     }
   });
 
@@ -910,14 +915,47 @@ function fileToBlob(file) {
         reader.readAsDataURL(file);
     });
 }
+let selectedStatus = 'disponible'; // valeur par défaut
+
+const pmStatusBtn = document.getElementById('pmStatusBtn');
+const statusModal = document.getElementById('statusModal');
+
+// Ouvrir/fermer
+pmStatusBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  statusModal.classList.toggle('open');
+  timerModal.classList.remove('open');
+  locModal.classList.remove('open');
+  catDropdown.classList.remove('open');
+});
+
+// Sélection d'un statut
+statusModal.querySelectorAll('.status-option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    selectedStatus = opt.dataset.value;
+    statusModal.querySelectorAll('.status-option').forEach(o => o.classList.remove('selected'));
+    opt.classList.add('selected');
+    pmStatusBtn.classList.add('active');
+    statusModal.classList.remove('open');
+    showNotification(`✓ Statut : ${opt.textContent.trim()}`);
+  });
+});
+
+// Fermer si clic ailleurs 
+if (!statusModal.contains(e.target) && e.target !== pmStatusBtn) statusModal.classList.remove('open');
+
 
 async function publierService() {
     console.log("publierService is called");
 
     try {
         const titre       = document.getElementById("postTitle").value.trim();
-        const prix        = document.getElementById("postPrice").value.trim();
+        const prixRaw = document.getElementById("postPrice").value.trim();
+        const prixNum = parseFloat(prixRaw);
+        const prix = isNaN(prixNum) ? 0 : prixNum;
+
         const description = document.getElementById("postDesc").value.trim();
+        const status = selectedStatus;
 
         // Validation
         if (!titre) {
@@ -945,12 +983,14 @@ async function publierService() {
                 return;
             }
         }
-
+console.log("status envoyé:", selectedStatus);
         // ── Build FormData ──
         const formData = new FormData();
         formData.append("titre", titre);
-        formData.append("prix", prix);
         formData.append("description", description);
+        formData.append("prix", prix);
+        formData.append("prix_affichage", prixRaw);
+        formData.append("status", selectedStatus);
 
         // Append each converted blob with an indexed filename
         photoBlobs.forEach((blob, i) => {
@@ -976,7 +1016,11 @@ async function publierService() {
             }
         );
 
-        const result = await response.json();
+        // const result = await response.json();
+const text = await response.text();
+console.log("Raw response:", text);
+const result = JSON.parse(text);
+
         console.log("Server response:", result);
 
         if (result.success) {
@@ -989,11 +1033,8 @@ async function publierService() {
         console.error("Publish error:", error);
         showNotification('❌ Erreur réseau');
     }
-}
 
-
-
-
+  }
 
 
 })();

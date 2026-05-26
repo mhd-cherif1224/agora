@@ -32,6 +32,7 @@ $userId = $_SESSION['utilisateur_id'];
 
 // Connexion à la base
 $pdo = Database::getConnection();
+$pdo->exec("SET time_zone = '+00:00'"); 
 
 
 // ======================================
@@ -43,9 +44,18 @@ $titre = trim($_POST['titre'] ?? '');
 
 // Description du service
 $description = trim($_POST['description'] ?? '');
+$prix_affichage = trim($_POST['prix_affichage'] ?? '');
+
+if (!empty($prix_affichage) && !is_numeric($prix_affichage)) {
+    $description .= "\n[prix_texte:" . $prix_affichage . "]";
+}
 
 // Prix du service
 $prix = $_POST['prix'] ?? null;
+
+// Statut du service
+$status = $_POST['status'] ?? 'disponible';
+error_log("status reçu: " . $status);
 
 // Tableau des catégories sélectionnées
 $categories = $_POST['categories'] ?? [];
@@ -54,7 +64,7 @@ $categories = $_POST['categories'] ?? [];
 // ======================================
 // Validation
 // ======================================
-if (empty($titre) || empty($prix)) {
+if (empty($titre) || !isset($_POST['prix'])) {
 
     echo json_encode([
         'success' => false,
@@ -128,11 +138,10 @@ try {
     // Insertion du service
     // ======================================
     $stmt = $pdo->prepare("
-        INSERT INTO service (titre, description, prix, ID_Utilisateur)
-        VALUES (?, ?, ?, ?)
-    ");
-
-    $stmt->execute([$titre, $description, $prix, $userId]);
+    INSERT INTO service (titre, description, prix, status, ID_Utilisateur, DateDePublication)
+    VALUES (?, ?, ?, ?, ?, UTC_TIMESTAMP())
+");
+$stmt->execute([$titre, $description, $prix, $status, $userId]);
 
     // Récupérer l'ID du service créé
     $serviceId = $pdo->lastInsertId();

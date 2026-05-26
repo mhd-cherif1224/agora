@@ -107,79 +107,35 @@ function renderPeopleCarousel(users) {
 
 /* ══ FEED SERVICES ══ */
 function renderServicesFeed(services) {
-  const feed = document.querySelector('.feed');
-  feed.innerHTML = '';
+    const feed = document.querySelector('.feed');
+    feed.innerHTML = '';
 
-  if (services.length === 0) {
-    feed.innerHTML = '<div style="padding:20px;color:#8c8580;">Aucun service trouvé</div>';
-    return;
-  }
+    if (services.length === 0) {
+        feed.innerHTML = '<div style="padding:20px;color:#8c8580;">Aucun service trouvé</div>';
+        return;
+    }
 
-  services.forEach(s => {
-    const article = document.createElement('article');
-    article.className = 'post-card';
-    article.dataset.serviceId = s.ID;
+    services.forEach(s => {
+        // Normaliser les champs pour correspondre à ce qu'attend createServiceCard
+        const normalized = {
+            ID:               s.ID,
+            titre:            s.titre,
+            description:      s.description || '',
+            prix:             s.prix,
+            status:           s.status,
+            DateDePublication: s.DateDePublication,
+            nom:              s.utilisateur_nom,
+            prenom:           s.utilisateur_prenom,
+            photo_profil:     s.photo_profil,
+            service_photo:    s.photo_service,
+            categorie:        (s.categories || []).join(','),
+            note_moyenne:     s.Evaluation_Moyenne || 0,
+            nb_avis:          s.nb_avis || 0,
+            ID_Utilisateur:   s.ID_Utilisateur
+        };
 
-    const profileImg = s.photo_profil
-        ? `<img src="../../../${s.photo_profil}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.textContent='${(s.utilisateur_prenom[0] + s.utilisateur_nom[0]).toUpperCase()}'">`
-        : `${(s.utilisateur_prenom[0] + s.utilisateur_nom[0]).toUpperCase()}`;
-
-    const serviceImg = s.photo_service
-      ? `<img class="post-image" src="../../../${s.photo_service}" alt="${s.titre}" onerror="this.style.display='none'">`
-      : '';
-
-    const catsHtml = (s.categories || [])
-      .map(c => `<span class="category-pill green">${c}</span>`)
-      .join('');
-
-    const stars = generateStars(s.Evaluation_Moyenne || 0);
-
-    article.innerHTML = `
-      <div class="post-header">
-        <div class="post-avatar" ${!s.photo_profil ? `style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#6366f1,#4338ca);color:#fff;font-weight:700;"` : ''}>
-       ${profileImg}
-       </div>
-        <div class="post-meta">
-          <div class="post-name">${s.utilisateur_prenom} ${s.utilisateur_nom}</div>
-          <div class="post-time-row">
-            <span class="post-time">${s.DateDePublication}</span>
-          </div>
-        </div>
-        <button class="post-more"><i class="fa-solid fa-ellipsis"></i></button>
-      </div>
-
-      <div class="post-title">${s.titre}</div>
-
-      ${catsHtml ? `<div class="post-tags"><span class="post-tag">${catsHtml}</span></div>` : ''}
-
-      <div class="post-body">
-        ${s.description || ''}<br>
-        prix : ${s.prix} DZD
-      </div>
-
-      ${serviceImg}
-
-      <div class="post-rating-summary">
-        <div class="rating-stars-display">${stars}</div>
-        <span class="rating-score">${s.Evaluation_Moyenne || '—'}</span>
-        <span class="rating-count">(0 évaluations)</span>
-      </div>
-
-      <div class="post-actions">
-        <button class="post-action-btn" data-action="rate">
-          <i class="fa-regular fa-star"></i> Évaluer
-        </button>
-      </div>
-    `;
-
-    article.style.cursor = 'pointer';
-    article.addEventListener('click', (e) => {
-      if (e.target.closest('.post-action-btn') || e.target.closest('.post-more')) return;
-      window.location.href = `../../UI/service/service-detail.html?id=${s.ID}`;
+        feed.innerHTML += createServiceCard(normalized);
     });
-
-    feed.appendChild(article);
-  });
 }
 
 

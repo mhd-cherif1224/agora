@@ -1614,34 +1614,23 @@ function createServiceCard(service) {
 
 function getTimeAgo(dateString) {
     const now = new Date();
-    const serviceDate = new Date(dateString);
+    const date = new Date(
+        dateString.includes('Z') || dateString.includes('+')
+            ? dateString
+            : dateString.replace(' ', 'T') + 'Z'
+    );
+    const diffMs = now - date;
+    const minutes = Math.floor(diffMs / 60000);
+    const hours   = Math.floor(diffMs / 3600000);
+    const days    = Math.floor(diffMs / 86400000);
+    const months  = Math.floor(days / 30);
+    const years   = Math.floor(months / 12);
 
-    const diffMs = now - serviceDate;
-
-    const minutes = Math.floor(diffMs / (1000 * 60));
-    const hours = Math.floor(diffMs / (1000 * 60 * 60));
-    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-    if (minutes < 60) {
-        return `il y a ${minutes} min`;
-    }
-
-    if (hours < 24) {
-        return `il y a ${hours} h`;
-    }
-
-    if (days < 30) {
-        return `il y a ${days} jours`;
-    }
-
-    const months = Math.floor(days / 30);
-
-    if (months < 12) {
-        return `il y a ${months} mois`;
-    }
-
-    const years = Math.floor(months / 12);
-
+    if (minutes < 1)   return `à l'instant`;
+    if (minutes < 60)  return `il y a ${minutes} min`;
+    if (hours < 24)    return `il y a ${hours} h`;
+    if (days < 30)     return `il y a ${days} jours`;
+    if (months < 12)   return `il y a ${months} mois`;
     return `il y a ${years} an(s)`;
 }
 

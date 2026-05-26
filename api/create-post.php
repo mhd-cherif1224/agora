@@ -37,6 +37,7 @@ if (empty($titre) || empty($description)) {
 try {
 
     $pdo = Database::getConnection();
+    $pdo->exec("SET time_zone = '+00:00'"); 
 
     $pdo->beginTransaction();
 

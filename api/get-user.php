@@ -15,6 +15,7 @@ $id = intval($_GET['id']);
 
 try {
     $pdo = Database::getConnection();
+    $pdo->exec("SET time_zone = '+00:00'"); 
 
     $stmt = $pdo->prepare("
     SELECT 
