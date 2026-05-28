@@ -1825,22 +1825,39 @@ document.getElementById('modalConfirm').addEventListener('click', async () => {
   if (pmPhotoInput && !pmPhotoInput._editBound) {
     pmPhotoInput._editBound = true;
     pmPhotoInput.addEventListener('change', () => {
-      const file = pmPhotoInput.files[0];
-      if (!file) return;
-      const url = URL.createObjectURL(file);
-      if (postPreview) {
-        postPreview.innerHTML = `
-                <div class="preview-item" style="position:relative;display:inline-block;margin-top:8px;">
-                    <img src="${url}" style="width:100%;border-radius:10px;max-height:200px;object-fit:cover;">
-                    <button class="preview-remove" style="position:absolute;top:6px;right:6px;background:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.2);">×</button>
-                </div>`;
-        postPreview.querySelector('.preview-remove').addEventListener('click', () => {
-          postPreview.innerHTML = '';
-          pmPhotoInput.value = '';
-        });
-      }
+        const file = pmPhotoInput.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            attachedPhotos.push({ url: e.target.result, file: file });
+            const preview = document.getElementById('postPreview');
+            if (preview) {
+                preview.innerHTML = '';
+                preview.classList.add('has-items');
+                attachedPhotos.forEach((photo, idx) => {
+                    const div = document.createElement('div');
+                    div.style.cssText = 'position:relative;display:inline-block;margin-top:8px;width:100%;';
+                    const img = document.createElement('img');
+                    img.src = photo.url;
+                    img.style.cssText = 'width:100%;border-radius:10px;max-height:200px;object-fit:cover;display:block;';
+                    const rm = document.createElement('button');
+                    rm.style.cssText = 'position:absolute;top:6px;right:6px;background:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.2);';
+                    rm.textContent = '×';
+                    rm.addEventListener('click', () => {
+                        attachedPhotos.splice(idx, 1);
+                        div.remove();
+                        if (attachedPhotos.length === 0) preview.classList.remove('has-items');
+                    });
+                    div.appendChild(img);
+                    div.appendChild(rm);
+                    preview.appendChild(div);
+                });
+            }
+        };
+        reader.readAsDataURL(file);
+        pmPhotoInput.value = '';
     });
-  }
+}
 
   // Location
   if (pmLocBtn && !pmLocBtn._editBound) {
@@ -1937,6 +1954,19 @@ document.getElementById('modalConfirm').addEventListener('click', async () => {
     pmTimerBtn._editBound = true;
     pmTimerBtn.addEventListener('click', (e) => {
       e.stopPropagation();
+      // Pré-remplir avec la date du jour et 10:00 si les champs sont vides
+      const timerDate = document.getElementById('timerDate');
+      const timerTime = document.getElementById('timerTime');
+      if (timerDate && !timerDate.value) {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        timerDate.value = `${yyyy}-${mm}-${dd}`;
+      }
+      if (timerTime && !timerTime.value) {
+        timerTime.value = '10:00';
+      }
       timerModal?.classList.toggle('open');
     });
   }
