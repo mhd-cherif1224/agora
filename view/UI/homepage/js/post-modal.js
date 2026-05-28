@@ -1,15 +1,12 @@
 // ════════════════════════════════════════
 // MAKE A POST MODAL + POST-MORE MENU
-// ConnectU — accueil/feed
 // ════════════════════════════════════════
 
-// ── Inject all required CSS ──
 function buildPhotoUrl(path) {
   if (!path) return null;
   if (path.startsWith('/') || path.startsWith('http')) return path;
   return `../../../${path}`;
 }
-
 
 // ════════════════════════════════════════
 // HIDDEN POSTS PANEL
@@ -73,70 +70,51 @@ function _renderHiddenPanel() {
   });
 }
 
-//user profile load
-
+// ── user profile load ──
 loadUserProfile();
-
 
 async function loadUserProfile() {
   try {
     const res = await fetch('../../../api/get-profile.php');
-
     if (res.status === 401) {
       window.location.href = '../../../html/login.html';
       return;
     }
-
     const data = await res.json();
-
     if (!data.success || !data.id) {
       console.error('Invalid profile response', data);
       return;
     }
-
     currentUser = {
       id: data.id,
       nom: data.nom,
       prenom: data.prenom,
-      role : data.role,
-      avatar:buildPhotoUrl(data.avatar)
+      role: data.role,
+      avatar: buildPhotoUrl(data.avatar)
     };
-
-    // NAV avatar
-    const pmAvatar = document.getElementById('pmAvatar');
+    const pmAvatar      = document.getElementById('pmAvatar');
     const postModalName = document.querySelector('.post-modal-name');
     const postModalRole = document.querySelector('.post-modal-role');
-    
-    if(data.nom){
+    if (data.nom) {
       postModalName.textContent = data.nom;
-    }else{
-      console.log("error loading the post modal name ")
+    } else {
+      console.log("error loading the post modal name");
     }
-
-    if(data.role){
-      postModalRole.textContent = data.role;
-    }else{
-      console.log("error loading the post modal role ")
+    if (data.role || data.status || data.specialite) {
+      postModalRole.textContent = data.role || data.status || data.specialite || '';
+    } else {
+      postModalRole.style.display = 'none';
     }
-
-   
-    console.log(pmAvatar)
-
     if (data.avatar) {
       pmAvatar.src = buildPhotoUrl(data.avatar);
       pmAvatar.style.display = 'block';
-      
-      
-    } else{
-
-      console.log("error loading the pmAvatar ")
+    } else {
+      console.log("error loading the pmAvatar");
     }
-
   } catch (err) {
     console.error('Profile error:', err);
   }
 }
-
 
 // ════════════════════════════════════════
 // NOTIFICATION helper
@@ -150,41 +128,71 @@ function showNotification(msg) {
   el._t = setTimeout(() => { el.style.display = 'none'; }, 3500);
 }
 
+// ════════════════════════════════════════
+// CONVERT a File to a JPEG Blob via canvas
+// ════════════════════════════════════════
+function fileToBlob(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('FileReader failed'));
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Image load failed'));
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width  = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        canvas.toBlob(
+          (blob) => blob ? resolve(blob) : reject(new Error('toBlob failed')),
+          'image/jpeg',
+          0.92
+        );
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 // ════════════════════════════════════════
 // MAKE A POST MODAL
 // ════════════════════════════════════════
 (function () {
-  
 
   let selectedCats = new Set(), scheduledAt = null, locationValue = '';
   let pollActive = false, pollOptions = ['', ''], pollDuration = '1';
+  let selectedStatus = 'disponible';
+  let categories = [];
+  let selectedCategories = [];
 
-  const overlay        = document.getElementById('postModalOverlay');
-  const closeBtn       = document.getElementById('postModalClose');
-  const preview        = document.getElementById('postPreview');
-  const publishBtn     = document.getElementById('postPublishBtn');
-  const pmPhotoBtn     = document.getElementById('pmPhotoBtn');
-  const pmPhotoInput   = document.getElementById('pmPhotoInput');
-  const pmLocBtn       = document.getElementById('pmLocBtn');
-  const locModal       = document.getElementById('locModal');
-  const locInput       = document.getElementById('locInput');
-  const locConfirm     = document.getElementById('locConfirm');
-  const locationChip   = document.getElementById('locationChip');
-  const locationText   = document.getElementById('locationText');
-  const locationRemove = document.getElementById('locationRemove');
-  const pmCatBtn       = document.getElementById('pmCatBtn');
-  const catDropdown    = document.getElementById('catDropdown');
-  const catChipsBox    = document.getElementById('categoryChips');
-  const pmTimerBtn     = document.getElementById('pmTimerBtn');
-  const timerModal     = document.getElementById('timerModal');
-  const timerDate      = document.getElementById('timerDate');
-  const timerTime      = document.getElementById('timerTime');
-  const timerConfirm   = document.getElementById('timerConfirm');
-  const timerClose     = document.getElementById('timerModalClose');
-  const scheduledChip  = document.getElementById('scheduledChip');
-  const scheduledText  = document.getElementById('scheduledText');
+  const overlay         = document.getElementById('postModalOverlay');
+  const closeBtn        = document.getElementById('postModalClose');
+  const preview         = document.getElementById('postPreview');
+  const publishBtn      = document.getElementById('postPublishBtn');
+  const pmPhotoBtn      = document.getElementById('pmPhotoBtn');
+  const pmPhotoInput    = document.getElementById('pmPhotoInput');
+  const pmLocBtn        = document.getElementById('pmLocBtn');
+  const locModal        = document.getElementById('locModal');
+  const locInput        = document.getElementById('locInput');
+  const locConfirm      = document.getElementById('locConfirm');
+  const locationChip    = document.getElementById('locationChip');
+  const locationText    = document.getElementById('locationText');
+  const locationRemove  = document.getElementById('locationRemove');
+  const pmCatBtn        = document.getElementById('pmCatBtn');
+  const catDropdown     = document.getElementById('catDropdown');
+  const catChipsBox     = document.getElementById('categoryChips');
+  const pmTimerBtn      = document.getElementById('pmTimerBtn');
+  const timerModal      = document.getElementById('timerModal');
+  const timerDate       = document.getElementById('timerDate');
+  const timerTime       = document.getElementById('timerTime');
+  const timerConfirm    = document.getElementById('timerConfirm');
+  const timerClose      = document.getElementById('timerModalClose');
+  const scheduledChip   = document.getElementById('scheduledChip');
+  const scheduledText   = document.getElementById('scheduledText');
   const scheduledRemove = document.getElementById('scheduledRemove');
+  const pmStatusBtn     = document.getElementById('pmStatusBtn');
+  const statusModal     = document.getElementById('statusModal');
 
   // ── Wrap modal inner content in scroll div ──
   const postModal = document.getElementById('postModal');
@@ -202,110 +210,185 @@ function showNotification(msg) {
     }
   }
 
-  // ── Build category dropdown ──
-  
-
-
+  // ── Modal open / close / reset ──
   function openModal(focusOnPhoto) {
     const tmr = new Date(Date.now() + 86400000);
-    timerDate.value = tmr.toISOString().split('T')[0]; timerTime.value = '10:00';
-    overlay.classList.add('active'); document.body.style.overflow = 'hidden';
+    timerDate.value = tmr.toISOString().split('T')[0];
+    timerTime.value = '10:00';
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
     setTimeout(() => { if (focusOnPhoto) pmPhotoInput.click(); }, 80);
   }
-  function closeModal() { overlay.classList.remove('active'); document.body.style.overflow = ''; }
+
+  function closeModal() {
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
   function resetModal() {
     selectedCats.clear(); scheduledAt = null; locationValue = '';
     pollActive = false; pollOptions = ['', '']; pollDuration = '1';
+    attachedPhotos = [];
     renderPreview();
     [scheduledChip, locationChip].forEach(c => c.classList.remove('visible'));
     [pmTimerBtn, pmCatBtn, pmLocBtn].forEach(b => b.classList.remove('active'));
-    publishBtn.classList.remove('scheduled'); publishBtn.innerHTML = 'publier';
-    catDropdown.querySelectorAll('.cat-option').forEach(o => o.classList.remove('selected'));
 
+    // Ne réinitialiser le bouton QUE si pas en mode édition
+    if (!publishBtn.dataset.editMode) {
+      publishBtn.classList.remove('scheduled');
+      publishBtn.innerHTML = 'publier';
+    }
+
+    catDropdown.querySelectorAll('.cat-option').forEach(o => o.classList.remove('selected'));
     selectedStatus = 'disponible';
     statusModal.querySelectorAll('.status-option').forEach(o => o.classList.remove('selected'));
     pmStatusBtn.classList.remove('active');
 
-    console.log("resetModal called");
-console.log("Before reset:", attachedPhotos);
+    // Réinitialiser les champs texte
+    const postTitle = document.getElementById('postTitle');
+    const postDesc  = document.getElementById('postDesc');
+    const postPrice = document.getElementById('postPrice');
+    if (postTitle) postTitle.value = '';
+    if (postDesc)  postDesc.value  = '';
+    if (postPrice) postPrice.value = '';
+
+    // Réinitialiser les catégories
+    selectedCategories = [];
+    if (catChipsBox) catChipsBox.innerHTML = '';
   }
 
-  // Composer triggers
+  // ── Composer triggers ──
   const composerInput = document.getElementById('composerTrigger');
   const composerPhoto = document.getElementById('composerPhotoBtn');
   const composerCal   = document.getElementById('composerCalBtn');
   if (composerInput) composerInput.addEventListener('click', () => openModal(false));
   if (composerPhoto) composerPhoto.addEventListener('click', () => openModal(true));
   if (composerCal)   composerCal.addEventListener('click', () => { openModal(false); setTimeout(() => pmTimerBtn.click(), 120); });
-  const composerPollBtn = document.querySelector('.composer-btn[title="Sondage"]');
-  if (composerPollBtn) composerPollBtn.addEventListener('click', () => { openModal(false); setTimeout(() => activatePoll(), 150); });
 
   closeBtn.addEventListener('click', () => { closeModal(); resetModal(); });
   overlay.addEventListener('click', e => { if (e.target === overlay) { closeModal(); resetModal(); } });
 
-  // Photo
-  // Photo
-console.log("pmPhotoBtn:", pmPhotoBtn);
-console.log("pmPhotoInput:", pmPhotoInput);
-
-pmPhotoBtn.addEventListener('click', () => {
-    console.log("Photo button clicked");
-    pmPhotoInput.click();
-});
-
-pmPhotoInput.addEventListener('change', function () {
-
-    console.log("Files selected:", this.files);
-
+  // ── Photo ──
+  pmPhotoBtn.addEventListener('click', () => { pmPhotoInput.click(); });
+  pmPhotoInput.addEventListener('change', function () {
     Array.from(this.files).forEach(file => {
-
-        if (file.type === 'image/gif') {
-            showNotification('⚠️ Les GIFs animés ne sont pas acceptés');
-            return;
-        }
-
-        const reader = new FileReader();
-
-        reader.onload = (e) => {
-
-            attachedPhotos.push({
-                url: e.target.result,
-                file: file
-            });
-
-            console.log("After push:", attachedPhotos);
-
-            renderPreview();
-        };
-
-        reader.readAsDataURL(file);
+      if (file.type === 'image/gif') {
+        showNotification('⚠️ Les GIFs animés ne sont pas acceptés');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        attachedPhotos.push({ url: e.target.result, file: file });
+        renderPreview();
+      };
+      reader.readAsDataURL(file);
     });
-
     this.value = '';
-});
+  });
+
   function renderPreview() {
     preview.innerHTML = '';
     attachedPhotos.forEach((photo, idx) => {
-      const div = document.createElement('div'); div.className = 'preview-item';
+      const div = document.createElement('div');
+      div.className = 'preview-item';
       div.innerHTML = `<img src="${photo.url}" alt="">`;
-      const rm = document.createElement('button'); rm.className = 'preview-remove'; rm.innerHTML = '×';
+      const rm = document.createElement('button');
+      rm.className = 'preview-remove';
+      rm.innerHTML = '×';
       rm.addEventListener('click', () => { attachedPhotos.splice(idx, 1); renderPreview(); });
-      div.appendChild(rm); preview.appendChild(div);
+      div.appendChild(rm);
+      preview.appendChild(div);
     });
     preview.classList.toggle('has-items', attachedPhotos.length > 0);
   }
 
-  // Location
-  pmLocBtn.addEventListener('click', e => { e.stopPropagation(); locModal.classList.toggle('open'); timerModal.classList.remove('open');  if (locModal.classList.contains('open')) setTimeout(() => locInput.focus(), 50); });
-  locConfirm.addEventListener('click', () => { const val = locInput.value.trim(); if (!val) return; locationValue = val; locationText.textContent = val; locationChip.classList.add('visible'); pmLocBtn.classList.add('active'); locModal.classList.remove('open'); });
+  // ── Location ──
+  pmLocBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    locModal.classList.toggle('open');
+    timerModal.classList.remove('open');
+    if (locModal.classList.contains('open')) setTimeout(() => locInput.focus(), 50);
+  });
+  locConfirm.addEventListener('click', () => {
+    const val = locInput.value.trim();
+    if (!val) return;
+    locationValue = val;
+    locationText.textContent = val;
+    locationChip.classList.add('visible');
+    pmLocBtn.classList.add('active');
+    locModal.classList.remove('open');
+  });
   locInput.addEventListener('keydown', e => { if (e.key === 'Enter') locConfirm.click(); });
-  locationRemove.addEventListener('click', () => { locationValue = ''; locationChip.classList.remove('visible'); pmLocBtn.classList.remove('active'); locInput.value = ''; });
+  locationRemove.addEventListener('click', () => {
+    locationValue = '';
+    locationChip.classList.remove('visible');
+    pmLocBtn.classList.remove('active');
+    locInput.value = '';
+  });
 
-  // Category
-  pmCatBtn.addEventListener('click', e => { e.stopPropagation(); catDropdown.classList.toggle('open'); timerModal.classList.remove('open'); locModal.classList.remove('open'); pmCatBtn.classList.toggle('active', catDropdown.classList.contains('open')); });
+  // ── Category ──
+  pmCatBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    catDropdown.classList.toggle('open');
+    timerModal.classList.remove('open');
+    locModal.classList.remove('open');
+    pmCatBtn.classList.toggle('active', catDropdown.classList.contains('open'));
+    loadCategories();
+  });
 
-  // Timer
-  pmTimerBtn.addEventListener('click', e => { e.stopPropagation(); timerModal.classList.toggle('open'); catDropdown.classList.remove('open'); locModal.classList.remove('open'); pmTimerBtn.classList.toggle('active', timerModal.classList.contains('open')); });
+  async function loadCategories() {
+    if (categories.length > 0) { renderCategoryDropdown(); return; }
+    try {
+      const response = await fetch('../../../api/get-all-categories.php');
+      const result   = await response.json();
+      if (result.success) { categories = result.data; renderCategoryDropdown(); }
+    } catch (error) {
+      console.error("Category loading error:", error);
+    }
+  }
+
+  function renderCategoryDropdown() {
+    catDropdown.innerHTML = '';
+    categories.forEach(category => {
+      const item = document.createElement('div');
+      item.className = 'cat-option';
+      item.textContent = category.titre;
+      item.addEventListener('click', () => selectCategory(category));
+      catDropdown.appendChild(item);
+    });
+  }
+
+  function selectCategory(category) {
+    const exists = selectedCategories.some(c => c.ID == category.ID);
+    if (exists) { showNotification("⚠️ Catégorie déjà ajoutée"); return; }
+    selectedCategories.push(category);
+    renderCatChips();
+    catDropdown.classList.remove('open');
+  }
+
+  function renderCatChips() {
+    if (!catChipsBox) return;
+    catChipsBox.innerHTML = '';
+    selectedCategories.forEach(category => {
+      const chip = document.createElement('div');
+      chip.className = 'category-chip';
+      chip.innerHTML = `<span>${category.titre}</span><button>x</button>`;
+      chip.querySelector('button').addEventListener('click', () => {
+        selectedCategories = selectedCategories.filter(cat => cat.ID != category.ID);
+        renderCatChips();
+      });
+      catChipsBox.appendChild(chip);
+    });
+  }
+
+  // ── Timer ──
+  pmTimerBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    timerModal.classList.toggle('open');
+    catDropdown.classList.remove('open');
+    locModal.classList.remove('open');
+    pmTimerBtn.classList.toggle('active', timerModal.classList.contains('open'));
+  });
   timerClose.addEventListener('click', () => { timerModal.classList.remove('open'); pmTimerBtn.classList.remove('active'); });
   timerConfirm.addEventListener('click', () => {
     const d = timerDate.value, t = timerTime.value;
@@ -313,57 +396,172 @@ pmPhotoInput.addEventListener('change', function () {
     scheduledAt = new Date(`${d}T${t}`);
     if (scheduledAt <= new Date()) { showNotification('⚠️ La date doit être dans le futur'); scheduledAt = null; return; }
     const fmt = scheduledAt.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) + ' à ' + t;
-    scheduledText.textContent = `Programmé · ${fmt}`; scheduledChip.classList.add('visible'); pmTimerBtn.classList.add('active');
-    publishBtn.classList.add('scheduled'); publishBtn.innerHTML = `<i class="fa-regular fa-clock"></i> Programmer`;
+    scheduledText.textContent = `Programmé · ${fmt}`;
+    scheduledChip.classList.add('visible');
+    pmTimerBtn.classList.add('active');
+    publishBtn.classList.add('scheduled');
+    publishBtn.innerHTML = `<i class="fa-regular fa-clock"></i> Programmer`;
     timerModal.classList.remove('open');
   });
-  scheduledRemove.addEventListener('click', () => { scheduledAt = null; scheduledChip.classList.remove('visible'); pmTimerBtn.classList.remove('active'); publishBtn.classList.remove('scheduled'); publishBtn.innerHTML = 'publier'; });
+  scheduledRemove.addEventListener('click', () => {
+    scheduledAt = null;
+    scheduledChip.classList.remove('visible');
+    pmTimerBtn.classList.remove('active');
+    publishBtn.classList.remove('scheduled');
+    publishBtn.innerHTML = 'publier';
+  });
 
-  // Poll button in footer
-  const modalFooter = document.querySelector('.post-modal-footer');
-  const sep = modalFooter?.querySelector('.post-tool-sep');
-  
+  // ── Status ──
+  pmStatusBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    statusModal.classList.toggle('open');
+    timerModal.classList.remove('open');
+    locModal.classList.remove('open');
+    catDropdown.classList.remove('open');
+  });
+  statusModal.querySelectorAll('.status-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      selectedStatus = opt.dataset.value;
+      statusModal.querySelectorAll('.status-option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      pmStatusBtn.classList.add('active');
+      statusModal.classList.remove('open');
+      showNotification(`✓ Statut : ${opt.textContent.trim()}`);
+    });
+  });
 
-  // Poll chip + builder injected into scroll area
+  // ── Poll chip ──
   setTimeout(() => {
     const scrollArea = document.querySelector('.post-modal-scroll');
     if (scrollArea && !document.getElementById('pollChip')) {
       const pollChipEl = document.createElement('div');
-      pollChipEl.className = 'poll-chip'; pollChipEl.id = 'pollChip';
+      pollChipEl.className = 'poll-chip';
+      pollChipEl.id = 'pollChip';
       pollChipEl.innerHTML = `<i class="fa-solid fa-chart-bar"></i><span>Sondage actif</span><button class="poll-chip-remove" id="pollChipRemove"><i class="fa-solid fa-xmark"></i></button>`;
       scrollArea.appendChild(pollChipEl);
       const pollBuilderEl = document.createElement('div');
-      pollBuilderEl.className = 'poll-builder'; pollBuilderEl.id = 'pollBuilder';
+      pollBuilderEl.className = 'poll-builder';
+      pollBuilderEl.id = 'pollBuilder';
       scrollArea.appendChild(pollBuilderEl);
-      document.getElementById('pollChipRemove').addEventListener('click', () => deactivatePoll());
     }
   }, 0);
 
- 
-
-  // Close sub-popups on outside click
+  // ── Close sub-popups on outside click ──
   document.addEventListener('click', e => {
     if (!catDropdown.contains(e.target) && e.target !== pmCatBtn) catDropdown.classList.remove('open');
     if (!timerModal.contains(e.target) && e.target !== pmTimerBtn) timerModal.classList.remove('open');
+    if (!statusModal.contains(e.target) && e.target !== pmStatusBtn) statusModal.classList.remove('open');
   });
 
-  // Publish
-  publishBtn.addEventListener('click', () => {
-    const text = ""
-    
-    
+  // ════════════════════════════════════════
+  // PUBLISH BUTTON
+  // ════════════════════════════════════════
+  publishBtn.addEventListener('click', async () => {
+    await publierService();
     if (scheduledAt) {
       const delay = scheduledAt - Date.now();
-      const fmt = scheduledAt.toLocaleString('fr-FR', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+      const fmt = scheduledAt.toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
       showNotification(`🕐 Post programmé · ${fmt}`);
-      setTimeout(() => {  showNotification('✓ Post publié automatiquement !'); }, delay);
-    } else {
-      showNotification('✓ Post publié avec succès !');
+      setTimeout(() => { showNotification('✓ Post publié automatiquement !'); }, delay);
     }
-    closeModal(); resetModal();
+    closeModal();
+    resetModal();
   });
 
-})();
+  // ════════════════════════════════════════
+  // PUBLIER SERVICE — à l'intérieur du IIFE
+  // ════════════════════════════════════════
+  async function publierService() {
+    const isEdit  = publishBtn.dataset.editMode === 'true';
+    const editId  = publishBtn.dataset.editId;
+
+    console.log("isEdit:", isEdit, "editId:", editId);
+
+    const titre       = document.getElementById("postTitle").value.trim();
+    const prixRaw     = document.getElementById("postPrice").value.trim();
+    const prix        = isNaN(parseFloat(prixRaw)) ? 0 : parseFloat(prixRaw);
+    const description = document.getElementById("postDesc").value.trim();
+
+    if (!titre) { showNotification('⚠️ Le titre est obligatoire'); return; }
+
+    const formData = new FormData();
+    formData.append("titre", titre);
+    formData.append("description", description);
+    formData.append("prix", prix);
+    formData.append("prix_affichage", prixRaw);
+    formData.append("status", selectedStatus);
+
+    // ── Photos ──
+    if (attachedPhotos.length > 0) {
+      try {
+        const photoBlobs = await Promise.all(
+          attachedPhotos.map(photo => fileToBlob(photo.file))
+        );
+        photoBlobs.forEach((blob, i) => {
+          formData.append('photos[]', blob, `photo_${i + 1}.jpg`);
+        });
+      } catch (imgErr) {
+        showNotification('❌ Erreur lors du traitement des images');
+        return;
+      }
+    }
+
+    // ── Catégories ──
+    selectedCategories.forEach(category => {
+      formData.append("categories[]", category.ID);
+    });
+
+    if (isEdit) {
+      // ── Mode édition ──
+      formData.append("id", editId);
+      try {
+        const res    = await fetch('../../../api/update-service.php', {
+          method: 'POST', credentials: 'include', body: formData
+        });
+        const text   = await res.text();
+        console.log("Raw response update:", text);
+        const result = JSON.parse(text);
+        if (result.success) {
+          // Nettoyer APRÈS succès
+          delete publishBtn.dataset.editMode;
+          delete publishBtn.dataset.editId;
+          publishBtn.innerHTML = 'publier';
+          showNotification('✅ Service modifié avec succès !');
+          if (typeof refreshService === 'function') await refreshService(editId);
+          document.getElementById('postModalOverlay').classList.remove('active');
+          document.body.style.overflow = '';
+        } else {
+          showNotification('❌ ' + (result.message || 'Erreur'));
+        }
+      } catch (err) {
+        console.error(err);
+        showNotification('❌ Erreur réseau');
+      }
+
+    } else {
+      // ── Mode création ──
+      try {
+        const response = await fetch('../../../api/create-service.php', {
+          method: "POST", credentials: "include", body: formData
+        });
+        const text   = await response.text();
+        console.log("Raw response create:", text);
+        const result = JSON.parse(text);
+        if (result.success) {
+          showNotification('✓ Service publié !');
+          document.getElementById('postModalOverlay').classList.remove('active');
+          document.body.style.overflow = '';
+        } else {
+          showNotification('❌ ' + (result.message || 'Erreur lors de la publication'));
+        }
+      } catch (error) {
+        console.error(error);
+        showNotification('❌ Erreur réseau');
+      }
+    }
+  }
+
+})(); // ← fermeture du premier IIFE
 
 
 // ════════════════════════════════════════
@@ -372,60 +570,11 @@ pmPhotoInput.addEventListener('change', function () {
 (function () {
 
   
-  // Add pin badges to all existing cards
-  document.querySelectorAll('.post-card').forEach(card => {
-    if (!card.querySelector('.post-pin-badge')) {
-      const badge = document.createElement('div');
-      badge.className = 'post-pin-badge';
-      badge.innerHTML = '<i class="fa-solid fa-thumbtack"></i> Épinglé';
-      card.insertBefore(badge, card.firstChild);
-    }
-  });
-
-  document.addEventListener("DOMContentLoaded", () => {
-    loadSessionUser();
-});
-
-async function loadSessionUser() {
-
-    try {
-
-        const userId = localStorage.getItem("userId");
-
-        if (!userId) return;
-
-        const response = await fetch(
-            `../../../api/get-profile.php?id=${userId}`
-        );
-
-        const data = await response.json();
-        
-
-        if (!data.success) return;
-
-        const user = data.user;
-
-        const profileImage = buildPhotoUrl(user.photo_profil);
-
-        document.getElementById("postModalAvatar").src =
-            profileImage;
-
-        document.getElementById("postModalName").textContent =
-            `${user.nom} ${user.prenom}`;
-
-        document.getElementById("postModalRole").textContent =
-            `${user.specialite || ""} ${user.niveau || ""}`;
-
-    } catch (error) {
-        console.error(error);
-    }
-}
 
   // ════ EDIT MODAL ════
-
-
   const editOverlay = document.createElement('div');
-  editOverlay.className = 'edit-post-overlay'; editOverlay.id = 'editPostOverlay';
+  editOverlay.className = 'edit-post-overlay';
+  editOverlay.id = 'editPostOverlay';
   editOverlay.innerHTML = `
     <div class="edit-post-modal" id="editPostModal">
       <div class="edit-post-header">
@@ -470,79 +619,26 @@ async function loadSessionUser() {
 
   let editTargetCard = null, editNewPhotos = [], editKeptPhotos = [], editSelectedCats = new Set(), editLocation = '';
 
-  // Build edit cat dropdown
-  
-
-  function renderEditCatChips() {
-    const box = document.getElementById('editCatChips'); box.innerHTML = '';
-    editSelectedCats.forEach(id => {
-      const cat = CATEGORIES.find(c => c.id === id); if (!cat) return;
-      const chip = document.createElement('span'); chip.className = 'cat-chip';
-      chip.style.cssText = `color:${cat.color};background:${cat.bg};border-color:${cat.color}`;
-      chip.textContent = cat.label; box.appendChild(chip);
-    });
-    box.classList.toggle('visible', editSelectedCats.size > 0);
-  }
-
-  function openEditModal(card) {
-    editTargetCard = card; editNewPhotos = []; editKeptPhotos = []; editSelectedCats = new Set(); editLocation = '';
-
-    // Pre-fill text
-    const bodyEl = card.querySelector('.post-body');
-    document.getElementById('editPostTextarea').value = bodyEl ? bodyEl.innerText.replace(/voir plus\s*$/, '').trim() : '';
-
-    // Pre-fill tags
-    editCatDD.querySelectorAll('.cat-option').forEach(o => o.classList.remove('selected'));
-    card.querySelectorAll('.post-tags [class*="post-tag"], .post-tags .post-tag').forEach(tag => {
-      const label = tag.textContent.trim();
-      const cat = CATEGORIES.find(c => c.label === label);
-      if (cat) { editSelectedCats.add(cat.id); editCatDD.querySelector(`[data-id="${cat.id}"]`)?.classList.add('selected'); }
-    });
-    renderEditCatChips();
-
-    // Pre-fill location
-    const locEl = card.querySelector('[data-loc]');
-    if (locEl) {
-      editLocation = locEl.dataset.loc || locEl.textContent.replace(/\s+/g,' ').trim();
-      document.getElementById('editLocChipText').textContent = editLocation;
-      document.getElementById('editLocChip').classList.add('visible');
-      document.getElementById('editLocInput').value = editLocation;
-      document.getElementById('editLocBtn').classList.add('active');
-    } else {
-      document.getElementById('editLocChip').classList.remove('visible');
-      document.getElementById('editLocBtn').classList.remove('active');
-    }
-
-    // Pre-fill images
-    const previewArea = document.getElementById('editPreviewArea'); previewArea.innerHTML = '';
-    card.querySelectorAll('img.post-image, .post-card > img').forEach(img => {
-      if (editKeptPhotos.find(k => k.src === img.src)) return;
-      editKeptPhotos.push({ src: img.src });
-      _addEditPreviewItem(previewArea, img.src, true);
-    });
-
-    // Reset dropdown states
-    editCatDD.classList.remove('open'); document.getElementById('editLocModal').classList.remove('open');
-    document.getElementById('editCatBtn').classList.toggle('active', false);
-
-    editOverlay.classList.add('active'); document.body.style.overflow = 'hidden';
-    setTimeout(() => document.getElementById('editPostTextarea').focus(), 80);
-  }
-
   function closeEditModal() {
-    editOverlay.classList.remove('active'); document.body.style.overflow = ''; editTargetCard = null;
+    editOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+    editTargetCard = null;
   }
 
   function _addEditPreviewItem(area, src, isExisting) {
-    const div = document.createElement('div'); div.className = 'preview-item';
+    const div = document.createElement('div');
+    div.className = 'preview-item';
     div.innerHTML = `<img src="${src}" alt="">`;
-    const rm = document.createElement('button'); rm.className = 'preview-remove'; rm.innerHTML = '×';
+    const rm = document.createElement('button');
+    rm.className = 'preview-remove';
+    rm.innerHTML = '×';
     rm.addEventListener('click', () => {
       if (isExisting) editKeptPhotos = editKeptPhotos.filter(k => k.src !== src);
       else editNewPhotos = editNewPhotos.filter(p => p.url !== src);
       div.remove();
     });
-    div.appendChild(rm); area.appendChild(div);
+    div.appendChild(rm);
+    area.appendChild(div);
   }
 
   // Photo input
@@ -550,491 +646,128 @@ async function loadSessionUser() {
   document.getElementById('editPhotoInput').addEventListener('change', function () {
     Array.from(this.files).forEach(file => {
       const reader = new FileReader();
-      reader.onload = e => { editNewPhotos.push({ url: e.target.result }); _addEditPreviewItem(document.getElementById('editPreviewArea'), e.target.result, false); };
+      reader.onload = e => {
+        editNewPhotos.push({ url: e.target.result });
+        _addEditPreviewItem(document.getElementById('editPreviewArea'), e.target.result, false);
+      };
       reader.readAsDataURL(file);
     });
     this.value = '';
   });
 
   // Location in edit modal
-  const editLocBtn = document.getElementById('editLocBtn'), editLocModal = document.getElementById('editLocModal'), editLocInput = document.getElementById('editLocInput');
-  editLocBtn.addEventListener('click', e => { e.stopPropagation(); editLocModal.classList.toggle('open'); editCatDD.classList.remove('open'); if (editLocModal.classList.contains('open')) setTimeout(() => editLocInput.focus(), 40); });
+  const editLocBtn   = document.getElementById('editLocBtn');
+  const editLocModal = document.getElementById('editLocModal');
+  const editLocInput = document.getElementById('editLocInput');
+  const editCatBtn   = document.getElementById('editCatBtn');
+  const editCatDD    = document.getElementById('editCatDropdown');
+
+  editLocBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    editLocModal.classList.toggle('open');
+    editCatDD.classList.remove('open');
+    if (editLocModal.classList.contains('open')) setTimeout(() => editLocInput.focus(), 40);
+  });
   document.getElementById('editLocConfirm').addEventListener('click', () => {
-    const val = editLocInput.value.trim(); if (!val) return;
-    editLocation = val; document.getElementById('editLocChipText').textContent = val;
+    const val = editLocInput.value.trim();
+    if (!val) return;
+    editLocation = val;
+    document.getElementById('editLocChipText').textContent = val;
     document.getElementById('editLocChip').classList.add('visible');
-    editLocBtn.classList.add('active'); editLocModal.classList.remove('open');
+    editLocBtn.classList.add('active');
+    editLocModal.classList.remove('open');
   });
   editLocInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('editLocConfirm').click(); });
   document.getElementById('editLocChipRemove').addEventListener('click', () => {
-    editLocation = ''; document.getElementById('editLocChip').classList.remove('visible');
-    editLocBtn.classList.remove('active'); editLocInput.value = '';
+    editLocation = '';
+    document.getElementById('editLocChip').classList.remove('visible');
+    editLocBtn.classList.remove('active');
+    editLocInput.value = '';
   });
 
   // Category in edit modal
-  const editCatBtn = document.getElementById('editCatBtn');
-  editCatBtn.addEventListener('click', e => { e.stopPropagation(); editCatDD.classList.toggle('open'); editLocModal.classList.remove('open'); editCatBtn.classList.toggle('active', editCatDD.classList.contains('open')); });
+  editCatBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    editCatDD.classList.toggle('open');
+    editLocModal.classList.remove('open');
+    editCatBtn.classList.toggle('active', editCatDD.classList.contains('open'));
+  });
 
   document.addEventListener('click', e => {
     if (editOverlay.classList.contains('active')) {
       if (!editCatDD.contains(e.target) && e.target !== editCatBtn) editCatDD.classList.remove('open');
       if (!editLocModal.contains(e.target) && e.target !== editLocBtn) editLocModal.classList.remove('open');
-      if (!statusModal.contains(e.target) && e.target !== pmStatusBtn) statusModal.classList.remove('open');
     }
   });
 
   document.getElementById('editPostClose').addEventListener('click', closeEditModal);
   editOverlay.addEventListener('click', e => { if (e.target === editOverlay) closeEditModal(); });
 
-  // SAVE
+  // SAVE edit
   document.getElementById('editSaveBtn').addEventListener('click', () => {
     if (!editTargetCard) return;
-    const card = editTargetCard;
+    const card    = editTargetCard;
     const newText = document.getElementById('editPostTextarea').value.trim();
 
     // 1. Text
     let bodyEl = card.querySelector('.post-body');
     if (newText) {
       if (!bodyEl) {
-        bodyEl = document.createElement('div'); bodyEl.className = 'post-body'; bodyEl.style.cssText = 'padding:0 18px 14px;';
-        const anchor = card.querySelector('.post-actions') || card.querySelector('.post-rating-summary'); anchor ? anchor.before(bodyEl) : card.appendChild(bodyEl);
+        bodyEl = document.createElement('div');
+        bodyEl.className = 'post-body';
+        bodyEl.style.cssText = 'padding:0 18px 14px;';
+        const anchor = card.querySelector('.post-actions') || card.querySelector('.post-rating-summary');
+        anchor ? anchor.before(bodyEl) : card.appendChild(bodyEl);
       }
       bodyEl.innerHTML = newText.replace(/\n/g, '<br>');
     } else if (bodyEl) { bodyEl.remove(); }
 
-    // 2. Tags
-    let tagsEl = card.querySelector('.post-tags');
-    if (editSelectedCats.size > 0) {
-      if (!tagsEl) {
-        tagsEl = document.createElement('div'); tagsEl.className = 'post-tags'; tagsEl.style.cssText = 'padding:0 18px 14px;';
-        const header = card.querySelector('.post-header'); header ? header.after(tagsEl) : card.insertBefore(tagsEl, card.children[1]);
-      }
-      tagsEl.innerHTML = Array.from(editSelectedCats).map(id => { const cat = CATEGORIES.find(c => c.id === id); return cat ? `<span class="post-tag" style="background:${cat.bg};color:${cat.color}">${cat.label}</span>` : ''; }).join('');
-    } else if (tagsEl) { tagsEl.remove(); }
-
-    // 3. Location
+    // 2. Location
     let locDiv = card.querySelector('[data-loc]');
     if (editLocation) {
       if (!locDiv) {
-        locDiv = document.createElement('div'); locDiv.className = 'post-loc-chip';
+        locDiv = document.createElement('div');
+        locDiv.className = 'post-loc-chip';
         locDiv.style.cssText = 'padding:0 18px 10px;font-size:11px;color:#8c8580;display:flex;align-items:center;gap:5px;';
-        const anchor = card.querySelector('.post-body') || card.querySelector('.post-actions') || card.querySelector('.post-rating-summary'); anchor ? anchor.before(locDiv) : card.appendChild(locDiv);
+        const anchor = card.querySelector('.post-body') || card.querySelector('.post-actions') || card.querySelector('.post-rating-summary');
+        anchor ? anchor.before(locDiv) : card.appendChild(locDiv);
       }
-      locDiv.dataset.loc = editLocation; locDiv.innerHTML = `<i class="fa-solid fa-location-dot" style="color:#e8734a;font-size:10px;"></i>${editLocation}`;
+      locDiv.dataset.loc = editLocation;
+      locDiv.innerHTML = `<i class="fa-solid fa-location-dot" style="color:#e8734a;font-size:10px;"></i>${editLocation}`;
     } else if (locDiv) { locDiv.remove(); }
 
-    // 4. Remove old images
+    // 3. Remove old images
     card.querySelectorAll('img.post-image, .post-card > img:not(.post-avatar)').forEach(img => img.remove());
 
-    // 5. Re-inject kept + new images
+    // 4. Re-inject kept + new images
     const imgAnchor = card.querySelector('.post-rating-summary') || card.querySelector('.post-actions');
     editKeptPhotos.forEach(({ src }) => {
-      const img = document.createElement('img'); img.className = 'post-image'; img.src = src; img.style.display = 'block';
+      const img = document.createElement('img');
+      img.className = 'post-image'; img.src = src; img.style.display = 'block';
       imgAnchor ? imgAnchor.before(img) : card.appendChild(img);
     });
     editNewPhotos.forEach(({ url }) => {
-      const img = document.createElement('img'); img.className = 'post-image'; img.src = url; img.style.display = 'block';
+      const img = document.createElement('img');
+      img.className = 'post-image'; img.src = url; img.style.display = 'block';
       imgAnchor ? imgAnchor.before(img) : card.appendChild(img);
     });
 
-    // 6. Edit mark
+    // 5. Edit mark
     const timeEl = card.querySelector('.post-time');
     if (timeEl) {
       const fmt = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
       let mark = timeEl.querySelector('.edit-mark');
-      if (!mark) { mark = document.createElement('span'); mark.className = 'edit-mark'; mark.style.cssText = 'margin-left:6px;font-size:10px;color:#8c8580;font-style:italic;'; timeEl.appendChild(mark); }
+      if (!mark) {
+        mark = document.createElement('span');
+        mark.className = 'edit-mark';
+        mark.style.cssText = 'margin-left:6px;font-size:10px;color:#8c8580;font-style:italic;';
+        timeEl.appendChild(mark);
+      }
       mark.textContent = `· modifié à ${fmt}`;
     }
 
-    closeEditModal(); showNotification('✏️ Post modifié avec succès !');
+    closeEditModal();
+    showNotification('✏️ Post modifié avec succès !');
   });
 
-
-  // ════ CONTEXT MENU ════
-  function buildMenu(card) {
-    document.querySelectorAll('.post-more-menu').forEach(m => m.remove());
-    const isPinned = card.querySelector('.post-pin-badge')?.classList.contains('visible');
-
-    const menu = document.createElement('div'); menu.className = 'post-more-menu open';
-    const items = [
-      { icon: 'fa-pen-to-square', label: 'Modifier le post',              action: 'edit' },
-      { icon: 'fa-thumbtack',     label: isPinned ? 'Désépingler' : 'Épingler', action: 'pin' },
-      { icon: 'fa-eye-slash',     label: 'Masquer le post',               action: 'hide' },
-      'sep',
-      { icon: 'fa-trash',         label: 'Supprimer le post',             action: 'delete', danger: true },
-    ];
-
-    items.forEach(item => {
-      if (item === 'sep') { const sep = document.createElement('div'); sep.className = 'post-more-sep'; menu.appendChild(sep); return; }
-      const el = document.createElement('div'); el.className = 'post-more-item' + (item.danger ? ' danger' : '');
-      el.innerHTML = `<i class="fa-solid ${item.icon}"></i><span>${item.label}</span>`;
-      el.addEventListener('click', e => { e.stopPropagation(); handleAction(item.action, card); menu.remove(); });
-      menu.appendChild(el);
-    });
-    return menu;
-  }
-
-  function handleAction(action, card) {
-    if (action === 'edit') {
-      openEditModal(card);
-
-    } else if (action === 'pin') {
-      const badge = card.querySelector('.post-pin-badge');
-      if (!badge) return;
-      const willPin = !badge.classList.contains('visible');
-      badge.classList.toggle('visible', willPin);
-      if (willPin) {
-        const feed = document.querySelector('.feed');
-        if (feed) feed.insertBefore(card, feed.firstChild);
-        showNotification('📌 Post épinglé');
-      } else {
-        showNotification('📌 Post désépinglé');
-      }
-
-    } else if (action === 'hide') {
-      addToHiddenPanel(card);
-      card.style.transition = 'opacity .3s, transform .3s';
-      card.style.opacity = '0'; card.style.transform = 'translateX(20px)';
-      setTimeout(() => { card.style.display = 'none'; card.style.opacity = ''; card.style.transform = ''; }, 310);
-      // Notification with shortcut to open panel
-      const el = document.getElementById('notification');
-      if (el) {
-        el.innerHTML = `👁️ Post masqué &nbsp;<span id="_openHiddenBtn" style="text-decoration:underline;cursor:pointer;font-weight:900;">Voir les posts masqués →</span>`;
-        el.style.display = 'flex'; clearTimeout(el._t); el._t = setTimeout(() => { el.style.display = 'none'; }, 5000);
-        document.getElementById('_openHiddenBtn')?.addEventListener('click', () => { hiddenPostsOverlay.classList.add('active'); el.style.display = 'none'; });
-      }
-
-    } else if (action === 'delete') {
-      const confirmOverlay = document.createElement('div');
-      confirmOverlay.style.cssText = 'position:fixed;inset:0;background:rgba(26,23,20,.6);backdrop-filter:blur(6px);z-index:2000;display:flex;justify-content:center;align-items:center;';
-      confirmOverlay.innerHTML = `<div style="background:#fff;border:1px solid #e2ddd7;border-radius:18px;padding:28px 24px;width:100%;max-width:320px;box-shadow:0 24px 64px rgba(0,0,0,.22);text-align:center;animation:postModalIn .22s cubic-bezier(.34,1.3,.64,1) both;">
-        <div style="width:48px;height:48px;background:#fee2e2;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:22px;">🗑️</div>
-        <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:#1a1714;margin-bottom:8px;">Supprimer ce post ?</div>
-        <div style="font-size:12px;color:#8c8580;margin-bottom:22px;line-height:1.55;">Cette action est irréversible.</div>
-        <div style="display:flex;gap:10px;">
-          <button id="delCancelBtn" style="flex:1;padding:10px;border:1px solid #e2ddd7;border-radius:12px;background:transparent;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;">Annuler</button>
-          <button id="delConfirmBtn" style="flex:1;padding:10px;border:none;border-radius:12px;background:#dc2626;color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;">Supprimer</button>
-        </div></div>`;
-      document.body.appendChild(confirmOverlay);
-      document.getElementById('delCancelBtn').addEventListener('click', () => confirmOverlay.remove());
-      confirmOverlay.addEventListener('click', e => { if (e.target === confirmOverlay) confirmOverlay.remove(); });
-      document.getElementById('delConfirmBtn').addEventListener('click', () => {
-        confirmOverlay.remove();
-        card.style.transition = 'opacity .3s, transform .3s'; card.style.opacity = '0'; card.style.transform = 'scale(.97)';
-        setTimeout(() => card.remove(), 300); showNotification('🗑️ Post supprimé');
-      });
-    }
-  }
-
-  // Delegate .post-more clicks (works for dynamically added posts too)
-  document.addEventListener('click', e => {
-    const moreBtn = e.target.closest('.post-more');
-    if (moreBtn) {
-      e.stopPropagation();
-      const card = moreBtn.closest('.post-card'); if (!card) return;
-      const existing = card.querySelector('.post-more-menu');
-      if (existing) { existing.remove(); return; }
-      moreBtn.closest('.post-header').appendChild(buildMenu(card));
-      return;
-    }
-    document.querySelectorAll('.post-more-menu').forEach(m => m.remove());
-  });
-const catBtn = document.getElementById('pmCatBtn');
-const catDropdown = document.getElementById('catDropdown');
-
-let categories = [];
-let selectedCategories = [];
-
-// Load categories from PHP
-async function loadCategories() {
-
-    if (categories.length > 0) {
-        renderCategoryDropdown();
-        return;
-    }
-
-    try {
-
-        const response = await fetch('../../../api/get-all-categories.php');
-
-        const result = await response.json();
-
-        console.log("categories:", result);
-
-        if (result.success) {
-            categories = result.data;
-            renderCategoryDropdown();
-        }
-
-    } catch (error) {
-        console.error("Category loading error:", error);
-    }
-}
-
-function renderCategoryDropdown() {
-
-    catDropdown.innerHTML = '';
-
-    categories.forEach(category => {
-
-        const item = document.createElement('div');
-
-        item.className = 'cat-option';
-
-        item.textContent = category.titre;
-
-        item.addEventListener('click', () => {
-            selectCategory(category);
-        });
-
-        catDropdown.appendChild(item);
-    });
-}
-
-function selectCategory(category) {
-
-    const exists = selectedCategories.some(
-        c => c.ID == category.ID
-    );
-
-    if (exists) {
-        showNotification("⚠️ Catégorie déjà ajoutée");
-        return;
-    }
-
-    selectedCategories.push(category);
-
-    renderCatChips();
-
-    catDropdown.classList.remove('open');
-}
-
-function renderCatChips() {
-
-    const container = document.getElementById('categoryChips');
-
-    container.innerHTML = '';
-
-    selectedCategories.forEach(category => {
-
-        const chip = document.createElement('div');
-
-        chip.className = 'category-chip';
-
-        chip.innerHTML = `
-            <span>${category.titre}</span>
-            <button>x</button>
-        `;
-
-        chip.querySelector('button').addEventListener('click', () => {
-            removeCategory(category.ID);
-        });
-
-        container.appendChild(chip);
-    });
-}
-
-function removeCategory(categoryId) {
-
-    selectedCategories =
-        selectedCategories.filter(
-            cat => cat.ID != categoryId
-        );
-
-    renderCatChips();
-}
-
-catBtn.addEventListener('click', (e) => {
-
-    e.stopPropagation();
-
-    catDropdown.classList.toggle('open');
-
-    loadCategories();
-});
-
-document.addEventListener('click', () => {
-    catDropdown.classList.remove('open');
-});
-
-
-loadCategories();
-
-let categoriesLoaded = false;
-
-if (pmCatBtn) {
-  pmCatBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    catDropdown.classList.toggle('open');
-
-    // load only once or reload every time
-    if (!categoriesLoaded) {
-      loadCategories();
-      categoriesLoaded = true;
-    }
-  });
-}
-
-
-const postPublishBtn = document.getElementById('postPublishBtn');
-
-
-  postPublishBtn.addEventListener('click',publierService );
-
-
-// Call function (for testing / auto run)
-
-
-// ======================================
-// Fonction pour publier un service
-// ======================================
-// ════════════════════════════════════════
-// CONVERT a File to a JPEG Blob via canvas
-// (mirrors edit-profile.js uploadImage pattern, no cropper)
-// ════════════════════════════════════════
-function fileToBlob(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onerror = () => reject(new Error('FileReader failed'));
-        reader.onload = (e) => {
-            const img = new Image();
-            img.onerror = () => reject(new Error('Image load failed'));
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                canvas.width  = img.naturalWidth;
-                canvas.height = img.naturalHeight;
-                canvas.getContext('2d').drawImage(img, 0, 0);
-                canvas.toBlob(
-                    (blob) => blob ? resolve(blob) : reject(new Error('toBlob failed')),
-                    'image/jpeg',
-                    0.92          // same quality as edit-profile.js
-                );
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    });
-}
-let selectedStatus = 'disponible'; // valeur par défaut
-
-const pmStatusBtn = document.getElementById('pmStatusBtn');
-const statusModal = document.getElementById('statusModal');
-
-// Ouvrir/fermer
-pmStatusBtn.addEventListener('click', e => {
-  e.stopPropagation();
-  statusModal.classList.toggle('open');
-  timerModal.classList.remove('open');
-  locModal.classList.remove('open');
-  catDropdown.classList.remove('open');
-});
-
-// Sélection d'un statut
-statusModal.querySelectorAll('.status-option').forEach(opt => {
-  opt.addEventListener('click', () => {
-    selectedStatus = opt.dataset.value;
-    statusModal.querySelectorAll('.status-option').forEach(o => o.classList.remove('selected'));
-    opt.classList.add('selected');
-    pmStatusBtn.classList.add('active');
-    statusModal.classList.remove('open');
-    showNotification(`✓ Statut : ${opt.textContent.trim()}`);
-  });
-});
-
-// Fermer si clic ailleurs 
-if (!statusModal.contains(e.target) && e.target !== pmStatusBtn) statusModal.classList.remove('open');
-
-
-async function publierService() {
-    console.log("publierService is called");
-
-    try {
-        const titre       = document.getElementById("postTitle").value.trim();
-        const prixRaw = document.getElementById("postPrice").value.trim();
-        const prixNum = parseFloat(prixRaw);
-        const prix = isNaN(prixNum) ? 0 : prixNum;
-
-        const description = document.getElementById("postDesc").value.trim();
-        const status = selectedStatus;
-
-        // Validation
-        if (!titre) {
-            showNotification('⚠️ Le titre est obligatoire');
-            return;
-        }
-
-        console.log("attachedPhotos:", attachedPhotos);
-        console.log("attachedPhotos length:", attachedPhotos.length);
-
-        // ── Convert every attached photo to a JPEG blob ──
-        // attachedPhotos is populated by the FileReader preview flow above.
-        // We convert each File through a canvas (like edit-profile.js uploadImage)
-        // so the server always receives clean JPEG data.
-        let photoBlobs = [];
-        if (attachedPhotos.length > 0) {
-          console.log("attached is read")
-            try {
-                photoBlobs = await Promise.all(
-                    attachedPhotos.map(photo => fileToBlob(photo.file))
-                );
-            } catch (imgErr) {
-                console.error('Image conversion error:', imgErr);
-                showNotification('❌ Erreur lors du traitement des images');
-                return;
-            }
-        }
-console.log("status envoyé:", selectedStatus);
-        // ── Build FormData ──
-        const formData = new FormData();
-        formData.append("titre", titre);
-        formData.append("description", description);
-        formData.append("prix", prix);
-        formData.append("prix_affichage", prixRaw);
-        formData.append("status", selectedStatus);
-
-        // Append each converted blob with an indexed filename
-        photoBlobs.forEach((blob, i) => {
-            formData.append('photos[]', blob, `photo_${i + 1}.jpg`);
-        });
-
-        // Add selected categories
-        selectedCategories.forEach(category => {
-            formData.append("categories[]", category.ID);
-        });
-
-        // Debug
-        for (let pair of formData.entries()) {
-            console.log(pair[0], pair[1]);
-        }
-
-        const response = await fetch(
-            '../../../api/update-service.php',
-            {
-                method: "POST",
-                credentials: "include",
-                body: formData
-            }
-        );
-
-        // const result = await response.json();
-const text = await response.text();
-console.log("Raw response:", text);
-const result = JSON.parse(text);
-
-        console.log("Server response:", result);
-
-        if (result.success) {
-            showNotification('✓ Service publié !');
-        } else {
-            showNotification('❌ ' + (result.message || 'Erreur lors de la publication'));
-        }
-
-    } catch (error) {
-        console.error("Publish error:", error);
-        showNotification('❌ Erreur réseau');
-    }
-
-  }
-
-
-})();
+})(); 

@@ -218,7 +218,7 @@ nav {
 .post-meta  { flex: 1; min-width: 0; }
 .post-name  {
   font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14px;
-  color: var(--color-text); cursor: pointer;
+  color: var(--color-text); 
 }
 .post-name:hover { color: var(--color-pink-light); }
 .post-role  { font-size: 11px; color: var(--color-muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

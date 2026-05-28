@@ -164,16 +164,33 @@ document.addEventListener("DOMContentLoaded", async () => {
     return `
 <article class="post-card" data-service-id="${service.ID}" data-owner-id="${service.ID_Utilisateur || service.utilisateur_id || service.user_id || ''}">
 
-    <div class="post-header post-owner" data-owner-id="${service.ID_Utilisateur || service.utilisateur_id || service.user_id || ''}" style="cursor:pointer">
-        <div class="post-avatar">
-            <img src="${profileImage}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
-        </div>
-        <div class="post-meta">
-            <div class="post-name">${service.nom} ${service.prenom}</div>
-            <div class="post-time-row">
-                <span class="post-time">${timeAgo}</span>
+    <div class="post-header" style="position:relative;">
+       <div class="post-header-left post-owner" 
+     data-owner-id="${service.ID_Utilisateur || service.utilisateur_id || service.user_id || ''}" 
+     style="cursor:${currentUser.id == (service.ID_Utilisateur || service.utilisateur_id || service.user_id) ? 'default' : 'pointer'};display:flex;align-items:flex-start;gap:12px;flex:1;">
+            <div class="post-avatar">
+                <img src="${profileImage}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+            </div>
+            <div class="post-meta">
+                <div class="post-name">${service.nom} ${service.prenom}</div>
+                <div class="post-time-row">
+                    <span class="post-time">${timeAgo}</span>
+                </div>
             </div>
         </div>
+        ${currentUser.id == (service.ID_Utilisateur || service.utilisateur_id || service.user_id) ? `
+            <button class="post-more" data-action="more">
+                <i class="fa-solid fa-ellipsis"></i>
+            </button>
+            <div class="post-more-menu" hidden>
+                <button class="more-menu-item" data-action="edit">
+                    <i class="fa-regular fa-pen-to-square"></i> Modifier le service
+                </button>
+                <button class="more-menu-item danger" data-action="delete">
+                    <i class="fa-regular fa-trash-can"></i> Supprimer le service
+                </button>
+            </div>
+            ` : ''}
     </div>
 
     <div class="post-title">${service.titre}</div>
@@ -240,17 +257,190 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     // ── Events du feed ──
-    document.querySelector('.feed').addEventListener('click', (e) => {
+   document.querySelector('.feed').addEventListener('click', async (e) => {
 
-        const ownerClick = e.target.closest('.post-owner');
-        if (ownerClick) {
-            const userId = ownerClick.dataset.ownerId;
-            if (userId) {
-                window.location.href = '../profile/profile.html?id=' + encodeURIComponent(userId);
+        // ── PRIORITÉ 1 : bouton "..." ──
+        if (e.target.closest('.post-more[data-action="more"]')) {
+            const card = e.target.closest('.post-card');
+            if (!card) return;
+            const menu = card.querySelector('.post-more-menu');
+            if (!menu) return;
+
+            const wasHidden = menu.hidden;
+            document.querySelectorAll('.post-more-menu').forEach(m => m.hidden = true);
+            menu.hidden = !wasHidden;
+            e.stopPropagation(); // ← stoppe la propagation vers document
+            return;
+        }
+
+        if (e.target.closest('.more-menu-item[data-action="delete"]')) {
+            const card = e.target.closest('.post-card');
+            const menu = card.querySelector('.post-more-menu');
+            menu.hidden = true;
+
+            // Créer le modal de confirmation
+            const confirmOverlay = document.createElement('div');
+            confirmOverlay.style.cssText = `
+                position:fixed;inset:0;
+                background:rgba(0,0,0,0.6);
+                backdrop-filter:blur(8px);
+                z-index:2000;
+                display:flex;justify-content:center;align-items:center;
+            `;
+            confirmOverlay.innerHTML = `
+                <div style="
+                    background:rgba(13,13,28,0.97);
+                    border:1px solid rgba(75,72,236,0.30);
+                    border-radius:18px;
+                    padding:28px 24px;
+                    width:100%;max-width:320px;
+                    box-shadow:0 24px 64px rgba(0,0,0,0.5);
+                    text-align:center;
+                    animation:fadeUp .25s ease both;
+                ">
+                    <div style="
+                        width:52px;height:52px;
+                        background:rgba(248,113,113,0.12);
+                        border:1px solid rgba(248,113,113,0.25);
+                        border-radius:14px;
+                        display:flex;align-items:center;justify-content:center;
+                        margin:0 auto 16px;font-size:22px;
+                    ">🗑️</div>
+                    <div style="
+                        font-family:'Space Grotesk',sans-serif;
+                        font-weight:700;font-size:16px;
+                        color:#f1f0f5;margin-bottom:8px;
+                    ">Supprimer ce service ?</div>
+                    <div style="
+                        font-size:13px;color:#8b8a99;
+                        margin-bottom:24px;line-height:1.55;
+                    ">Cette action est irréversible. Le service sera définitivement supprimé.</div>
+                    <div style="display:flex;gap:10px;">
+                        <button id="delCancelBtn" style="
+                            flex:1;padding:11px;
+                            border:1px solid rgba(75,72,236,0.30);
+                            border-radius:10px;
+                            background:rgba(255,255,255,0.05);
+                            color:#f1f0f5;
+                            font-family:'Space Grotesk',sans-serif;
+                            font-weight:700;font-size:13px;
+                            cursor:pointer;
+                            transition:background .2s;
+                        ">Annuler</button>
+                        <button id="delConfirmBtn" style="
+                            flex:1;padding:11px;
+                            border:none;border-radius:10px;
+                            background:linear-gradient(135deg,#ef4444,#dc2626);
+                            color:#fff;
+                            font-family:'Space Grotesk',sans-serif;
+                            font-weight:700;font-size:13px;
+                            cursor:pointer;
+                            box-shadow:0 4px 14px rgba(220,38,38,0.35);
+                            transition:opacity .2s;
+                        ">Supprimer</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(confirmOverlay);
+
+            document.getElementById('delCancelBtn').addEventListener('click', () => confirmOverlay.remove());
+            confirmOverlay.addEventListener('click', e => { if (e.target === confirmOverlay) confirmOverlay.remove(); });
+
+            document.getElementById('delConfirmBtn').addEventListener('click', async () => {
+                confirmOverlay.remove();
+                const serviceId = card.dataset.serviceId;
+                try {
+                    const res = await fetch('../../../api/delete-service.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: serviceId })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        card.style.transition = 'opacity .3s, transform .3s';
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.97)';
+                        setTimeout(() => card.remove(), 300);
+                    } else {
+                        alert('Erreur : ' + (data.message || 'Impossible de supprimer.'));
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            });
+            return;
+        }
+
+        if (e.target.closest('.more-menu-item[data-action="edit"]')) {
+            const card = e.target.closest('.post-card');
+            card.querySelector('.post-more-menu').hidden = true;
+
+            const serviceId = card.dataset.serviceId;
+
+            // Récupérer les données du service
+            try {
+                const res = await fetch(`../../../api/get-single-service.php?id=${serviceId}`);
+                const data = await res.json();
+                if (!data.success) return;
+                const s = data.service;
+
+                // Ouvrir le modal
+                const overlay = document.getElementById('postModalOverlay');
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+
+                // Remplir les champs
+                document.getElementById('postTitle').value = s.titre || '';
+                document.getElementById('postDesc').value  = s.description || '';
+
+                // Prix — extraire le texte si format spécial
+                const matchPrix = (s.description || '').match(/\[prix_texte:(.+?)\]/);
+                document.getElementById('postPrice').value = matchPrix ? matchPrix[1] : (s.prix || '');
+                if (matchPrix) {
+                    document.getElementById('postDesc').value =
+                        s.description.replace(/\[prix_texte:.+?\]/, '').trim();
+                }
+
+                // Image existante — afficher en preview
+                if (s.service_photo) {
+                    const preview = document.getElementById('postPreview');
+                    preview.innerHTML = `
+                        <div class="preview-item">
+                            <img src="../../../${s.service_photo}" alt="">
+                            <button class="preview-remove" id="existingPhotoRemove">×</button>
+                        </div>
+                    `;
+                    preview.classList.add('has-items');
+                    document.getElementById('existingPhotoRemove').addEventListener('click', () => {
+                        preview.innerHTML = '';
+                        preview.classList.remove('has-items');
+                    });
+                }
+
+                // Changer le bouton publier en "Enregistrer"
+                const publishBtn = document.getElementById('postPublishBtn');
+                publishBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Enregistrer';
+                publishBtn.dataset.editMode = 'true';
+                publishBtn.dataset.editId   = serviceId;
+
+            } catch(err) {
+                console.error(err);
             }
             return;
         }
 
+        // ── PRIORITÉ 3 : navigation vers profil ──
+        const ownerClick = e.target.closest('.post-owner');
+        if (ownerClick) {
+            if (e.target.closest('.post-more') || e.target.closest('.post-more-menu')) return;
+            const userId = ownerClick.dataset.ownerId;
+            // Ne pas naviguer si c'est l'utilisateur actuel
+            if (userId && userId != currentUser.id) {
+                window.location.href = '../profile/profile.html?id=' + encodeURIComponent(userId);
+            }
+            return;
+        }
+        // ── PRIORITÉ 4 : reste des actions ──
         if (e.target.closest('.post-action-btn[data-action="rate"]')) {
             const card = e.target.closest('.post-card');
             const panel = card.querySelector('.rating-panel');
@@ -307,7 +497,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         renderPickerStars(picker, parseInt(picker.dataset.selected || 0));
     });
 
+    document.addEventListener('mousedown', (e) => {
+        if (!e.target.closest('.post-more') && !e.target.closest('.post-more-menu')) {
+            document.querySelectorAll('.post-more-menu').forEach(m => m.hidden = true);
+        }
+        if (navDropdown && !e.target.closest('#navMenuBtn') && !e.target.closest('#navDropdown')) {
+            navDropdown.hidden = true;
+        }
+    });
+
+    
 });
+
 
 
 // ── Fonctions utilitaires ──

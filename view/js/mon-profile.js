@@ -812,8 +812,6 @@ async function loadAllUsers() {
     .share-close-btn{width:100%;padding:8px;border:none;border-radius:12px;background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--muted);cursor:pointer;transition:background .2s}
     .share-close-btn:hover{background:var(--input-bg)}
 
-    .post-pin-badge{display:none;position:absolute;top:12px;right:48px;background:#fef3e2;border:1px solid #fed7aa;border-radius:8px;padding:2px 8px;font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:#d97706;align-items:center;gap:4px}
-    .post-pin-badge.visible{display:flex}
     .post-card{position:relative}
 
     .file-dl-link{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;font-size:12px;color:var(--text);text-decoration:none;transition:background .15s;cursor:pointer}
@@ -964,12 +962,7 @@ function buildCommentSection(card) {
 // BIND POST INTERACTIONS
 // ════════════════════════════════════════
 function enrichCard(card) {
-  // Pin badge
-  if (!card.querySelector('.post-pin-badge')) {
-    const pinBadge = document.createElement('div'); pinBadge.className = 'post-pin-badge';
-    pinBadge.innerHTML = '<i class="fa-solid fa-thumbtack"></i> Épinglé';
-    card.insertBefore(pinBadge, card.firstChild);
-  }
+ 
 
   // Dynamic avatar in post-top
   const oldAv = card.querySelector('.post-top .post-avatar-placeholder:not(.post-avatar-dyn)');
@@ -990,7 +983,6 @@ function enrichCard(card) {
   if (menuBtn && !menuBtn.querySelector('.post-ctx-menu')) {
     const ctx = document.createElement('div'); ctx.className = 'post-ctx-menu';
     ctx.innerHTML = `
-      <div class="ctx-item" data-action="pin"><i class="fa-solid fa-thumbtack"></i> Épingler</div>
       <div class="ctx-item" data-action="edit"><i class="fa-solid fa-pen"></i> Modifier</div>
       <div class="ctx-item danger" data-action="delete"><i class="fa-solid fa-trash"></i> Supprimer</div>`;
     menuBtn.appendChild(ctx);
@@ -1030,16 +1022,8 @@ function enrichCard(card) {
         } else if (action === 'edit') {
           openEditModal(card);
 
-        } else if (action === 'pin') {
-          const pinBadge = card.querySelector('.post-pin-badge');
-          if (pinBadge) {
-            pinBadge.classList.toggle('visible');
-            const isPinned = pinBadge.classList.contains('visible');
-            item.innerHTML = `<i class="fa-solid fa-thumbtack"></i> ${isPinned ? 'Désépingler' : 'Épingler'}`;
-            showNotification(isPinned ? '📌 Post épinglé' : '📌 Post désépinglé');
-            if (isPinned) { const newPostBox = document.querySelector('.new-post-box'); newPostBox?.insertAdjacentElement('afterend', card); }
-          }
-        }
+        } 
+        
       });
     });
   }
@@ -1088,19 +1072,9 @@ document.addEventListener('click', () => document.querySelectorAll('.post-ctx-me
 document.querySelectorAll('.post-card').forEach(enrichCard);
 
 
-document.addEventListener("DOMContentLoaded", () => {
-    loadServices();
-});
-
 async function loadServices() {
-
     try {
-      
-
-        const response = await fetch(
-            "../../api/get-my-services.php"
-        );
-
+        const response = await fetch("../../api/get-my-services.php");
         const data = await response.json();
         
         console.log("Services loaded:", data);
@@ -1108,7 +1082,6 @@ async function loadServices() {
         if (!data.success) return;
 
         const container = document.getElementById("servicesContainer");
-
         if (!container) {
             console.log("Container not found");
             return;
@@ -1116,23 +1089,166 @@ async function loadServices() {
 
         container.innerHTML = "";
 
+        if (data.services.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center;padding:40px;color:#8b8a99;font-family:'DM Sans',sans-serif;">
+                    <i class="fa-regular fa-folder-open" style="font-size:32px;margin-bottom:12px;display:block;opacity:0.4;"></i>
+                    Aucun service publié pour le moment.
+                </div>`;
+            return;
+        }
+
         data.services.forEach(service => {
             container.innerHTML += createServiceCard(service);
         });
 
     } catch (error) {
-        console.error(error);
+        console.error("loadServices error:", error);
     }
 }
 
+// Appeler loadServices au chargement
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadServices);
+} else {
+    loadServices();
+}
+
+// ── Events menu ... page profil ──
+document.addEventListener('click', async (e) => {
+
+    // ── Bouton ... ──
+    if (e.target.closest('.post-more[data-action="more"]')) {
+        const card = e.target.closest('.post-card');
+        if (!card) return;
+        const menu = card.querySelector('.post-more-menu');
+        if (!menu) return;
+        const wasHidden = menu.hidden;
+        document.querySelectorAll('.post-more-menu').forEach(m => m.hidden = true);
+        menu.hidden = !wasHidden;
+        e.stopPropagation();
+        return;
+    }
+
+    // ── Supprimer ──
+    if (e.target.closest('.more-menu-item[data-action="delete"]')) {
+        const card = e.target.closest('.post-card');
+        const menu = card.querySelector('.post-more-menu');
+        menu.hidden = true;
+
+        const confirmOverlay = document.createElement('div');
+        confirmOverlay.style.cssText = `
+            position:fixed;inset:0;
+            background:rgba(0,0,0,0.6);
+            backdrop-filter:blur(8px);
+            z-index:2000;
+            display:flex;justify-content:center;align-items:center;
+        `;
+        confirmOverlay.innerHTML = `
+            <div style="
+                background:rgba(13,13,28,0.97);
+                border:1px solid rgba(75,72,236,0.30);
+                border-radius:18px;padding:28px 24px;
+                width:100%;max-width:320px;
+                box-shadow:0 24px 64px rgba(0,0,0,0.5);
+                text-align:center;
+                animation:fadeUp .25s ease both;
+            ">
+                <div style="
+                    width:52px;height:52px;
+                    background:rgba(248,113,113,0.12);
+                    border:1px solid rgba(248,113,113,0.25);
+                    border-radius:14px;
+                    display:flex;align-items:center;justify-content:center;
+                    margin:0 auto 16px;font-size:22px;
+                ">🗑️</div>
+                <div style="
+                    font-family:'Space Grotesk',sans-serif;
+                    font-weight:700;font-size:16px;
+                    color:#f1f0f5;margin-bottom:8px;
+                ">Supprimer ce service ?</div>
+                <div style="
+                    font-size:13px;color:#8b8a99;
+                    margin-bottom:24px;line-height:1.55;
+                ">Cette action est irréversible. Le service sera définitivement supprimé.</div>
+                <div style="display:flex;gap:10px;">
+                    <button id="delCancelBtn" style="
+                        flex:1;padding:11px;
+                        border:1px solid rgba(75,72,236,0.30);
+                        border-radius:10px;
+                        background:rgba(255,255,255,0.05);
+                        color:#f1f0f5;
+                        font-family:'Space Grotesk',sans-serif;
+                        font-weight:700;font-size:13px;cursor:pointer;
+                    ">Annuler</button>
+                    <button id="delConfirmBtn" style="
+                        flex:1;padding:11px;
+                        border:none;border-radius:10px;
+                        background:linear-gradient(135deg,#ef4444,#dc2626);
+                        color:#fff;
+                        font-family:'Space Grotesk',sans-serif;
+                        font-weight:700;font-size:13px;cursor:pointer;
+                        box-shadow:0 4px 14px rgba(220,38,38,0.35);
+                    ">Supprimer</button>
+                </div>
+            </div>`;
+        document.body.appendChild(confirmOverlay);
+
+        document.getElementById('delCancelBtn').addEventListener('click', () => confirmOverlay.remove());
+        confirmOverlay.addEventListener('click', ev => {
+            if (ev.target === confirmOverlay) confirmOverlay.remove();
+        });
+
+        document.getElementById('delConfirmBtn').addEventListener('click', async () => {
+            confirmOverlay.remove();
+            const serviceId = card.dataset.serviceId;
+            try {
+                const res = await fetch('../../api/delete-service.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: serviceId })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    card.style.transition = 'opacity .3s, transform .3s';
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.97)';
+                    setTimeout(() => card.remove(), 300);
+                } else {
+                    alert('Erreur : ' + (data.message || 'Impossible de supprimer.'));
+                }
+            } catch (err) { console.error(err); }
+        });
+        return;
+    }
+
+    // ── Modifier ──
+// ── Modifier ──
+if (e.target.closest('.more-menu-item[data-action="edit"]')) {
+    const card = e.target.closest('.post-card');
+    card.querySelector('.post-more-menu').hidden = true;
+    const serviceId = card.dataset.serviceId;
+    try {
+        const res  = await fetch(`../../api/get-single-service.php?id=${serviceId}`);
+        const data = await res.json();
+        if (!data.success) return;
+        const s = data.service;
+        openServiceEditModal(s, serviceId);
+    } catch(err) { console.error(err); }
+    return;
+}
+
+    // ── Fermer menus si clic ailleurs ──
+    if (!e.target.closest('.post-more') && !e.target.closest('.post-more-menu')) {
+        document.querySelectorAll('.post-more-menu').forEach(m => m.hidden = true);
+    }
+});
 
 function createServiceCard(service) {
 
     const profileImage = service.photo_profil
         ? `../../${service.photo_profil}`
-        : "";
-
-    console.log(service)
+        : null;
 
     const serviceImage = service.service_photo
         ? `../../${service.service_photo}`
@@ -1142,91 +1258,80 @@ function createServiceCard(service) {
         ? service.categorie.split(",")
         : [];
 
+    const timeAgo = getTimeAgo(service.DateDePublication);
+
+    let prixAffiche = service.prix + ' DZD';
+    const match = service.description ? service.description.match(/\[prix_texte:(.+?)\]/) : null;
+    if (match) {
+        prixAffiche = match[1];
+        service.description = service.description.replace(/\[prix_texte:.+?\]/, '').trim();
+    }
+
+    const statusConfig = {
+        'disponible': { color: '#16a34a', bg: '#eaf5ee', label: 'Disponible' },
+        'en cours':   { color: '#d97706', bg: '#fef9c3', label: 'En cours' },
+        'terminé':    { color: '#6b7280', bg: '#f3f4f6', label: 'Terminé' }
+    };
+    const st = statusConfig[service.status] || statusConfig['disponible'];
+
     return `
+<article class="post-card" data-service-id="${service.ID}" data-owner-id="${service.ID_Utilisateur || ''}">
 
-    <article class="post-card" data-service-id="${service.ID}">
-        
-        <div class="post-header">
-
-            <div class="post-avatar">
-                <img 
-                    src="${profileImage}" 
-                    style="width:100%;height:100%;object-fit:cover;border-radius:50%;"
-                >
+    <div class="post-header" style="position:relative;">
+        <div class="post-avatar">
+            <img src="${profileImage}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+        </div>
+        <div class="post-meta" style="flex:1;">
+            <div class="post-name">${service.nom} ${service.prenom}</div>
+            <div class="post-time-row">
+                <span class="post-time">${timeAgo}</span>
             </div>
-
-            <div class="post-meta">
-
-                <div class="post-name">
-                    ${service.nom} ${service.prenom}
-                </div>
-
-                <div class="post-time-row">
-                    <span class="post-time">
-                        ${getTimeAgo(service.DateDePublication)}
-                    </span>
-                </div>
-
-            </div>
-
         </div>
-
-        <div class="post-title">
-            ${service.titre}
+        <button class="post-more" data-action="more">
+            <i class="fa-solid fa-ellipsis"></i>
+        </button>
+        <div class="post-more-menu" hidden>
+            <button class="more-menu-item" data-action="edit">
+                <i class="fa-regular fa-pen-to-square"></i> Modifier le service
+            </button>
+            <button class="more-menu-item danger" data-action="delete">
+                <i class="fa-regular fa-trash-can"></i> Supprimer le service
+            </button>
         </div>
+    </div>
 
-        <div class="post-tags">
-          <span class="post-tag ">
-            ${
-                categories.map(cat => `
-                    <span class="category-pill green">
-                        ${cat.trim()}
-                    </span>
-                `).join("")
-            }
-          </span>
-        </div>
+    <div class="post-title">${service.titre}</div>
 
-        <div class="post-body">
-            ${service.description}
-            <br>
-            prix : ${service.prix} DZD
-        </div>
-        <div class="post-body">${service.status}</div>
+    <div class="post-tags">
+        <span class="post-tag">
+            ${categories.map(cat => `
+                <span class="category-pill green" style="cursor:pointer"
+                      onclick="window.location.href='../UI/categorie-services/categorie-services.html?cat=${encodeURIComponent(cat.trim())}'">
+                    ${cat.trim()}
+                </span>
+            `).join("")}
+        </span>
+    </div>
 
-        ${
-            serviceImage
-            ? `
-                <img 
-                    class="post-image"
-                    src="${serviceImage}"
-                >
-            `
-            : ""
-        }
-        
-        
-        <div class="post-rating-summary">
+    <div class="post-body">
+        ${service.description ? service.description.replace(/\n/g, '<br>') : ''}
+        <br>prix : ${prixAffiche}
+    </div>
 
-            <div class="rating-stars-display">
-                ${generateStars(service.note_moyenne)}
-            </div>
+    <span style="display:inline-block;margin:0 18px 10px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;font-family:'Space Grotesk',sans-serif;background:${st.bg};color:${st.color};">
+        <i class="fa-solid fa-circle" style="font-size:7px;margin-right:4px;"></i>${st.label}
+    </span>
 
-            <span class="rating-score">
-                ${service.note_moyenne}
-            </span>
+    ${serviceImage ? `<img class="post-image" src="${serviceImage}">` : ""}
 
-            <span class="rating-count">
-                (${service.nb_avis} évaluations)
-            </span>
+    <div class="post-rating-summary">
+        <div class="rating-stars-display">${generateStars(service.note_moyenne)}</div>
+        <span class="rating-score">${service.note_moyenne}</span>
+        <span class="rating-count">(${service.nb_avis} évaluations)</span>
+    </div>
 
-        </div>
-
-    </article>
-
-    `;
+</article>`;
 }
-
 
 function getTimeAgo(dateString) {
     const now = new Date();
@@ -1347,3 +1452,426 @@ document.getElementById('modalConfirm').addEventListener('click', async () => {
         showNotification('Erreur : ' + (data.message || 'Impossible de supprimer le compte.'), '#b91c1c');
     }
 });
+
+
+// ════════════════════════════════════════
+// EDIT SERVICE MODAL (autonome)
+// ════════════════════════════════════════
+(function() {
+
+    const overlay = document.createElement('div');
+    overlay.id = 'editServiceOverlay';
+    overlay.style.cssText = `
+        display:none;position:fixed;inset:0;
+        background:rgba(0,0,0,0.5);backdrop-filter:blur(6px);
+        z-index:99999;justify-content:center;align-items:center;
+    `;
+    overlay.innerHTML = `
+    <div style="
+        background:#ffffff;
+        color-scheme: light;
+        border-radius:16px;
+        width:100%;max-width:520px;
+        box-shadow:0 24px 64px rgba(0,0,0,0.15);
+        overflow:hidden;
+        font-family:'DM Sans',sans-serif;
+        color:#1a1714;
+    ">
+        <!-- Header -->
+        <div style="
+            display:flex;align-items:center;gap:12px;
+            padding:16px 18px 14px;
+            border-bottom:1px solid #f0f0f0;
+        ">
+            <img id="editPmAvatar" src="" alt="" style="
+                width:42px;height:42px;border-radius:50%;
+                object-fit:cover;border:2px solid #e5e7eb;flex-shrink:0;
+            ">
+            <div style="flex:1;">
+                <div id="editPmName" style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;color:#1a1714;"></div>
+                <div id="editPmRole" style="font-size:11px;color:#6b7280;margin-top:1px;"></div>
+            </div>
+            <button id="editServiceClose" style="
+                width:30px;height:30px;border-radius:50%;border:none;
+                background:#f3f4f6;color:#6b7280;
+                font-size:14px;cursor:pointer;
+                display:flex;align-items:center;justify-content:center;
+            "><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <!-- Body -->
+        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px;">
+            <input id="editServiceTitre" type="text" placeholder="Titre du service" style="
+                width:100%;box-sizing:border-box;
+                background:#f9fafb;border:1px solid #e5e7eb;
+                border-radius:30px;padding:10px 18px;
+                font-family:'DM Sans',sans-serif;font-size:13px;
+                color:#1a1714;outline:none;
+            ">
+            <input id="editServicePrix" type="text" placeholder="Prix" style="
+                width:100%;box-sizing:border-box;
+                background:#f9fafb;border:1px solid #e5e7eb;
+                border-radius:30px;padding:10px 18px;
+                font-family:'DM Sans',sans-serif;font-size:13px;
+                color:#1a1714;outline:none;
+            ">
+            <textarea id="editServiceDesc" placeholder="Décrivez votre service..." style="
+                width:100%;box-sizing:border-box;
+                background:transparent;border:none;
+                padding:4px 4px;
+                font-family:'DM Sans',sans-serif;font-size:13px;
+                color:#1a1714;outline:none;resize:none;
+                min-height:100px;
+            "></textarea>
+        </div>
+
+        <!-- Footer -->
+        <div style="
+            display:flex;align-items:center;
+            padding:10px 18px 14px;
+            border-top:1px solid #f0f0f0;
+            gap:8px;
+        ">
+            <span style="font-size:11px;color:#6b7280;">Statut :</span>
+            <button data-status="disponible" class="edit-status-btn" style="
+                padding:4px 12px;border-radius:20px;
+                border:1.5px solid rgba(22,163,74,0.4);
+                background:rgba(22,163,74,0.08);color:#16a34a;
+                font-size:11px;font-weight:600;cursor:pointer;
+            ">● Disponible</button>
+            <button data-status="en cours" class="edit-status-btn" style="
+                padding:4px 12px;border-radius:20px;
+                border:1.5px solid rgba(217,119,6,0.4);
+                background:rgba(217,119,6,0.08);color:#d97706;
+                font-size:11px;font-weight:600;cursor:pointer;
+            ">⏳ En cours</button>
+            <button data-status="terminé" class="edit-status-btn" style="
+                padding:4px 12px;border-radius:20px;
+                border:1.5px solid rgba(107,114,128,0.4);
+                background:rgba(107,114,128,0.08);color:#6b7280;
+                font-size:11px;font-weight:600;cursor:pointer;
+            ">✗ Terminé</button>
+            <div style="flex:1;"></div>
+            <button id="editServiceSave" style="
+                padding:9px 22px;border-radius:30px;border:none;
+                background:#1a1714;color:#fff;
+                font-family:'Space Grotesk',sans-serif;
+                font-weight:700;font-size:13px;cursor:pointer;
+            "><i class="fa-solid fa-floppy-disk" style="margin-right:6px;"></i>Enregistrer</button>
+        </div>
+    </div>`;
+    document.body.appendChild(overlay);
+
+    let currentEditId = null;
+    let currentEditStatus = 'disponible';
+
+    overlay.querySelectorAll('.edit-status-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            currentEditStatus = btn.dataset.status;
+            overlay.querySelectorAll('.edit-status-btn').forEach(b => b.style.outline = 'none');
+            btn.style.outline = '2px solid currentColor';
+        });
+    });
+
+    function closeModal() {
+        overlay.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    document.getElementById('editServiceClose').addEventListener('click', closeModal);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+
+    document.getElementById('editServiceSave').addEventListener('click', async () => {
+        const titre = document.getElementById('editServiceTitre').value.trim();
+        const prix  = document.getElementById('editServicePrix').value.trim();
+        const desc  = document.getElementById('editServiceDesc').value.trim();
+
+        if (!titre) { showNotification('⚠️ Le titre est obligatoire'); return; }
+
+        const formData = new FormData();
+        formData.append('id', currentEditId);
+        formData.append('titre', titre);
+        formData.append('description', desc);
+        formData.append('prix', isNaN(parseFloat(prix)) ? 0 : parseFloat(prix));
+        formData.append('prix_affichage', prix);
+        formData.append('status', currentEditStatus);
+
+        try {
+            const res    = await fetch('../../api/update-service.php', {
+                method: 'POST', credentials: 'include', body: formData
+            });
+            const text   = await res.text();
+            const result = JSON.parse(text);
+            if (result.success) {
+                showNotification('✅ Service modifié avec succès !');
+                closeModal();
+                await loadServices();
+            } else {
+                showNotification('❌ ' + (result.message || 'Erreur'));
+            }
+        } catch(err) {
+            console.error(err);
+            showNotification('❌ Erreur réseau');
+        }
+    });
+
+    // ════════════════════════════════════════
+// EDIT SERVICE MODAL
+// ════════════════════════════════════════
+window.openServiceEditModal = function(service, serviceId) {
+
+    const overlay = document.getElementById('postModalOverlay');
+    if (!overlay) { console.error('postModalOverlay introuvable'); return; }
+
+    // Remplir les champs
+    const matchPrix = (service.description || '').match(/\[prix_texte:(.+?)\]/);
+    document.getElementById('postTitle').value = service.titre || '';
+    document.getElementById('postPrice').value = matchPrix ? matchPrix[1] : (service.prix || '');
+    document.getElementById('postDesc').value  = matchPrix
+        ? service.description.replace(/\[prix_texte:.+?\]/, '').trim()
+        : (service.description || '');
+
+    // Avatar et nom
+    const pmAvatar = document.getElementById('pmAvatar');
+    const pmName   = document.querySelector('.post-modal-name');
+    const pmRole   = document.querySelector('.post-modal-role');
+    if (pmAvatar && currentUser?.avatar) {
+        pmAvatar.src = buildPhotoUrl(currentUser.avatar);
+        pmAvatar.style.display = 'block';
+    }
+    if (pmName) pmName.textContent = `${currentUser?.prenom || ''} ${currentUser?.nom || ''}`.trim();
+    if (pmRole) pmRole.textContent = currentUser?.role || currentUser?.status || '';
+
+    // Cloner le bouton pour supprimer les anciens listeners
+    const oldBtn = document.getElementById('postPublishBtn');
+    const newBtn = oldBtn.cloneNode(true);
+    newBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Enregistrer';
+    oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+
+    newBtn.addEventListener('click', async () => {
+        const titre = document.getElementById('postTitle').value.trim();
+        const prix  = document.getElementById('postPrice').value.trim();
+        const desc  = document.getElementById('postDesc').value.trim();
+
+        if (!titre) { showNotification('⚠️ Le titre est obligatoire'); return; }
+
+        const formData = new FormData();
+        formData.append('id', serviceId);
+        formData.append('titre', titre);
+        formData.append('description', desc);
+        formData.append('prix', isNaN(parseFloat(prix)) ? 0 : parseFloat(prix));
+        formData.append('prix_affichage', prix);
+        formData.append('status', 'disponible');
+
+        try {
+            const res    = await fetch('../../api/update-service.php', {
+                method: 'POST', credentials: 'include', body: formData
+            });
+            const text   = await res.text();
+            const result = JSON.parse(text);
+            if (result.success) {
+                showNotification('✅ Service modifié avec succès !');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+                newBtn.innerHTML = 'publier';
+                await loadServices();
+            } else {
+                showNotification('❌ ' + (result.message || 'Erreur'));
+            }
+        } catch(err) {
+            console.error(err);
+            showNotification('❌ Erreur réseau');
+        }
+    });
+
+    // Fermeture du modal — remettre "publier" si on ferme sans sauvegarder
+    const closeBtn = document.getElementById('postModalClose');
+    const oldClose = closeBtn.cloneNode(true);
+    closeBtn.parentNode.replaceChild(oldClose, closeBtn);
+    oldClose.addEventListener('click', () => {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+        newBtn.innerHTML = 'publier';
+    });
+
+    // Ouvrir
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+};
+
+// ── Footer buttons (photo, location, catégorie, statut, timer) ──
+const pmPhotoBtn  = document.getElementById('pmPhotoBtn');
+const pmPhotoInput = document.getElementById('pmPhotoInput');
+const pmLocBtn    = document.getElementById('pmLocBtn');
+const locModal    = document.getElementById('locModal');
+const locConfirm  = document.getElementById('locConfirm');
+const locInput    = document.getElementById('locInput');
+const locationChip = document.getElementById('locationChip');
+const locationText = document.getElementById('locationText');
+const locationRemove = document.getElementById('locationRemove');
+const pmCatBtn    = document.getElementById('pmCatBtn');
+const catDropdown = document.getElementById('catDropdown');
+const pmStatusBtn = document.getElementById('pmStatusBtn');
+const statusModal = document.getElementById('statusModal');
+const pmTimerBtn  = document.getElementById('pmTimerBtn');
+const timerModal  = document.getElementById('timerModal');
+const timerModalClose = document.getElementById('timerModalClose');
+const timerConfirm = document.getElementById('timerConfirm');
+const scheduledChip = document.getElementById('scheduledChip');
+const scheduledText = document.getElementById('scheduledText');
+const scheduledRemove = document.getElementById('scheduledRemove');
+const postPreview = document.getElementById('postPreview');
+
+// Photo
+if (pmPhotoBtn && !pmPhotoBtn._editBound) {
+    pmPhotoBtn._editBound = true;
+    pmPhotoBtn.addEventListener('click', () => pmPhotoInput?.click());
+}
+if (pmPhotoInput && !pmPhotoInput._editBound) {
+    pmPhotoInput._editBound = true;
+    pmPhotoInput.addEventListener('change', () => {
+        const file = pmPhotoInput.files[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        if (postPreview) {
+            postPreview.innerHTML = `
+                <div class="preview-item" style="position:relative;display:inline-block;margin-top:8px;">
+                    <img src="${url}" style="width:100%;border-radius:10px;max-height:200px;object-fit:cover;">
+                    <button class="preview-remove" style="position:absolute;top:6px;right:6px;background:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.2);">×</button>
+                </div>`;
+            postPreview.querySelector('.preview-remove').addEventListener('click', () => {
+                postPreview.innerHTML = '';
+                pmPhotoInput.value = '';
+            });
+        }
+    });
+}
+
+// Location
+if (pmLocBtn && !pmLocBtn._editBound) {
+    pmLocBtn._editBound = true;
+    pmLocBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        locModal?.classList.toggle('open');
+    });
+}
+if (locConfirm && !locConfirm._editBound) {
+    locConfirm._editBound = true;
+    locConfirm.addEventListener('click', () => {
+        const val = locInput?.value.trim();
+        if (val && locationText && locationChip) {
+            locationText.textContent = val;
+            locationChip.style.display = 'flex';
+            locModal?.classList.remove('open');
+            if (locInput) locInput.value = '';
+        }
+    });
+}
+if (locationRemove && !locationRemove._editBound) {
+    locationRemove._editBound = true;
+    locationRemove.addEventListener('click', () => {
+        if (locationChip) locationChip.style.display = 'none';
+    });
+}
+
+// Catégories
+const CATEGORIES = ['Design', 'Dev', 'Marketing', 'Rédaction', 'Traduction', 'Musique', 'Photo', 'Vidéo'];
+if (pmCatBtn && !pmCatBtn._editBound) {
+    pmCatBtn._editBound = true;
+    if (catDropdown) {
+        catDropdown.innerHTML = CATEGORIES.map(c =>
+            `<div class="cat-option" data-cat="${c}" style="padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px;color:#1a1714;transition:background .15s;">${c}</div>`
+        ).join('');
+        catDropdown.querySelectorAll('.cat-option').forEach(opt => {
+            opt.addEventListener('mouseenter', () => opt.style.background = '#f3f4f6');
+            opt.addEventListener('mouseleave', () => opt.style.background = '');
+            opt.addEventListener('click', () => {
+                const cat = opt.dataset.cat;
+                const chips = document.getElementById('categoryChips');
+                if (chips && !chips.querySelector(`[data-cat="${cat}"]`)) {
+                    const chip = document.createElement('span');
+                    chip.dataset.cat = cat;
+                    // Pas de style inline — laisser le CSS gérer
+                    chip.innerHTML = `${cat} <span data-remove>×</span>`;
+                    chip.querySelector('[data-remove]').addEventListener('click', () => chip.remove());
+                    chips.appendChild(chip);
+                }
+                catDropdown.classList.remove('open');
+            });
+        });
+    }
+    pmCatBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        catDropdown?.classList.toggle('open');
+    });
+}
+
+// Statut
+if (pmStatusBtn && !pmStatusBtn._editBound) {
+    pmStatusBtn._editBound = true;
+    pmStatusBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        statusModal?.classList.toggle('open');
+    });
+}
+if (statusModal && !statusModal._editBound) {
+    statusModal._editBound = true;
+    statusModal.querySelectorAll('.status-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            // Retirer selected des autres
+            statusModal.querySelectorAll('.status-option').forEach(o => o.classList.remove('selected'));
+            // Marquer celui cliqué
+            opt.classList.add('selected');
+            // Stocker la valeur
+            document.getElementById('postModalOverlay').dataset.selectedStatus = opt.dataset.value;
+            // Feedback visuel sur le bouton
+            const statusBtn = document.getElementById('pmStatusBtn');
+            if (statusBtn) {
+                statusBtn.classList.add('active');
+                statusBtn.title = opt.textContent.trim();
+            }
+            statusModal.classList.remove('open');
+        });
+    });
+}
+
+// Timer
+if (pmTimerBtn && !pmTimerBtn._editBound) {
+    pmTimerBtn._editBound = true;
+    pmTimerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        timerModal?.classList.toggle('open');
+    });
+}
+if (timerModalClose && !timerModalClose._editBound) {
+    timerModalClose._editBound = true;
+    timerModalClose.addEventListener('click', () => timerModal?.classList.remove('open'));
+}
+if (timerConfirm && !timerConfirm._editBound) {
+    timerConfirm._editBound = true;
+    timerConfirm.addEventListener('click', () => {
+        const date = document.getElementById('timerDate')?.value;
+        const time = document.getElementById('timerTime')?.value;
+        if (date && scheduledText && scheduledChip) {
+            scheduledText.textContent = `${date}${time ? ' à ' + time : ''}`;
+            scheduledChip.style.display = 'flex';
+            timerModal?.classList.remove('open');
+        }
+    });
+}
+if (scheduledRemove && !scheduledRemove._editBound) {
+    scheduledRemove._editBound = true;
+    scheduledRemove.addEventListener('click', () => {
+        if (scheduledChip) scheduledChip.style.display = 'none';
+    });
+}
+
+// Fermer les dropdowns si clic dehors
+document.addEventListener('click', () => {
+    locModal?.classList.remove('open');
+    catDropdown?.classList.remove('open');
+    statusModal?.classList.remove('open');
+    timerModal?.classList.remove('open');
+}, { once: false });
+
+})();

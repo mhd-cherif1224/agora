@@ -104,7 +104,7 @@ function generateStars(note) {
     return `
 <article class="post-card" data-service-id="${service.ID}" data-owner-id="${service.ID_Utilisateur || service.utilisateur_id || service.user_id || ''}">
 
-    <div class="post-header post-owner" data-owner-id="${service.ID_Utilisateur || service.utilisateur_id || service.user_id || ''}" style="cursor:pointer">
+    <div class="post-header post-owner" data-owner-id="${service.ID_Utilisateur || service.utilisateur_id || service.user_id || ''}" style="cursor:${currentUser.id == (service.ID_Utilisateur || service.utilisateur_id || service.user_id) ? 'default' : 'pointer'}">
         <div class="post-avatar">
             <img src="${profileImage}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
         </div>
@@ -413,7 +413,8 @@ function attachRatingEvents(container) {
         const ownerClick = e.target.closest('.post-owner');
         if (ownerClick) {
             const userId = ownerClick.dataset.ownerId;
-            if (userId) {
+            
+            if (userId && userId != currentUser.id) {
                 window.location.href = '../profile/profile.html?id=' + encodeURIComponent(userId);
             }
             return;

@@ -1,5 +1,6 @@
 <?php
-
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 require_once __DIR__ . '/../model/Database.php';
 
 header('Content-Type: application/json');
@@ -47,7 +48,7 @@ try {
         INNER JOIN utilisateur u
             ON s.ID_Utilisateur = u.ID
 
-        LEFT JOIN service_categories sc
+        LEFT JOIN service_categorie sc
             ON s.ID = sc.ID_Service
 
         LEFT JOIN categorie c
