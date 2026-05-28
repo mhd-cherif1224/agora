@@ -236,6 +236,18 @@ document.addEventListener("DOMContentLoaded", async () => {
             <i class="fa-regular fa-star"></i> Évaluer
         </button>
         ` : ''}
+        <button class="post-action-btn" data-action="comment">
+            <i class="fa-regular fa-comment"></i> Commentaires
+            <span class="comments-count-badge" style="
+                background:rgba(75,72,236,0.15);
+                color:#4b48ec;
+                font-size:10px;
+                font-weight:700;
+                padding:1px 6px;
+                border-radius:10px;
+                margin-left:4px;
+            ">${service.nb_avis || 0}</span>
+        </button>
     </div>
 
     <div class="rating-panel" hidden>
@@ -256,7 +268,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>
     </div>
 
-    <div class="comments-list" hidden></div>
+    <div class="comments-list" hidden data-loaded="false"></div>
 
 </article>`;
 }
@@ -461,8 +473,71 @@ document.addEventListener("DOMContentLoaded", async () => {
             const card = e.target.closest('.post-card');
             const commentsList = card.querySelector('.comments-list');
             const panel = card.querySelector('.rating-panel');
-            commentsList.hidden = !commentsList.hidden;
-            if (!commentsList.hidden && !panel.hidden) panel.hidden = true;
+
+            const isOpen = !commentsList.hidden;
+
+            // Fermer le panel de notation si ouvert
+            if (!panel.hidden) panel.hidden = true;
+
+            if (isOpen) {
+                commentsList.hidden = true;
+                return;
+            }
+
+            // Charger les commentaires si pas encore fait
+            if (commentsList.dataset.loaded === 'false') {
+                commentsList.dataset.loaded = 'loading';
+                commentsList.hidden = false;
+                commentsList.innerHTML = `
+                    <div style="padding:14px 18px;color:#8c8580;font-size:12px;
+                                font-family:'Space Grotesk',sans-serif;display:flex;
+                                align-items:center;gap:8px;">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Chargement des avis...
+                    </div>`;
+
+                const serviceId = card.dataset.serviceId;
+                try {
+                    const res = await fetch(`../../../api/get-ratings.php?service_id=${serviceId}`);
+                    const data = await res.json();
+
+                    commentsList.innerHTML = '';
+
+                    if (!data.success || !data.ratings || data.ratings.length === 0) {
+                        commentsList.innerHTML = `
+                            <div style="padding:14px 18px;color:#8c8580;font-size:12px;
+                                        font-family:'Space Grotesk',sans-serif;text-align:center;">
+                                <i class="fa-regular fa-comment-dots" style="font-size:20px;display:block;margin-bottom:6px;"></i>
+                                Aucun avis pour l'instant
+                            </div>`;
+                    } else {
+                        data.ratings.forEach(r => {
+                            const dateStr = new Date(r.DateEval).toLocaleDateString('fr-FR', {
+                                day: '2-digit', month: 'short', year: 'numeric'
+                            });
+                            commentsList.appendChild(
+                                buildCommentItem(
+                                    `${r.prenom} ${r.nom}`,
+                                    parseInt(r.note),
+                                    r.commentaire || '',
+                                    dateStr,
+                                    r.photo_profil
+                                )
+                            );
+                        });
+                    }
+                    commentsList.dataset.loaded = 'true';
+                } catch (err) {
+                    console.error(err);
+                    commentsList.innerHTML = `
+                        <div style="padding:14px 18px;color:#ef4444;font-size:12px;
+                                    font-family:'Space Grotesk',sans-serif;">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Erreur de chargement
+                        </div>`;
+                    commentsList.dataset.loaded = 'false';
+                }
+            } else {
+                commentsList.hidden = false;
+            }
             return;
         }
 
@@ -597,7 +672,7 @@ async function submitRating(card) {
             textarea.placeholder = 'Laissez un commentaire (optionnel)...';
             textarea.classList.remove('input-error');
         }, 2000);
-        return;
+        return; // ← return ajouté
     }
 
     const commentaire = textarea.value.trim();
@@ -613,18 +688,15 @@ async function submitRating(card) {
     };
 
     try {
-        // Send to backend
         const response = await fetch('../../../api/submit-rating.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(evaluation)
         });
 
         const text = await response.text();
-console.log("Raw response:", text);
-const result = JSON.parse(text);
+        console.log("Raw response:", text);
+        const result = JSON.parse(text);
 
         if (!result.success) {
             console.error('Erreur:', result.message);
@@ -639,14 +711,13 @@ const result = JSON.parse(text);
 
         console.log('Évaluation soumise avec succès :', evaluation);
 
-        const commentsList = card.querySelector('.comments-list');
-        if (commentaire) {
-            commentsList.appendChild(buildCommentItem('Moi', note, commentaire, dateEval));
-            commentsList.hidden = false;
-        }
-
         updateRatingSummary(card, note);
         closeRatingPanel(card);
+
+        // Réinitialiser la liste pour forcer un rechargement
+        const commentsList = card.querySelector('.comments-list'); // ← une seule déclaration
+        commentsList.dataset.loaded = 'false';
+        commentsList.innerHTML = '';
 
     } catch (err) {
         console.error('Erreur lors de la soumission:', err);
@@ -656,6 +727,7 @@ const result = JSON.parse(text);
             textarea.placeholder = 'Laissez un commentaire (optionnel)...';
             textarea.classList.remove('input-error');
         }, 2000);
+        return;
     }
 
     const rateBtn = card.querySelector('.post-action-btn[data-action="rate"]');
@@ -663,22 +735,29 @@ const result = JSON.parse(text);
     rateBtn.innerHTML = `<i class="fa-solid fa-star"></i> Évalué`;
 }
 
-function buildCommentItem(name, note, text, date) {
+function buildCommentItem(name, note, text, date, photoProfile) {
     const item = document.createElement('div');
     item.className = 'comment-item';
     const initials  = name.slice(0, 2).toUpperCase();
     const starsHtml = Array.from({ length: 5 }, (_, i) =>
         `<i class="${i < note ? 'fa-solid' : 'fa-regular'} fa-star"></i>`
     ).join('');
+
+    const avatarHtml = photoProfile
+        ? `<img src="../../../${photoProfile}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+        : initials;
+
     item.innerHTML = `
-        <div class="comment-avatar" style="background:linear-gradient(135deg,#4b48ec,#7299f4);">${initials}</div>
+        <div class="comment-avatar" style="${photoProfile ? '' : 'background:linear-gradient(135deg,#4b48ec,#7299f4);'}">
+            ${avatarHtml}
+        </div>
         <div class="comment-body">
             <div class="comment-header">
                 <span class="comment-name">${name}</span>
                 <div class="comment-stars">${starsHtml}</div>
                 <span class="comment-date">${date}</span>
             </div>
-            <p class="comment-text">${text}</p>
+            ${text ? `<p class="comment-text">${text}</p>` : ''}
         </div>`;
     return item;
 }
