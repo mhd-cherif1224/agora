@@ -1,182 +1,141 @@
 <?php
-require_once __DIR__ . '/../Controller/session-config.php';
 
-header('Content-Type: application/json; charset=utf-8');
+require_once __DIR__ . '/../model/Database.php';
 
-/* ══ CONNEXION BDD ══ */
-require_once __DIR__ . '/../Model/Database.php'; 
-$pdo = Database::getConnection();
-$pdo->exec("SET time_zone = '+00:00'"); 
-
-/* ══ PARAMÈTRES ══ */
-$search  = isset($_GET['q'])      ? trim($_GET['q'])           : '';
-$sort    = isset($_GET['sort'])   ? $_GET['sort']              : 'date'; // 'date' ou 'id'
-$order   = isset($_GET['order'])  ? strtoupper($_GET['order']) : 'DESC';
-$categorie = isset($_GET['categorie']) ? (int)$_GET['categorie'] : 0;
-
-// Sécuriser l'ordre
-if (!in_array($order, ['ASC', 'DESC'])) $order = 'DESC';
-// Sécuriser le tri
-if (!in_array($sort, ['date', 'id'])) $sort = 'date';
-
-$like = '%' . $search . '%';
+header('Content-Type: application/json');
 
 try {
 
-    /* ══════════════════════════════════════
-       1. RECHERCHE SERVICES
-    ══════════════════════════════════════ */
-    $sortColService = ($sort === 'id') ? 's.ID' : 's.DateDePublication';
+    $sort      = $_GET['sort']      ?? 'recent';
+    $categorie = $_GET['categorie'] ?? null;
+    $query     = $_GET['q']         ?? null;
 
-    $sqlService = "
+    if (!$query || trim($query) === '') {
+        echo json_encode([
+            'success' => true,
+            'count'   => ['services' => 0, 'utilisateurs' => 0],
+            'results' => ['services' => [], 'utilisateurs' => []]
+        ]);
+        exit;
+    }
+
+    $keyword = trim($query);
+
+    $orderBy = "s.DateDePublication DESC";
+    if ($sort === "popular") {
+        $orderBy = "nb_avis DESC, note_moyenne DESC";
+    }
+
+    $pdo = Database::getConnection();
+    $pdo->exec("SET time_zone = '+00:00'");
+
+    // ── SERVICES — filtrage par catégorie enregistrée uniquement ──
+    $serviceParams = [':kw' => "%$keyword%"];
+
+    $havingClause = "";
+    if ($categorie) {
+        $havingClause          = "HAVING categorie LIKE :cat";
+        $serviceParams[':cat'] = "%$categorie%";
+    }
+
+    $stmtServices = $pdo->prepare("
         SELECT
             s.ID,
             s.titre,
             s.description,
-            s.DateDePublication,
-            s.status,
             s.prix,
-            s.Evaluation_Moyenne,
-            u.ID          AS utilisateur_id,
-            u.nom         AS utilisateur_nom,
-            u.prenom      AS utilisateur_prenom,
-            u.photo_profil,
-            u.specialite,
-            u.localisation,
-            GROUP_CONCAT(DISTINCT c.titre ORDER BY c.titre SEPARATOR ', ') AS categories,
-            MIN(p.photo_path) AS photo_service
-        FROM service s
-        INNER JOIN utilisateur u ON s.ID_Utilisateur = u.ID
-        LEFT JOIN service_categorie sc ON sc.ID_Service = s.ID
-        LEFT JOIN categorie c          ON c.ID = sc.ID_Categorie
-        LEFT JOIN service_photos sp    ON sp.ID_Service = s.ID
-        LEFT JOIN photos p             ON p.ID = sp.ID_Photos
-        WHERE (
-            s.titre       LIKE :like
-            OR s.description LIKE :like2
-            OR u.nom      LIKE :like3
-            OR u.prenom   LIKE :like4
-            OR c.titre    LIKE :like5
-        )
-    ";
+            s.status,
+            s.DateDePublication,
 
-    // Filtre catégorie optionnel
-    if ($categorie > 0) {
-        $sqlService .= " AND sc.ID_Categorie = :categorie ";
-    }
-
-    $sqlService .= "
-        GROUP BY s.ID, u.ID
-        ORDER BY {$sortColService} {$order}
-    ";
-
-    $stmtS = $pdo->prepare($sqlService);
-    $stmtS->bindValue(':like',  $like);
-    $stmtS->bindValue(':like2', $like);
-    $stmtS->bindValue(':like3', $like);
-    $stmtS->bindValue(':like4', $like);
-    $stmtS->bindValue(':like5', $like);
-    if ($categorie > 0) {
-        $stmtS->bindValue(':categorie', $categorie, PDO::PARAM_INT);
-    }
-    $stmtS->execute();
-    $services = $stmtS->fetchAll(PDO::FETCH_ASSOC);
-
-    // Formatage des services
-    foreach ($services as &$s) {
-        $s['ID']               = (int)$s['ID'];
-        $s['utilisateur_id']   = (int)$s['utilisateur_id'];
-        $s['prix']             = (float)$s['prix'];
-        $s['Evaluation_Moyenne'] = $s['Evaluation_Moyenne'] !== null ? (int)$s['Evaluation_Moyenne'] : null;
-        $s['categories']       = $s['categories'] ? explode(', ', $s['categories']) : [];
-    }
-    unset($s);
-
-    /* ══════════════════════════════════════
-       2. RECHERCHE UTILISATEURS
-    ══════════════════════════════════════ */
-    $sortColUser = ($sort === 'id') ? 'u.ID' : 'u.ID'; // pas de date sur utilisateur → fallback ID
-
-    $sqlUser = "
-        SELECT
-            u.ID,
+            u.ID AS ID_Utilisateur,
             u.nom,
             u.prenom,
-            u.sexe,
-            u.email,
-            u.niveau,
-            u.specialite,
-            u.localisation,
-            u.status,
             u.photo_profil,
-            u.photo_banniere,
-            u.role,
-            COUNT(DISTINCT s.ID)  AS nb_services,
-            ROUND(AVG(e.note), 1) AS note_moyenne
-        FROM utilisateur u
-        LEFT JOIN service s    ON s.ID_Utilisateur = u.ID
-        LEFT JOIN evaluation e ON e.ID_Utilisateur = u.ID
-        WHERE (
-            u.nom       LIKE :like
-            OR u.prenom LIKE :like2
-            OR u.email  LIKE :like3
-            OR u.specialite LIKE :like4
-            OR u.localisation LIKE :like5
+            u.specialite,
+            u.niveau,
+
+            GROUP_CONCAT(DISTINCT c.titre) AS categorie,
+
+            p.photo_path AS service_photo,
+
+            COALESCE(ROUND(AVG(e.note), 1), 0) AS note_moyenne,
+            COUNT(DISTINCT e.ID)               AS nb_avis
+
+        FROM service s
+
+        INNER JOIN utilisateur u ON s.ID_Utilisateur = u.ID
+        LEFT JOIN service_categorie sc ON s.ID = sc.ID_Service
+        LEFT JOIN categorie c ON sc.ID_Categorie = c.ID
+        LEFT JOIN evaluation e ON s.ID = e.ID_Service
+        LEFT JOIN service_photos sp ON s.ID = sp.ID_Service
+        LEFT JOIN photos p ON sp.ID_Photos = p.ID
+
+        WHERE EXISTS (
+            SELECT 1
+            FROM service_categorie sc2
+            INNER JOIN categorie c2 ON sc2.ID_Categorie = c2.ID
+            WHERE sc2.ID_Service = s.ID
+            AND c2.titre LIKE :kw
         )
-        GROUP BY u.ID
-        ORDER BY {$sortColUser} {$order}
-    ";
 
-    $stmtU = $pdo->prepare($sqlUser);
-    $stmtU->bindValue(':like',  $like);
-    $stmtU->bindValue(':like2', $like);
-    $stmtU->bindValue(':like3', $like);
-    $stmtU->bindValue(':like4', $like);
-    $stmtU->bindValue(':like5', $like);
-    $stmtU->execute();
-    $utilisateurs = $stmtU->fetchAll(PDO::FETCH_ASSOC);
+        GROUP BY s.ID
 
-    // Formatage des utilisateurs
-    foreach ($utilisateurs as &$u) {
-        $u['ID']           = (int)$u['ID'];
-        $u['nb_services']  = (int)$u['nb_services'];
-        $u['note_moyenne'] = $u['note_moyenne'] !== null ? (float)$u['note_moyenne'] : null;
-        unset($u['email']); // ne pas exposer l'email dans les résultats publics
-    }
-    unset($u);
+        $havingClause
 
-    /* ══════════════════════════════════════
-       3. CATEGORIES (pour les filtres)
-    ══════════════════════════════════════ */
-    $cats = $pdo->query("SELECT ID, titre FROM categorie ORDER BY titre ASC")
-                ->fetchAll(PDO::FETCH_ASSOC);
-    foreach ($cats as &$c) $c['ID'] = (int)$c['ID'];
-    unset($c);
+        ORDER BY $orderBy
+    ");
 
-    /* ══════════════════════════════════════
-       4. RÉPONSE JSON
-    ══════════════════════════════════════ */
+    $stmtServices->execute($serviceParams);
+    $services = $stmtServices->fetchAll(PDO::FETCH_ASSOC);
+
+    // ── UTILISATEURS — recherche par nom / prénom / spécialité ──
+    $stmtUsers = $pdo->prepare("
+        SELECT
+            ID,
+            nom,
+            prenom,
+            photo_profil,
+            specialite,
+            niveau
+        FROM utilisateur
+        WHERE
+            nom           LIKE :kw1
+            OR prenom     LIKE :kw2
+            OR specialite LIKE :kw3
+            OR CONCAT(prenom, ' ', nom) LIKE :kw4
+            OR CONCAT(nom, ' ', prenom) LIKE :kw5
+        LIMIT 10
+    ");
+
+    $stmtUsers->execute([
+        ':kw1' => "%$keyword%",
+        ':kw2' => "%$keyword%",
+        ':kw3' => "%$keyword%",
+        ':kw4' => "%$keyword%",
+        ':kw5' => "%$keyword%",
+    ]);
+
+    $utilisateurs = $stmtUsers->fetchAll(PDO::FETCH_ASSOC);
+
     echo json_encode([
-        'success'      => true,
-        'query'        => $search,
-        'sort'         => $sort,
-        'order'        => $order,
-        'categories'   => $cats,
-        'results'      => [
-            'services'     => $services,
-            'utilisateurs' => $utilisateurs,
-        ],
-        'count' => [
+        'success' => true,
+        'query'   => $keyword,
+        'count'   => [
             'services'     => count($services),
             'utilisateurs' => count($utilisateurs),
+        ],
+        'results' => [
+            'services'     => $services,
+            'utilisateurs' => $utilisateurs,
         ]
-    ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    ]);
 
 } catch (PDOException $e) {
+
     http_response_code(500);
+
     echo json_encode([
         'success' => false,
-        'message' => 'Erreur BDD : ' . $e->getMessage()
+        'message' => $e->getMessage()
     ]);
 }
-?>

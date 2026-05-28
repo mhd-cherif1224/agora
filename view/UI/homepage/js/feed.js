@@ -58,25 +58,31 @@ document.addEventListener("DOMContentLoaded", async () => {
             console.log("le role,",data.status )
 
             if (data.avatar) {
-                navImg.src             = buildPhotoUrl(data.avatar);
-                navImg.style.display   = 'block';
-                navLetter.style.display = 'none';
-                composetImg.src        = buildPhotoUrl(data.avatar);
-                composetImg.style.display = 'block';
-            } else {
-                navLetter.textContent     = (data.prenom[0] + data.nom[0]).toUpperCase();
-                navImg.style.display      = 'none';
-                navLetter.style.display   = 'block';
-                composetImg.textContent   = (data.prenom[0] + data.nom[0]).toUpperCase();
-                composetImg.style.display = 'block';
-            }
+              navImg.src              = buildPhotoUrl(data.avatar);
+              navImg.style.display    = 'block';
+              navLetter.style.display = 'none';
+           if (composetImg) {                                   // ← guard ajouté
+              composetImg.src           = buildPhotoUrl(data.avatar);
+              composetImg.style.display = 'block';
+           }
+           } else {
+              navLetter.textContent      = (data.prenom[0] + data.nom[0]).toUpperCase();
+              navImg.style.display       = 'none';
+              navLetter.style.display    = 'block';
+           if (composetImg) {                                   // ← guard ajouté
+              composetImg.textContent   = (data.prenom[0] + data.nom[0]).toUpperCase();
+              composetImg.style.display = 'block';
+    }
+}
 
         } catch (err) {
             console.error('Profile error:', err);
         }
     }
 
+    if (!window.IS_SEARCH_PAGE) {
     await loadServices(sortSelect.value, activeCategory);
+}
 
     async function loadServices(sort = "recent", cat = null) {
         try {
@@ -255,7 +261,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 </article>`;
 }
 
-
+    window.createServiceCard = createServiceCard; 
     // ── Events du feed ──
    document.querySelector('.feed').addEventListener('click', async (e) => {
 
