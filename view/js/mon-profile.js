@@ -1770,6 +1770,7 @@ document.getElementById('modalConfirm').addEventListener('click', async () => {
       });
     }
 
+    
     // ── Avatar + nom dans le header ──
     const pmAvatar = document.getElementById('pmAvatar');
     const pmName = document.querySelector('.post-modal-name');
