@@ -2,6 +2,8 @@
 // GLOBAL STATE
 // ════════════════════════════════════════
 let currentProfileSrc = null;
+
+// currentUser = utilisateur CONNECTÉ (chargé via get-profile.php)
 let currentUser = {
   id: null,
   nom: '',
@@ -10,7 +12,10 @@ let currentUser = {
   avatar: null
 };
 
-let socket = null;
+// profileOwnerId = ID du profil qu'on est en train de consulter (depuis ?id=)
+let profileOwnerId = null;
+
+let socket   = null;
 let lastConv = null;
 
 // ════════════════════════════════════════
@@ -24,6 +29,7 @@ function buildPhotoUrl(path) {
 
 // ════════════════════════════════════════
 // LOAD PROFILE FROM SESSION (PHP API)
+// Affiche les données du profil visité (?id=)
 // ════════════════════════════════════════
 async function loadProfile() {
   try {
@@ -45,14 +51,8 @@ async function loadProfile() {
 
     const user = data.user || data;
 
-    currentUser.prenom    = user.prenom || '';
-    currentUser.nom       = user.nom    || '';
-    currentUser.initiales = ((user.prenom?.[0] || '') + (user.nom?.[0] || '')).toUpperCase() || '?';
-
-    const fullName = `${user.prenom} ${user.nom}`.trim();
-
     const displayName = document.getElementById('displayName');
-    if (displayName) displayName.childNodes[0].textContent = fullName;
+    if (displayName) displayName.childNodes[0].textContent = `${user.prenom} ${user.nom}`.trim();
 
     const displayRole = document.getElementById('displayRole');
     if (displayRole) displayRole.textContent = user.specialite || user.niveau || user.role || '';
@@ -74,18 +74,17 @@ async function loadProfile() {
     }
 
     const bannerBottom = document.getElementById('bannerBottom');
-    if (bannerBottom) {
-      const dark  = user.banner_color_dark;
-      const light = user.banner_color_light;
-      if (dark && light) {
-        bannerBottom.style.background = `linear-gradient(to right, ${dark}, ${light})`;
-      }
+    if (bannerBottom && user.banner_color_dark && user.banner_color_light) {
+      bannerBottom.style.background = `linear-gradient(to right, ${user.banner_color_dark}, ${user.banner_color_light})`;
     }
 
     const messageBtn = document.getElementById('messageBtn');
     if (messageBtn && user.ID) {
       messageBtn.dataset.userId = user.ID;
     }
+
+    // Stocker l'ID du propriétaire du profil visité
+    profileOwnerId = user.ID || null;
 
   } catch (err) {
     console.error('loadProfile error:', err);
@@ -112,71 +111,38 @@ function showNotification(message, duration = 3500) {
 function getDominantColors(source, topN = 2) {
   let canvas, ctx;
   if (source instanceof HTMLCanvasElement) {
-    canvas = source;
-    ctx = canvas.getContext('2d');
+    canvas = source; ctx = canvas.getContext('2d');
   } else {
-    canvas = document.createElement('canvas');
-    ctx = canvas.getContext('2d');
+    canvas = document.createElement('canvas'); ctx = canvas.getContext('2d');
     const MAX = 200;
-    let w = source.naturalWidth || source.width;
-    let h = source.naturalHeight || source.height;
-    if (w > MAX || h > MAX) {
-      const s = MAX / Math.max(w, h);
-      w = Math.round(w * s);
-      h = Math.round(h * s);
-    }
-    canvas.width = w;
-    canvas.height = h;
-    ctx.drawImage(source, 0, 0, w, h);
+    let w = source.naturalWidth || source.width, h = source.naturalHeight || source.height;
+    if (w > MAX || h > MAX) { const s = MAX / Math.max(w, h); w = Math.round(w * s); h = Math.round(h * s); }
+    canvas.width = w; canvas.height = h; ctx.drawImage(source, 0, 0, w, h);
   }
-  const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-  const counts = {};
+  const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data, counts = {};
   for (let i = 0; i < data.length; i += 4) {
     if (data[i + 3] < 128) continue;
-    const r = Math.round(data[i]     / 16) * 16;
-    const g = Math.round(data[i + 1] / 16) * 16;
-    const b = Math.round(data[i + 2] / 16) * 16;
-    const key = `${r},${g},${b}`;
-    counts[key] = (counts[key] || 0) + 1;
+    const r = Math.round(data[i] / 16) * 16, g = Math.round(data[i + 1] / 16) * 16, b = Math.round(data[i + 2] / 16) * 16;
+    const key = `${r},${g},${b}`; counts[key] = (counts[key] || 0) + 1;
   }
-  return Object.entries(counts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, topN)
-    .map(([key]) => {
-      const [r, g, b] = key.split(',').map(Number);
-      return { hex: '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('') };
-    });
+  return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, topN)
+    .map(([key]) => { const [r, g, b] = key.split(',').map(Number); return { hex: '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('') }; });
 }
 
 function adaptColor(hex, amount = 80) {
-  let r = parseInt(hex.slice(1, 3), 16);
-  let g = parseInt(hex.slice(3, 5), 16);
-  let b = parseInt(hex.slice(5, 7), 16);
+  let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
   const br = (r * 299 + g * 587 + b * 114) / 1000;
-  if (br > 128) {
-    r = Math.max(0, r - amount);
-    g = Math.max(0, g - amount);
-    b = Math.max(0, b - amount);
-  } else {
-    r = Math.min(255, r + amount);
-    g = Math.min(255, g + amount);
-    b = Math.min(255, b + amount);
-  }
+  if (br > 128) { r = Math.max(0, r - amount); g = Math.max(0, g - amount); b = Math.max(0, b - amount); }
+  else { r = Math.min(255, r + amount); g = Math.min(255, g + amount); b = Math.min(255, b + amount); }
   return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
 }
 
 function changeBannerColor(color1, color2) {
-  const br = h => {
-    const r = parseInt(h.slice(1, 3), 16);
-    const g = parseInt(h.slice(3, 5), 16);
-    const b = parseInt(h.slice(5, 7), 16);
-    return (r * 299 + g * 587 + b * 114) / 1000;
-  };
+  const br = h => { const r = parseInt(h.slice(1, 3), 16), g = parseInt(h.slice(3, 5), 16), b = parseInt(h.slice(5, 7), 16); return (r * 299 + g * 587 + b * 114) / 1000; };
   const dark  = br(color1) < br(color2) ? color1 : color2;
   const light = br(color1) < br(color2) ? color2 : color1;
   const bannerBottom = document.getElementById('bannerBottom');
-  if (bannerBottom)
-    bannerBottom.style.background = `linear-gradient(to right, ${dark}, ${light})`;
+  if (bannerBottom) bannerBottom.style.background = `linear-gradient(to right, ${dark}, ${light})`;
 }
 
 // ════════════════════════════════════════
@@ -185,14 +151,11 @@ function changeBannerColor(color1, color2) {
 function updateAllPostAvatars(src) {
   currentProfileSrc = src;
   document.querySelectorAll('.post-avatar-dyn').forEach(el => {
-    if (el.tagName === 'IMG') {
-      el.src = src;
-    } else {
+    if (el.tagName === 'IMG') { el.src = src; }
+    else {
       const img = document.createElement('img');
-      img.src = src;
-      img.className = el.className;
-      img.style.cssText = el.style.cssText ||
-        'width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;';
+      img.src = src; img.className = el.className;
+      img.style.cssText = el.style.cssText || 'width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;';
       el.replaceWith(img);
     }
   });
@@ -269,8 +232,7 @@ let showingAll = false;
 
 if (seeAllBtn) {
   seeAllBtn.addEventListener('click', e => {
-    e.preventDefault();
-    showingAll = !showingAll;
+    e.preventDefault(); showingAll = !showingAll;
     if (showingAll) {
       if (listPreview) listPreview.style.display = 'none';
       if (listAll)     listAll.style.display = 'flex';
@@ -303,29 +265,27 @@ document.addEventListener('DOMContentLoaded', () => {
   const messageBtn  = document.getElementById('messageBtn');
   const fabHelpBtn  = document.getElementById('fabHelpBtn');
 
+  // ── Charge l'utilisateur CONNECTÉ (pas le profil visité) ──
   async function loadUserProfile() {
     try {
       const res = await fetch('../../../api/get-profile.php');
-      if (res.status === 401) {
-        window.location.href = '../../../html/login.html';
-        return;
-      }
+      if (res.status === 401) { window.location.href = '../../../html/login.html'; return; }
       const data = await res.json();
       if (!data.success || !data.id) return;
 
       currentUser = {
-        id: data.id,
-        nom: data.nom,
-        prenom: data.prenom,
-        avatar: data.avatar
+        id:       data.id,
+        nom:      data.nom,
+        prenom:   data.prenom,
+        initiales: ((data.prenom?.[0] || '') + (data.nom?.[0] || '')).toUpperCase() || '?',
+        avatar:   data.avatar
       };
 
       const navImg    = document.getElementById('navAvatarImg');
       const navLetter = document.getElementById('navAvatarLetter');
-
       if (data.avatar) {
-        if (navImg) { navImg.src = buildPhotoUrl(data.avatar); navImg.style.display = 'block'; }
-        if (navLetter) navLetter.style.display = 'none';
+        if (navImg)    { navImg.src = buildPhotoUrl(data.avatar); navImg.style.display = 'block'; }
+        if (navLetter)   navLetter.style.display = 'none';
       } else {
         if (navLetter) {
           navLetter.textContent = ((data.prenom?.[0] || '') + (data.nom?.[0] || '')).toUpperCase();
@@ -333,6 +293,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (navImg) navImg.style.display = 'none';
       }
+
+      // Charger les liens APRÈS avoir currentUser.id, et appliquer la visibilité
+      loadLinks();
+      applyLinksVisibility();
+
     } catch (err) {
       console.error('Profile error:', err);
     }
@@ -341,32 +306,18 @@ document.addEventListener('DOMContentLoaded', () => {
   function initWebSocket() {
     if (!currentUser?.id || !lastConv) return;
     if (socket) return;
-
     socket = io('http://localhost:3000', { query: { userId: currentUser.id } });
-
-    socket.on('connect', () => {
-      socket.emit('get_history', { otherUserId: lastConv.id });
-    });
-
+    socket.on('connect', () => { socket.emit('get_history', { otherUserId: lastConv.id }); });
     socket.on('conversation_history', ({ otherUserId, messages: msgs }) => {
       if (!lastConv || otherUserId !== lastConv.id) return;
-      lastConv.messages = msgs.map(m => ({
-        text: m.contenue,
-        time: m.DateEnvoie,
-        sent: m.ID_Expediteur === currentUser.id
-      }));
+      lastConv.messages = msgs.map(m => ({ text: m.contenue, time: m.DateEnvoie, sent: m.ID_Expediteur === currentUser.id }));
       renderMessages();
     });
-
     socket.on(`msg_${currentUser.id}`, msg => {
       if (!lastConv) return;
       const otherId = msg.ID_Expediteur === currentUser.id ? msg.ID_Destinataire : msg.ID_Expediteur;
       if (otherId !== lastConv.id) return;
-      lastConv.messages.push({
-        text: msg.contenue,
-        time: msg.DateEnvoie,
-        sent: msg.ID_Expediteur === currentUser.id
-      });
+      lastConv.messages.push({ text: msg.contenue, time: msg.DateEnvoie, sent: msg.ID_Expediteur === currentUser.id });
       renderMessages();
     });
   }
@@ -377,10 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
     lastConv.messages.forEach(msg => {
       const div = document.createElement('div');
       div.className = `chat-msg ${msg.sent ? 'sent' : 'received'}`;
-      div.innerHTML = `
-        <div class="msg-bubble">${escapeHtml(msg.text)}</div>
-        <span class="msg-time">${formatTime(msg.time)}</span>
-      `;
+      div.innerHTML = `<div class="msg-bubble">${escapeHtml(msg.text)}</div><span class="msg-time">${formatTime(msg.time)}</span>`;
       messages.appendChild(div);
     });
     scrollToBottom();
@@ -414,7 +362,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!res.ok) return;
       const data = await res.json();
       if (!Array.isArray(data) || data.length === 0) return;
-
       const u = data[0];
       lastConv = {
         id:       u.ID,
@@ -433,11 +380,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function switchConversation(userId) {
     try {
-      const res = await fetch(`../../../api/get-user.php?id=${userId}`);
+      const res  = await fetch(`../../../api/get-user.php?id=${userId}`);
       const data = await res.json();
       if (!data.success) return;
       const user = data.user || data;
-
       if (!lastConv) {
         lastConv = { id: null, name: '', avatar: null, initials: '', gradient: '', messages: [] };
       }
@@ -446,15 +392,12 @@ document.addEventListener('DOMContentLoaded', () => {
       lastConv.avatar   = user.photo_profil || null;
       lastConv.initials = (user.prenom[0] + user.nom[0]).toUpperCase();
       lastConv.messages = [];
-
       updateChatPanelHeader();
       const msgs = document.getElementById('chatMessages');
       if (msgs) msgs.innerHTML = '';
       if (socket) socket.emit('get_history', { otherUserId: user.ID });
       document.getElementById('chatPanel')?.classList.add('active');
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); }
   }
 
   if (messageBtn) {
@@ -481,15 +424,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function sendMessage() {
-    const text = input.value.trim();
-    if (!text) return;
+    const text = input.value.trim(); if (!text) return;
     if (!lastConv?.id || !currentUser?.id) { showNotification('Conversation non initialisée.'); return; }
     const div = document.createElement('div');
     div.className = 'chat-msg sent';
     div.innerHTML = `<div class="msg-bubble">${escapeHtml(text)}</div><span class="msg-time">${formatTime(new Date().toISOString())}</span>`;
-    messages.appendChild(div);
-    input.value = '';
-    messages.scrollTop = messages.scrollHeight;
+    messages.appendChild(div); input.value = ''; messages.scrollTop = messages.scrollHeight;
     const payload = { ID_Expediteur: currentUser.id, ID_Destinataire: lastConv.id, contenue: text };
     if (socket?.connected) {
       socket.emit('send_message', payload);
@@ -500,18 +440,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function sendBotMessage() {
-    const text = botInput.value.trim();
-    if (!text) return;
+    const text = botInput.value.trim(); if (!text) return;
     const userMsg = document.createElement('div');
     userMsg.className = 'chat-msg sent';
     userMsg.innerHTML = `<div class="msg-bubble">${escapeHtml(text)}</div><span class="msg-time">${formatTime(new Date().toISOString())}</span>`;
-    botMessages.appendChild(userMsg);
-    botInput.value = '';
-    botMessages.scrollTop = botMessages.scrollHeight;
+    botMessages.appendChild(userMsg); botInput.value = ''; botMessages.scrollTop = botMessages.scrollHeight;
     const userId = currentUser?.id || 'anonymous';
     fetch('http://localhost:5000/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: text, user_id: userId }),
     })
     .then(r => r.json())
@@ -523,31 +459,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const div = document.createElement('div');
     div.className = 'chat-msg received';
     div.innerHTML = `<div class="msg-bubble">${escapeHtml(text)}</div><span class="msg-time">${formatTime(new Date().toISOString())}</span>`;
-    botMessages.appendChild(div);
-    botMessages.scrollTop = botMessages.scrollHeight;
+    botMessages.appendChild(div); botMessages.scrollTop = botMessages.scrollHeight;
   }
 
-  if (sendBtn) sendBtn.addEventListener('click', sendMessage);
-  if (input)   input.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+  if (sendBtn)    sendBtn.addEventListener('click', sendMessage);
+  if (input)      input.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
   if (botSendBtn) botSendBtn.addEventListener('click', sendBotMessage);
   if (botInput)   botInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendBotMessage(); });
 
-  function escapeHtml(str) {
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  }
-  function getInitials(nom, prenom) {
-    return ((nom?.[0] || '') + (prenom?.[0] || '')).toUpperCase();
-  }
-  function formatTime(d) {
-    if (!d) return '';
-    return new Date(d).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
+  function escapeHtml(str) { return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function getInitials(nom, prenom) { return ((nom?.[0] || '') + (prenom?.[0] || '')).toUpperCase(); }
+  function formatTime(d) { if (!d) return ''; return new Date(d).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
   function randomGradient(seed) {
     const gradients = [
-      'linear-gradient(135deg,#e44,#f97316)',
-      'linear-gradient(135deg,#059669,#34d399)',
-      'linear-gradient(135deg,#7c3aed,#a78bfa)',
-      'linear-gradient(135deg,#0ea5e9,#38bdf8)',
+      'linear-gradient(135deg,#e44,#f97316)', 'linear-gradient(135deg,#059669,#34d399)',
+      'linear-gradient(135deg,#7c3aed,#a78bfa)', 'linear-gradient(135deg,#0ea5e9,#38bdf8)',
       'linear-gradient(135deg,#db2777,#f472b6)',
     ];
     return gradients[(seed || 0) % gradients.length];
@@ -560,25 +486,70 @@ document.addEventListener('DOMContentLoaded', () => {
 const helpOverlay = document.getElementById('helpOverlay');
 const helpClose   = document.getElementById('helpClose');
 if (helpClose)   helpClose.addEventListener('click', () => helpOverlay?.classList.remove('active'));
-if (helpOverlay) helpOverlay.addEventListener('click', e => {
-  if (e.target === helpOverlay) helpOverlay.classList.remove('active');
-});
+if (helpOverlay) helpOverlay.addEventListener('click', e => { if (e.target === helpOverlay) helpOverlay.classList.remove('active'); });
 
 // ════════════════════════════════════════
 // LINKS WIDGET
 // ════════════════════════════════════════
-const openBtn       = document.getElementById('openModal');
-const modal         = document.getElementById('linkModal');
-const closeModalBtn = document.getElementById('closeModal');
-const saveBtn       = document.querySelector('.save-btn');
-const linkInput     = document.getElementById('modalLinkInput');
+const openBtn        = document.getElementById('openModal');
+const modal          = document.getElementById('linkModal');
+const closeModalBtn  = document.getElementById('closeModal');
+const saveBtn        = document.querySelector('.save-btn');
+const linkInput      = document.getElementById('modalLinkInput');
 const linksContainer = document.getElementById('linksContainer');
-const emptyMsg      = document.getElementById('linksEmpty');
-const badge         = document.getElementById('linksBadge');
-const toggleBtn     = document.getElementById('linksToggleBtn');
-const dropdown      = document.getElementById('linksDropdown');
+const emptyMsg       = document.getElementById('linksEmpty');
+const badge          = document.getElementById('linksBadge');
+const toggleBtn      = document.getElementById('linksToggleBtn');
+const dropdown       = document.getElementById('linksDropdown');
 
-let links = JSON.parse(localStorage.getItem('links')) || [];
+// ── Clé localStorage isolée par utilisateur connecté ──
+function getLinksKey() {
+  return `links_${currentUser?.id || 'guest'}`;
+}
+
+let links = [];
+
+function loadLinks() {
+  links = JSON.parse(localStorage.getItem(getLinksKey())) || [];
+  displayLinks();
+}
+
+function saveLinks() {
+  localStorage.setItem(getLinksKey(), JSON.stringify(links));
+}
+
+// ── Détecter si on est sur son propre profil ──
+function isOwnProfile() {
+  const params    = new URLSearchParams(window.location.search);
+  const profileId = params.get('id');
+  // Pas de ?id= → forcément son propre profil
+  if (!profileId) return true;
+  // Avec ?id= → comparer avec l'utilisateur connecté
+  return String(profileId) === String(currentUser?.id);
+}
+
+// ── Appliquer la visibilité du widget selon le profil ──
+function applyLinksVisibility() {
+  const own    = isOwnProfile();
+  const addBtn = document.getElementById('openModal');
+
+  if (own) {
+    // ── Propre profil : afficher ses propres liens, permettre l'ajout ──
+    if (addBtn) addBtn.style.display = '';
+    // links déjà chargés via loadLinks() → displayLinks() s'occupera des boutons supprimer
+  } else {
+    // ── Profil étranger : afficher les liens du PROPRIÉTAIRE en lecture seule ──
+    if (addBtn) addBtn.style.display = 'none';
+
+    const params    = new URLSearchParams(window.location.search);
+    const ownerId   = params.get('id');
+    links = JSON.parse(localStorage.getItem(`links_${ownerId}`)) || [];
+    displayLinks();
+
+    // Masquer tous les boutons de suppression après le rendu
+    document.querySelectorAll('#linksContainer .delete-btn').forEach(b => b.style.display = 'none');
+  }
+}
 
 if (toggleBtn) {
   toggleBtn.addEventListener('click', e => {
@@ -610,7 +581,7 @@ function displayLinks() {
     delBtn.addEventListener('click', e => {
       e.stopPropagation();
       links.splice(index, 1);
-      localStorage.setItem('links', JSON.stringify(links));
+      saveLinks();
       displayLinks();
     });
     div.appendChild(icon); div.appendChild(a); div.appendChild(delBtn);
@@ -649,11 +620,12 @@ window.addEventListener('click', e => {
 if (linkInput) linkInput.addEventListener('keydown', e => { if (e.key === 'Enter') saveBtn?.click(); });
 if (saveBtn) {
   saveBtn.addEventListener('click', () => {
+    if (!isOwnProfile()) return; // sécurité supplémentaire
     const link = linkInput?.value.trim();
     if (!link) { showNotification('⚠️  Entrez un lien !'); return; }
     if (!link.startsWith('http')) { showNotification('⚠️  Lien invalide !'); return; }
     links.push(link);
-    localStorage.setItem('links', JSON.stringify(links));
+    saveLinks();
     if (linkInput) linkInput.value = '';
     if (modal) modal.style.display = 'none';
     document.body.classList.remove('modal-open');
@@ -661,7 +633,8 @@ if (saveBtn) {
     showNotification('✓  Lien ajouté !');
   });
 }
-displayLinks();
+
+// NE PAS appeler displayLinks() ici — sera appelé par loadUserProfile() → loadLinks() → applyLinksVisibility()
 
 // ════════════════════════════════════════
 // LOAD ALL USERS FOR SIDEBAR
@@ -677,14 +650,11 @@ async function loadAllUsers() {
     if (!Array.isArray(users)) { list.innerHTML = 'Données invalides'; return; }
     list.innerHTML = '';
     users.forEach(user => {
-      const item = document.createElement('div');
-      item.className = 'suggest-item';
-      const avatarDiv = document.createElement('div');
-      avatarDiv.className = 'suggest-avatar';
+      const item      = document.createElement('div'); item.className = 'suggest-item';
+      const avatarDiv = document.createElement('div'); avatarDiv.className = 'suggest-avatar';
       if (user.photo_profil) {
         const img = document.createElement('img');
-        img.src = buildPhotoUrl(user.photo_profil);
-        img.alt = user.prenom;
+        img.src = buildPhotoUrl(user.photo_profil); img.alt = user.prenom;
         img.onerror = () => {
           avatarDiv.innerHTML = '';
           avatarDiv.textContent = (user.prenom[0] + user.nom[0]).toUpperCase();
@@ -695,18 +665,13 @@ async function loadAllUsers() {
         avatarDiv.textContent = (user.prenom[0] + user.nom[0]).toUpperCase();
         avatarDiv.style.background = 'linear-gradient(135deg,#6366f1,#4338ca)';
       }
-      const infoDiv = document.createElement('div');
-      infoDiv.className = 'suggest-info';
-      const nameDiv = document.createElement('div');
-      nameDiv.className = 'name';
+      const infoDiv = document.createElement('div'); infoDiv.className = 'suggest-info';
+      const nameDiv = document.createElement('div'); nameDiv.className = 'name';
       nameDiv.textContent = `${user.prenom} ${user.nom}`;
-      const roleDiv = document.createElement('div');
-      roleDiv.className = 'role';
+      const roleDiv = document.createElement('div'); roleDiv.className = 'role';
       roleDiv.textContent = user.specialite || user.niveau || user.role || 'Utilisateur';
-      infoDiv.appendChild(nameDiv);
-      infoDiv.appendChild(roleDiv);
-      item.appendChild(avatarDiv);
-      item.appendChild(infoDiv);
+      infoDiv.appendChild(nameDiv); infoDiv.appendChild(roleDiv);
+      item.appendChild(avatarDiv); item.appendChild(infoDiv);
       item.style.cursor = 'pointer';
       item.addEventListener('click', () => {
         window.location.href = `profile.html?id=${user.ID}`;
@@ -763,8 +728,7 @@ if (document.readyState === 'loading') {
 function buildDynAvatar(src, size) {
   if (src) {
     const img = document.createElement('img');
-    img.src = src;
-    img.className = 'post-avatar post-avatar-dyn';
+    img.src = src; img.className = 'post-avatar post-avatar-dyn';
     img.style.cssText = `width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;`;
     return img;
   }
@@ -776,8 +740,7 @@ function buildDynAvatar(src, size) {
 }
 
 function buildCommentSection(card) {
-  const sec = document.createElement('div');
-  sec.className = 'comments-section';
+  const sec = document.createElement('div'); sec.className = 'comments-section';
   const initiales  = currentUser.initiales || '?';
   const cmtAvStyle = currentProfileSrc
     ? `background-image:url(${currentProfileSrc});background-size:cover;background-position:center`
@@ -794,19 +757,15 @@ function buildCommentSection(card) {
   const cmtSend  = sec.querySelector('.comment-send');
   const cmtList  = sec.querySelector('.comment-list');
   function addComment() {
-    const txt = cmtInput.value.trim();
-    if (!txt) return;
-    const now  = new Date();
-    const time = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
-    const item = document.createElement('div');
-    item.className = 'comment-item';
+    const txt = cmtInput.value.trim(); if (!txt) return;
+    const now  = new Date(); const time = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
+    const item = document.createElement('div'); item.className = 'comment-item';
     const fullName = `${currentUser.prenom} ${currentUser.nom}`.trim() || 'Moi';
     const avHTML   = currentProfileSrc
       ? `<div class="comment-avatar" style="background-image:url(${currentProfileSrc});background-size:cover;background-position:center;background-color:transparent"></div>`
       : `<div class="comment-avatar">${initiales}</div>`;
     item.innerHTML = `${avHTML}<div class="comment-bubble"><div class="comment-author">${fullName}</div><div class="comment-text">${txt.replace(/</g, '&lt;')}</div><div class="comment-time">${time}</div></div>`;
-    cmtList.appendChild(item);
-    cmtInput.value = '';
+    cmtList.appendChild(item); cmtInput.value = '';
     showNotification('💬 Commentaire ajouté avec succès !');
   }
   cmtSend.addEventListener('click', addComment);
@@ -818,26 +777,24 @@ function buildCommentSection(card) {
 // BUILD COMMENT ITEM (ratings from API)
 // ════════════════════════════════════════
 function buildProfileCommentItem(name, note, text, date, photoProfile) {
-  const item = document.createElement('div');
-  item.className = 'comment-item';
+  const item      = document.createElement('div'); item.className = 'comment-item';
   const initials  = name.slice(0, 2).toUpperCase();
   const starsHtml = Array.from({ length: 5 }, (_, i) =>
-    `<i class="${i < note ? 'fa-solid' : 'fa-regular'} fa-star"></i>`
-  ).join('');
+    `<i class="${i < note ? 'fa-solid' : 'fa-regular'} fa-star"></i>`).join('');
   const avatarHtml = photoProfile
     ? `<img src="../../../${photoProfile}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
     : initials;
   item.innerHTML = `
     <div class="comment-avatar" style="${photoProfile ? '' : 'background:linear-gradient(135deg,#4b48ec,#7299f4);'}">
-        ${avatarHtml}
+      ${avatarHtml}
     </div>
     <div class="comment-body">
-        <div class="comment-header">
-            <span class="comment-name">${name}</span>
-            <div class="comment-stars">${starsHtml}</div>
-            <span class="comment-date">${date}</span>
-        </div>
-        ${text ? `<p class="comment-text">${text}</p>` : ''}
+      <div class="comment-header">
+        <span class="comment-name">${name}</span>
+        <div class="comment-stars">${starsHtml}</div>
+        <span class="comment-date">${date}</span>
+      </div>
+      ${text ? `<p class="comment-text">${text}</p>` : ''}
     </div>`;
   return item;
 }
@@ -869,62 +826,34 @@ async function submitRating(card) {
   const picker   = card.querySelector('.star-picker');
   const textarea = card.querySelector('.rating-comment-input');
   const note     = parseInt(picker?.dataset.selected || 0);
-
   if (note === 0) {
     textarea.placeholder = '⚠ Choisissez une note avant de soumettre...';
     textarea.classList.add('input-error');
-    setTimeout(() => {
-      textarea.placeholder = 'Commentaire...';
-      textarea.classList.remove('input-error');
-    }, 2000);
+    setTimeout(() => { textarea.placeholder = 'Commentaire...'; textarea.classList.remove('input-error'); }, 2000);
     return;
   }
-
   const commentaire = textarea.value.trim();
   const dateEval    = new Date().toLocaleDateString('fr-FR');
   const serviceId   = card.dataset.serviceId;
-
-  const payload = {
-    note,
-    commentaire: commentaire || null,
-    DateEval: dateEval,
-    ID_Service: serviceId
-  };
-
+  const payload     = { note, commentaire: commentaire || null, DateEval: dateEval, ID_Service: serviceId };
   try {
     const response = await fetch('../../../api/submit-rating.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
     });
     const result = await response.json();
     if (!result.success) throw new Error(result.message || 'Erreur');
-
     updateRatingSummary(card, note);
     closeRatingPanel(card);
-
     const commentsList = card.querySelector('.comments-list');
-    if (commentsList) {
-      commentsList.dataset.loaded = 'false';
-      commentsList.innerHTML = '';
-      commentsList.hidden = true;
-    }
-
+    if (commentsList) { commentsList.dataset.loaded = 'false'; commentsList.innerHTML = ''; commentsList.hidden = true; }
     const rateBtn = card.querySelector('.post-action-btn[data-action="rate"]');
-    if (rateBtn) {
-      rateBtn.classList.add('rated');
-      rateBtn.innerHTML = `<i class="fa-solid fa-star"></i> Évalué`;
-    }
-
+    if (rateBtn) { rateBtn.classList.add('rated'); rateBtn.innerHTML = `<i class="fa-solid fa-star"></i> Évalué`; }
     showNotification('Évaluation soumise avec succès !');
   } catch (err) {
     console.error('Erreur lors de la soumission :', err);
     textarea.placeholder = '⚠ Erreur lors de la soumission...';
     textarea.classList.add('input-error');
-    setTimeout(() => {
-      textarea.placeholder = 'Commentaire...';
-      textarea.classList.remove('input-error');
-    }, 2000);
+    setTimeout(() => { textarea.placeholder = 'Commentaire...'; textarea.classList.remove('input-error'); }, 2000);
   }
 }
 
@@ -940,8 +869,7 @@ function updateRatingSummary(card, newNote) {
   const rounded  = Math.round(((oldScore * oldCount) + newNote) / newCount * 10) / 10;
   scoreEl.textContent = rounded.toFixed(1);
   countEl.textContent = `(${newCount} évaluations)`;
-  const full = Math.floor(rounded);
-  const half = rounded - full >= 0.5;
+  const full = Math.floor(rounded), half = rounded - full >= 0.5;
   starsEl.innerHTML = Array.from({ length: 5 }, (_, i) => {
     if (i < full) return '<i class="fa-solid fa-star"></i>';
     if (i === full && half) return '<i class="fa-solid fa-star-half-stroke"></i>';
@@ -953,7 +881,6 @@ function updateRatingSummary(card, newNote) {
 // ENRICH CARD
 // ════════════════════════════════════════
 function enrichCard(card) {
-  // Pin badge
   if (!card.querySelector('.post-pin-badge')) {
     const pinBadge = document.createElement('div');
     pinBadge.className = 'post-pin-badge';
@@ -961,11 +888,9 @@ function enrichCard(card) {
     card.insertBefore(pinBadge, card.firstChild);
   }
 
-  // Dynamic avatar
   const oldAv = card.querySelector('.post-top .post-avatar-placeholder:not(.post-avatar-dyn)');
   if (oldAv) { const dyn = buildDynAvatar(currentProfileSrc, 36); oldAv.replaceWith(dyn); }
 
-  // Footer buttons classification
   const footer = card.querySelector('.post-footer');
   if (footer) {
     footer.querySelectorAll('.post-action').forEach(btn => {
@@ -975,11 +900,9 @@ function enrichCard(card) {
     });
   }
 
-  // 3-dot menu
   const menuBtn = card.querySelector('.post-menu-btn');
   if (menuBtn && !menuBtn.querySelector('.post-ctx-menu')) {
-    const ctx = document.createElement('div');
-    ctx.className = 'post-ctx-menu';
+    const ctx = document.createElement('div'); ctx.className = 'post-ctx-menu';
     ctx.innerHTML = `
       <div class="ctx-item" data-action="pin"><i class="fa-solid fa-thumbtack"></i> Épingler</div>
       <div class="ctx-item" data-action="edit"><i class="fa-solid fa-pen"></i> Modifier</div>
@@ -992,8 +915,7 @@ function enrichCard(card) {
     });
     ctx.querySelectorAll('.ctx-item').forEach(item => {
       item.addEventListener('click', e => {
-        e.stopPropagation();
-        ctx.classList.remove('open');
+        e.stopPropagation(); ctx.classList.remove('open');
         const action = item.dataset.action;
         if (action === 'delete') {
           const confirmOverlay = document.createElement('div');
@@ -1032,7 +954,6 @@ function enrichCard(card) {
     });
   }
 
-  // Like
   const likeBtn = card.querySelector('.like-btn');
   if (likeBtn && !likeBtn._bound) {
     likeBtn._bound = true;
@@ -1045,7 +966,6 @@ function enrichCard(card) {
     });
   }
 
-  // Comment (legacy .comment-btn)
   const commentSectionBtn = card.querySelector('.comment-btn');
   if (commentSectionBtn && !commentSectionBtn._bound) {
     commentSectionBtn._bound = true;
@@ -1057,7 +977,6 @@ function enrichCard(card) {
     });
   }
 
-  // Share
   const shareBtn = card.querySelector('.share-btn');
   if (shareBtn && !shareBtn._bound) {
     shareBtn._bound = true;
@@ -1065,11 +984,10 @@ function enrichCard(card) {
       const title = card.querySelector('.post-title')?.textContent || '';
       const body  = card.querySelector('.post-body')?.textContent  || '';
       shareText = `${title}\n${body}\n${location.href}`;
-      shareOverlay.classList.add('active');
+      shareOverlay?.classList.add('active');
     });
   }
 
-  // ── Rating & Comments buttons ──
   const rateBtn     = card.querySelector('.post-action-btn[data-action="rate"]');
   const commentBtn  = card.querySelector('.post-action-btn[data-action="comment"]');
   const ratingPanel = card.querySelector('.rating-panel');
@@ -1092,59 +1010,30 @@ function enrichCard(card) {
     commentBtn.addEventListener('click', async () => {
       const commentsList = card.querySelector('.comments-list');
       if (!commentsList) return;
-
       const isOpen = !commentsList.hidden;
       if (ratingPanel && !ratingPanel.hidden) ratingPanel.hidden = true;
-
-      if (isOpen) {
-        commentsList.hidden = true;
-        return;
-      }
-
+      if (isOpen) { commentsList.hidden = true; return; }
       if (commentsList.dataset.loaded === 'false') {
         commentsList.dataset.loaded = 'loading';
         commentsList.hidden = false;
-        commentsList.innerHTML = `
-          <div style="padding:14px 18px;color:#8c8580;font-size:12px;
-                      font-family:'Space Grotesk',sans-serif;display:flex;
-                      align-items:center;gap:8px;">
-            <i class="fa-solid fa-spinner fa-spin"></i> Chargement des avis...
-          </div>`;
-
+        commentsList.innerHTML = `<div style="padding:14px 18px;color:#8c8580;font-size:12px;font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-spinner fa-spin"></i> Chargement des avis...</div>`;
         const serviceId = card.dataset.serviceId;
         try {
           const res  = await fetch(`../../../api/get-ratings.php?service_id=${serviceId}`);
           const data = await res.json();
           commentsList.innerHTML = '';
           if (!data.success || !data.ratings || data.ratings.length === 0) {
-            commentsList.innerHTML = `
-              <div style="padding:14px 18px;color:#8c8580;font-size:12px;
-                          font-family:'Space Grotesk',sans-serif;text-align:center;">
-                <i class="fa-regular fa-comment-dots" style="font-size:20px;display:block;margin-bottom:6px;"></i>
-                Aucun avis pour l'instant
-              </div>`;
+            commentsList.innerHTML = `<div style="padding:14px 18px;color:#8c8580;font-size:12px;font-family:'Space Grotesk',sans-serif;text-align:center;"><i class="fa-regular fa-comment-dots" style="font-size:20px;display:block;margin-bottom:6px;"></i>Aucun avis pour l'instant</div>`;
           } else {
             data.ratings.forEach(r => {
-              const dateStr = new Date(r.DateEval).toLocaleDateString('fr-FR', {
-                day: '2-digit', month: 'short', year: 'numeric'
-              });
-              commentsList.appendChild(buildProfileCommentItem(
-                `${r.prenom} ${r.nom}`,
-                parseInt(r.note),
-                r.commentaire || '',
-                dateStr,
-                r.photo_profil
-              ));
+              const dateStr = new Date(r.DateEval).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+              commentsList.appendChild(buildProfileCommentItem(`${r.prenom} ${r.nom}`, parseInt(r.note), r.commentaire || '', dateStr, r.photo_profil));
             });
           }
           commentsList.dataset.loaded = 'true';
         } catch (err) {
           console.error(err);
-          commentsList.innerHTML = `
-            <div style="padding:14px 18px;color:#ef4444;font-size:12px;
-                        font-family:'Space Grotesk',sans-serif;">
-              <i class="fa-solid fa-triangle-exclamation"></i> Erreur de chargement
-            </div>`;
+          commentsList.innerHTML = `<div style="padding:14px 18px;color:#ef4444;font-size:12px;font-family:'Space Grotesk',sans-serif;"><i class="fa-solid fa-triangle-exclamation"></i> Erreur de chargement</div>`;
           commentsList.dataset.loaded = 'false';
         }
       } else {
@@ -1162,52 +1051,35 @@ function enrichCard(card) {
       renderPickerStars(starPicker, parseInt(star.dataset.star));
     });
   }
-
-  if (cancelBtn && !cancelBtn._bound) {
-    cancelBtn._bound = true;
-    cancelBtn.addEventListener('click', () => closeRatingPanel(card));
-  }
-
-  if (submitBtn && !submitBtn._bound) {
-    submitBtn._bound = true;
-    submitBtn.addEventListener('click', () => submitRating(card));
-  }
+  if (cancelBtn && !cancelBtn._bound) { cancelBtn._bound = true; cancelBtn.addEventListener('click', () => closeRatingPanel(card)); }
+  if (submitBtn && !submitBtn._bound) { submitBtn._bound = true; submitBtn.addEventListener('click', () => submitRating(card)); }
 }
 
 // ════════════════════════════════════════
 // LOAD SERVICES
 // ════════════════════════════════════════
-document.addEventListener("DOMContentLoaded", () => {
-  loadServices();
-});
+document.addEventListener("DOMContentLoaded", () => { loadServices(); });
 
 async function loadServices() {
   try {
     const urlParams = new URLSearchParams(window.location.search);
-    const userId = urlParams.get("id");
-
-    const response = await fetch(`../../../api/get-user-service.php?id=${userId}`);
-    const data = await response.json();
+    const userId    = urlParams.get("id");
+    const response  = await fetch(`../../../api/get-user-service.php?id=${userId}`);
+    const data      = await response.json();
     if (!data.success) return;
-
     const container = document.getElementById("servicesContainer");
     if (!container) return;
-
     container.innerHTML = "";
-    data.services.forEach(service => {
-      container.innerHTML += createServiceCard(service);
-    });
+    data.services.forEach(service => { container.innerHTML += createServiceCard(service); });
     container.querySelectorAll('.post-card').forEach(enrichCard);
-  } catch (error) {
-    console.error(error);
-  }
+  } catch (error) { console.error(error); }
 }
 
 // ════════════════════════════════════════
 // CREATE SERVICE CARD
 // ════════════════════════════════════════
 function createServiceCard(service) {
-  const profileImage = service.photo_profil ? `../../../${service.photo_profil}` : "";
+  const profileImage = service.photo_profil  ? `../../../${service.photo_profil}`  : "";
   const serviceImage = service.service_photo ? `../../../${service.service_photo}` : null;
   const categories   = service.categorie ? service.categorie.split(",") : [];
 
@@ -1219,49 +1091,34 @@ function createServiceCard(service) {
       </div>
       <div class="post-meta">
         <div class="post-name">${service.nom} ${service.prenom}</div>
-        <div class="post-time-row">
-          <span class="post-time">${getTimeAgo(service.DateDePublication)}</span>
-        </div>
+        <div class="post-time-row"><span class="post-time">${getTimeAgo(service.DateDePublication)}</span></div>
       </div>
     </div>
-
     <div class="post-title">${service.titre}</div>
-
     <div class="post-tags">
       <span class="post-tag">
         ${categories.map(cat => `
           <span class="category-pill green" style="cursor:pointer"
                 onclick="window.location.href='../categorie-services/categorie-services.html?cat=${encodeURIComponent(cat.trim())}'">
             ${cat.trim()}
-          </span>
-        `).join("")}
+          </span>`).join("")}
       </span>
     </div>
-
-    <div class="post-body">
-      ${service.description}<br>
-      prix : ${service.prix} DZD
-    </div>
+    <div class="post-body">${service.description}<br>prix : ${service.prix} DZD</div>
     <div class="post-body">${service.status}</div>
-
     ${serviceImage ? `<img class="post-image" src="${serviceImage}">` : ""}
-
     <div class="post-rating-summary">
       <div class="rating-stars-display">${generateStars(service.note_moyenne)}</div>
       <span class="rating-score">${service.note_moyenne}</span>
       <span class="rating-count">(${service.nb_avis} évaluations)</span>
     </div>
-
     <div class="post-actions">
-      <button class="post-action-btn" data-action="rate">
-        <i class="fa-regular fa-star"></i> Évaluer
-      </button>
+      <button class="post-action-btn" data-action="rate"><i class="fa-regular fa-star"></i> Évaluer</button>
       <button class="post-action-btn" data-action="comment">
         <i class="fa-regular fa-comment"></i> Commentaires
         <span style="background:rgba(75,72,236,0.15);color:#4b48ec;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px;">${service.nb_avis || 0}</span>
       </button>
     </div>
-
     <div class="rating-panel" hidden>
       <div class="rating-panel-inner">
         <p class="rating-panel-label">Votre évaluation</p>
@@ -1279,7 +1136,6 @@ function createServiceCard(service) {
         </div>
       </div>
     </div>
-
     <div class="comments-list" hidden data-loaded="false"></div>
   </article>`;
 }
@@ -1288,12 +1144,8 @@ function createServiceCard(service) {
 // UTILITIES
 // ════════════════════════════════════════
 function getTimeAgo(dateString) {
-  const now = new Date();
-  const date = new Date(
-    dateString.includes('Z') || dateString.includes('+')
-      ? dateString
-      : dateString.replace(' ', 'T') + 'Z'
-  );
+  const now  = new Date();
+  const date = new Date(dateString.includes('Z') || dateString.includes('+') ? dateString : dateString.replace(' ', 'T') + 'Z');
   const diffMs  = now - date;
   const minutes = Math.floor(diffMs / 60000);
   const hours   = Math.floor(diffMs / 3600000);
@@ -1302,9 +1154,9 @@ function getTimeAgo(dateString) {
   const years   = Math.floor(months / 12);
   if (minutes < 1)  return `à l'instant`;
   if (minutes < 60) return `il y a ${minutes} min`;
-  if (hours < 24)   return `il y a ${hours} h`;
-  if (days < 30)    return `il y a ${days} jours`;
-  if (months < 12)  return `il y a ${months} mois`;
+  if (hours   < 24) return `il y a ${hours} h`;
+  if (days    < 30) return `il y a ${days} jours`;
+  if (months  < 12) return `il y a ${months} mois`;
   return `il y a ${years} an(s)`;
 }
 
@@ -1313,19 +1165,15 @@ function generateStars(note) {
   const fullStars = Math.floor(note);
   let html = "";
   for (let i = 0; i < 5; i++) {
-    html += i < fullStars
-      ? `<i class="fa-solid fa-star"></i>`
-      : `<i class="fa-regular fa-star"></i>`;
+    html += i < fullStars ? `<i class="fa-solid fa-star"></i>` : `<i class="fa-regular fa-star"></i>`;
   }
   return html;
 }
 
-/* Close ctx menus on outside click */
 document.addEventListener('click', () =>
   document.querySelectorAll('.post-ctx-menu.open').forEach(m => m.classList.remove('open'))
 );
 
-/* Enrich existing cards */
 document.querySelectorAll('.post-card').forEach(enrichCard);
 
 // ════════════════════════════════════════
@@ -1334,30 +1182,22 @@ document.querySelectorAll('.post-card').forEach(enrichCard);
 const navMenuBtn  = document.getElementById('navMenuBtn');
 const navDropdown = document.getElementById('navDropdown');
 
-navMenuBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  navDropdown.hidden = !navDropdown.hidden;
-});
-
+navMenuBtn.addEventListener('click', (e) => { e.stopPropagation(); navDropdown.hidden = !navDropdown.hidden; });
 document.addEventListener('click', () => { navDropdown.hidden = true; });
 
 document.getElementById('btnDeconnexion').addEventListener('click', () => {
   window.location.href = '../../html/login-user.html';
 });
-
 document.getElementById('btnSupprimerCompte').addEventListener('click', () => {
   navDropdown.hidden = true;
   document.getElementById('modalSupprimer').hidden = false;
 });
-
 document.getElementById('modalCancel').addEventListener('click', () => {
   document.getElementById('modalSupprimer').hidden = true;
 });
-
 document.getElementById('modalOverlay').addEventListener('click', () => {
   document.getElementById('modalSupprimer').hidden = true;
 });
-
 document.getElementById('modalConfirm').addEventListener('click', async () => {
   document.getElementById('modalSupprimer').hidden = true;
   const res  = await fetch('../../../api/delete-account.php', { method: 'POST' });
