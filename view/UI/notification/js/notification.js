@@ -138,9 +138,6 @@ function renderNotifications() {
         </div>
         <div class="notif-aside">
           ${!n.is_read ? '<div class="unread-dot"></div>' : ''}
-          <button class="notif-menu-btn" title="Options">
-            <i class="fa-solid fa-ellipsis-vertical"></i>
-          </button>
         </div>
       </div>`;
 

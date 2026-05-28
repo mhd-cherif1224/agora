@@ -1761,8 +1761,7 @@ document.getElementById('modalConfirm').addEventListener('click', async () => {
       preview.innerHTML = `
             <div class="preview-item" style="position:relative;display:inline-block;margin-top:8px;">
                 <img src="${photoUrl}" style="width:100%;border-radius:10px;max-height:200px;object-fit:cover;">
-                <button class="preview-remove" style="position:absolute;top:6px;right:6px;background:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.2);">×</button>
-            </div>`;
+            <button type="button" class="preview-remove" style="position:absolute;top:6px;right:6px;background:#fff;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.25);z-index:10;padding:0; color:#000;">×</button>            </div>`;
       preview.classList.add('has-items');
       preview.querySelector('.preview-remove').addEventListener('click', () => {
         preview.innerHTML = '';
@@ -1788,11 +1787,44 @@ document.getElementById('modalConfirm').addEventListener('click', async () => {
     publishBtn.dataset.editMode = 'true';
     publishBtn.dataset.editId = serviceId;
 
+    // ── Bouton fermer (X) ──
+    const closeBtn = document.getElementById('postModalClose');
+    if (closeBtn && !closeBtn._editBound) {
+      closeBtn._editBound = true;
+      closeBtn.addEventListener('click', _resetAndClose);
+    } else if (closeBtn) {
+      // Remplacer pour éviter les anciens listeners
+      const newClose = closeBtn.cloneNode(true);
+      closeBtn.parentNode.replaceChild(newClose, closeBtn);
+      newClose.addEventListener('click', _resetAndClose);
+    }
+
+    // ── Clic sur le fond ──
+    overlay._closeHandler && overlay.removeEventListener('click', overlay._closeHandler);
+    overlay._closeHandler = (e) => { if (e.target === overlay) _resetAndClose(); };
+    overlay.addEventListener('click', overlay._closeHandler);
+
     // ── Ouvrir le modal ──
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
-  };
 
+    function _resetAndClose() {
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+      const publishBtn = document.getElementById('postPublishBtn');
+      if (publishBtn) {
+        delete publishBtn.dataset.editMode;
+        delete publishBtn.dataset.editId;
+        publishBtn.innerHTML = 'publier';
+      }
+      attachedPhotos = [];
+      document.getElementById('postPreview').innerHTML = '';
+      document.getElementById('postPreview').classList.remove('has-items');
+      document.getElementById('postTitle').value = '';
+      document.getElementById('postPrice').value = '';
+      document.getElementById('postDesc').value = '';
+    }
+  };
 
   // ── Footer buttons (photo, location, catégorie, statut, timer) ──
   const pmPhotoBtn = document.getElementById('pmPhotoBtn');
@@ -1841,13 +1873,15 @@ document.getElementById('modalConfirm').addEventListener('click', async () => {
                     img.src = photo.url;
                     img.style.cssText = 'width:100%;border-radius:10px;max-height:200px;object-fit:cover;display:block;';
                     const rm = document.createElement('button');
-                    rm.style.cssText = 'position:absolute;top:6px;right:6px;background:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.2);';
-                    rm.textContent = '×';
-                    rm.addEventListener('click', () => {
-                        attachedPhotos.splice(idx, 1);
-                        div.remove();
-                        if (attachedPhotos.length === 0) preview.classList.remove('has-items');
-                    });
+                      rm.type = 'button';
+                      rm.style.cssText = 'position:absolute;top:6px;right:6px;background:#fff;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.25);z-index:10;padding:0;';
+                      rm.textContent = '×';
+                      rm.addEventListener('click', (e) => {
+                          e.stopPropagation();
+                          attachedPhotos.splice(idx, 1);
+                          div.remove();
+                          if (attachedPhotos.length === 0) preview.classList.remove('has-items');
+                      });
                     div.appendChild(img);
                     div.appendChild(rm);
                     preview.appendChild(div);

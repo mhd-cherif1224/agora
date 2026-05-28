@@ -297,13 +297,13 @@ nav {
   box-shadow: 0 0 0 3px var(--color-accent-glow);
   flex-shrink: 0; margin-top: 4px;
 }
-.notif-menu-btn {
+/* .notif-menu-btn {
   width: 28px; height: 28px; border: none; border-radius: 50%;
   background: transparent; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   color: var(--color-muted); font-size: 13px; transition: background .2s, color .2s;
 }
-.notif-menu-btn:hover { background: var(--color-nav-icon-bg-hover); color: var(--color-text); }
+.notif-menu-btn:hover { background: var(--color-nav-icon-bg-hover); color: var(--color-text); } */
 
 /* Dismiss animation */
 .notif-card.dismissing {
