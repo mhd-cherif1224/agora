@@ -1,55 +1,54 @@
 <!-- TABLE DES SERVICES -->
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/table-admin.css">
-
     <title>Table des Services</title>
 </head>
-
 <body>
 
-    <header>
-        <nav class="admin-navbar">
+    <!-- NAVBAR -->
+    <header class="navbar">
+        <div class="nav-logo" onclick="window.location.href='../html/home-page-admin.html'">
+            <img src="../images/logo.svg" alt="">
+        </div>
 
-        <button id="adminTableBtn" class="MyBtns">
-            <a href="../html/table-admin.html">Table d'Admins</a>
-        </button>
-
-        <button class="MyBtns">
-            <a href="../html/table-utilisateur.html">Table d'Utilisateurs</a>
-        </button>
-
-        <button class="MyBtns">
-            <a href="../html/table-service.html"> <u>Table des Services</u></a>
-        </button>
-
-        <button class="MyBtns">
-            <a href="../html/table-categorie.html">Table des Catégories</a>
-        </button>
-
-        <button id="deconnexion-btn">
-            <a href="../html/login-admin.html">Déconnexion</a>
-        </button>
-
+        <nav class="navbar-links">
+            <a href="../html/table-admin.html" class="nav-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Table d'Admins
+            </a>
+            <a href="../html/table-utilisateur.html" class="nav-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Table d'Utilisateurs
+            </a>
+            <a href="../html/table-service.html" class="nav-link active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                Table des Services
+            </a>
+            <a href="../html/table-categorie.html" class="nav-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Table des Catégories
+            </a>
         </nav>
-    </header>
 
+        <div class="navbar-right">
+            <button id="toggleBtn">🌙</button>
+            <a href="../html/login-admin.html" class="btn-logout" id="logout-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Déconnexion
+            </a>
+        </div>
+    </header>
 
     <div class="container">
 
-
         <table id="serviceTable">
-
             <thead>
-
                 <tr>
                     <th>ID</th>
                     <th>Titre</th>
@@ -58,11 +57,8 @@
                     <th>StatutService</th>
                     <th>Prix</th>
                 </tr>
-
             </thead>
-
             <tbody>
-
                 <tr>
                     <td>1</td>
                     <td>Aide Java</td>
@@ -71,100 +67,20 @@
                     <td>Disponible</td>
                     <td>1000</td>
                 </tr>
-
             </tbody>
-
         </table>
 
-
         <div class="buttons-container">
-
             <button class="buttons" id="deleteBtn">
                 <i class="fa-solid fa-minus-square"></i>
                 Supprimer un Service
             </button>
-
-            
-
         </div>
 
 
-
-        <!-- MODAL AJOUT -->
-
-        <!-- <div id="modal" class="modal">
-
-            <div class="modal-content" style="height:auto;width:500px;">
-
-                <div class="modal-header">
-                    <p>Ajouter un Service</p>
-                    <span class="close">&times;</span>
-                </div>
-
-
-                <div class="input-row">
-
-                    <div class="input-group">
-                        <label>Titre</label>
-                        <input type="text" id="titreInput">
-                    </div>
-
-                    <div class="input-group">
-                        <label>Prix</label>
-                        <input type="number" id="prixInput">
-                    </div>
-
-                </div>
-
-
-                <div class="input-row">
-
-                    <div class="input-group">
-                        <label>Description</label>
-                        <input type="text" id="descriptionInput">
-                    </div>
-
-                    <div class="input-group">
-                        <label>Statut service</label>
-                        <input type="text" id="statutInput">
-                    </div>
-
-                </div>
-
-
-                <div class="input-row">
-
-                    <div class="input-group">
-                        <label>Date de publication</label>
-                        <input type="date" id="dateInput">
-                    </div>
-
-                </div>
-
-
-                <div class="modal-buttons">
-
-                    <button class="buttons" id="confirmAdd">
-                        <i class="fa-solid fa-plus-square vert"></i>
-                        Ajouter
-                    </button>
-
-                    <button class="buttons" id="cancelAdd">
-                        Annuler
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div> -->
-
-
-
-        <!-- MODAL SUPPRESSION -->
+        <!-- MODAL CONFIRMATION SUPPRESSION -->
 
         <div id="confirmModal" class="modal">
-
             <div class="modal-content confirm-modal">
 
                 <div class="modal-header">
@@ -177,31 +93,20 @@
                 </div>
 
                 <div class="modal-buttons">
-
                     <button class="buttons" id="confirmYes">
                         <i class="fa-solid fa-minus-square rouge"></i>
                         Supprimer
                     </button>
-
-                    <button class="buttons" id="confirmNo">
-                        Annuler
-                    </button>
-
+                    <button class="buttons" id="confirmNo">Annuler</button>
                 </div>
 
             </div>
-
         </div>
-
 
         <div id="notification"></div>
-        <div id="toggleBtnContainer">
-            <button id="toggleBtn">🌙</button>
-        </div>
+        
     </div>
 
-
     <script src="../js/table-service.js"></script>
-
 </body>
 </html>

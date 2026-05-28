@@ -1,4 +1,12 @@
 // ==============================
+// DARK THEME — appliqué tôt pour éviter le flash
+// ==============================
+if (localStorage.getItem('theme') === 'dark') {
+    document.documentElement.classList.add('dark-theme');
+    document.body && document.body.classList.add('dark-theme');
+}
+
+// ==============================
 // DROPDOWN
 // ==============================
 
@@ -30,7 +38,19 @@ window.onload = function(){
         // On désactive complètement le clic sur le bouton
         btn.style.pointerEvents = "none";
     }
-
+    // ==============================
+    // DARK THEME
+    // ==============================
+    const toggleBtn = document.getElementById('toggleBtn');
+    if (toggleBtn) {
+        toggleBtn.textContent = localStorage.getItem('theme') === 'dark' ? '☀️' : '🌙';
+        toggleBtn.addEventListener('click', function () {
+            document.body.classList.toggle('dark-theme');
+            const isDark = document.body.classList.contains('dark-theme');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            toggleBtn.textContent = isDark ? '☀️' : '🌙';
+        });
+    }
     // Affiche l'email de l'utilisateur connecté dans la page
     // Récupéré depuis le localStorage
     let email = localStorage.getItem("email");

@@ -24,46 +24,12 @@ document.addEventListener("click", function(e){
     }
 });
 
-// ==============================
-<<<<<<< HEAD
-// SUPPRESSION SERVICE
-// ==============================
-
-const modal = document.getElementById("modal");
-const cancelBtn = document.getElementById("deleteBtn");
-const closeModal = document.querySelector(".closeConfirm");
-
-cancelBtn.onclick = () => {
-    confirmModal.style.display = "none";
-    showNotification("Annulé");
-};
-
-closeModal.onclick = cancelBtn.onclick;
-
-
-
-// ==============================
-// AJOUTER SERVICE — commenté par ton binôme, on ne touche pas
-// ==============================
-
-// document.getElementById("confirmAdd").onclick = function(){
-//     ...
-// };
-
-
 
 // ==============================
 // SUPPRESSION SERVICE — AVEC PHP
 // ==============================
-
-=======
-// SUPPRESSION SERVICE — AVEC PHP
-// ==============================
->>>>>>> d8eceb2a5c2b5535a0818fec7858373909d6fe99
 const confirmModal = document.getElementById("confirmModal");
 const deleteBtn    = document.getElementById("deleteBtn");
-const cancelBtn    = document.getElementById("cancelBtn");
-const closeModal   = document.querySelector(".closeConfirm");
 
 deleteBtn.onclick = function(){
     if(!selectedRow){
@@ -73,19 +39,10 @@ deleteBtn.onclick = function(){
     confirmModal.style.display = "block";
 };
 
-if(cancelBtn){
-    cancelBtn.onclick = () => {
-        confirmModal.style.display = "none";
-        showNotification("Annulé");
-    };
-}
-
-if(closeModal){
-    closeModal.onclick = () => {
-        confirmModal.style.display = "none";
-        showNotification("Suppression annulée");
-    };
-}
+document.querySelector(".closeConfirm").onclick = function(){
+    confirmModal.style.display = "none";
+    showNotification("Suppression annulée");
+};
 
 document.getElementById("confirmYes").onclick = function(){
     let serviceId = selectedRow.cells[0].innerText;
@@ -101,7 +58,7 @@ document.getElementById("confirmYes").onclick = function(){
             selectedRow.remove();
             selectedRow = null;
             confirmModal.style.display = "none";
-            showNotification("Service supprimé avec succès ✅");
+            showNotification("Service supprimé avec succès");
         } else {
             showNotification("Erreur : " + data.message);
         }
@@ -109,7 +66,6 @@ document.getElementById("confirmYes").onclick = function(){
     .catch(err => {
         console.error(err);
         showNotification("Erreur de connexion au serveur");
-        console.error(err);
     });
 };
 
@@ -135,6 +91,7 @@ function showNotification(message){
     notif.style.display = "block";
     setTimeout(() => { notif.style.display = "none"; }, 3000);
 }
+
 
 // ==============================
 // CHARGEMENT DES DONNÉES
@@ -172,54 +129,30 @@ window.addEventListener("load", function(){
     });
 });
 
+
 // ==============================
 // DARK THEME
 // ==============================
 (function () {
-  const STORAGE_KEY = 'theme';
+    const STORAGE_KEY = 'theme';
 
-  function applyThemeEarly() {
     const savedTheme = localStorage.getItem(STORAGE_KEY);
     if (savedTheme === 'dark') {
-      document.documentElement.classList.add('dark-theme');
-    } else {
-      document.documentElement.classList.remove('dark-theme');
-    }
-  }
-
-  function applyTheme() {
-    const savedTheme = localStorage.getItem(STORAGE_KEY);
-    const isDark = savedTheme === 'dark';
-
-    document.body.classList.toggle('dark-theme', isDark);
-
-    const toggleBtn = document.getElementById('toggleBtn');
-    if (toggleBtn) {
-      toggleBtn.textContent = isDark ? '☀️' : '🌙';
-    }
-  }
-
-  function initToggle() {
-    const toggleBtn = document.getElementById('toggleBtn');
-
-    if (!toggleBtn) {
-      console.warn('toggleBtn not found in the DOM.');
-      return;
+        document.documentElement.classList.add('dark-theme');
+        document.body.classList.add('dark-theme');
     }
 
-    toggleBtn.addEventListener('click', () => {
-      const isDark = document.body.classList.toggle('dark-theme');
-      document.documentElement.classList.toggle('dark-theme', isDark);
-      localStorage.setItem(STORAGE_KEY, isDark ? 'dark' : 'light');
-      toggleBtn.textContent = isDark ? '☀️' : '🌙';
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleBtn = document.getElementById('toggleBtn');
+        if (!toggleBtn) return;
+
+        toggleBtn.textContent = localStorage.getItem(STORAGE_KEY) === 'dark' ? '☀️' : '🌙';
+
+        toggleBtn.addEventListener('click', function () {
+            document.body.classList.toggle('dark-theme');
+            const isDark = document.body.classList.contains('dark-theme');
+            localStorage.setItem(STORAGE_KEY, isDark ? 'dark' : 'light');
+            toggleBtn.textContent = isDark ? '☀️' : '🌙';
+        });
     });
-  }
-
-  applyThemeEarly();
-
-  document.addEventListener('DOMContentLoaded', () => {
-    applyTheme();
-    initToggle();
-  });
-
 })();

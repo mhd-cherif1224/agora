@@ -316,65 +316,29 @@ window.onload = function(){
 
 };
 
-// theme.js
-
+// ==============================
+// DARK THEME
+// ==============================
 (function () {
-  const STORAGE_KEY = 'theme';
+    const STORAGE_KEY = 'theme';
 
-  // Apply saved theme immediately (prevents flicker)
-  function applyThemeEarly() {
     const savedTheme = localStorage.getItem(STORAGE_KEY);
-
     if (savedTheme === 'dark') {
-      document.documentElement.classList.add('dark-theme');
-    } else {
-      document.documentElement.classList.remove('dark-theme');
-    }
-  }
-
-  // Apply theme after DOM is ready (sync body + button)
-  function applyTheme() {
-    const savedTheme = localStorage.getItem(STORAGE_KEY);
-    const isDark = savedTheme === 'dark';
-
-    document.body.classList.toggle('dark-theme', isDark);
-
-    const toggleBtn = document.getElementById('toggleBtn');
-    if (toggleBtn) {
-      toggleBtn.textContent = isDark ? '☀️' : '🌙';
-    }
-  }
-
-  // Toggle handler
-  function initToggle() {
-    const toggleBtn = document.getElementById('toggleBtn');
-
-    if (!toggleBtn) {
-      console.warn('toggleBtn not found in the DOM.');
-      return;
+        document.documentElement.classList.add('dark-theme');
+        document.body.classList.add('dark-theme');
     }
 
-    toggleBtn.addEventListener('click', () => {
-      const isDark = document.body.classList.toggle('dark-theme');
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleBtn = document.getElementById('toggleBtn');
+        if (!toggleBtn) return;
 
-      // Sync html element too (important if you style from root)
-      document.documentElement.classList.toggle('dark-theme', isDark);
+        toggleBtn.textContent = localStorage.getItem(STORAGE_KEY) === 'dark' ? '☀️' : '🌙';
 
-      // Save preference
-      localStorage.setItem(STORAGE_KEY, isDark ? 'dark' : 'light');
-
-      // Update button icon
-      toggleBtn.textContent = isDark ? '☀️' : '🌙';
+        toggleBtn.addEventListener('click', function () {
+            document.body.classList.toggle('dark-theme');
+            const isDark = document.body.classList.contains('dark-theme');
+            localStorage.setItem(STORAGE_KEY, isDark ? 'dark' : 'light');
+            toggleBtn.textContent = isDark ? '☀️' : '🌙';
+        });
     });
-  }
-
-  // Run early (before DOMContentLoaded)
-  applyThemeEarly();
-
-  // Run after DOM is ready
-  document.addEventListener('DOMContentLoaded', () => {
-    applyTheme();
-    initToggle();
-  });
-
 })();
