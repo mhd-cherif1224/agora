@@ -29,7 +29,6 @@ try {
     $pdo = Database::getConnection();
     $pdo->exec("SET time_zone = '+00:00'");
 
-    // ── SERVICES — filtrage par catégorie enregistrée uniquement ──
     $serviceParams = [':kw' => "%$keyword%"];
 
     $havingClause = "";
@@ -70,12 +69,18 @@ try {
         LEFT JOIN service_photos sp ON s.ID = sp.ID_Service
         LEFT JOIN photos p ON sp.ID_Photos = p.ID
 
-        WHERE EXISTS (
-            SELECT 1
-            FROM service_categorie sc2
-            INNER JOIN categorie c2 ON sc2.ID_Categorie = c2.ID
-            WHERE sc2.ID_Service = s.ID
-            AND c2.titre LIKE :kw
+        WHERE (
+            s.titre          LIKE :kw
+            OR s.description LIKE :kw
+            OR u.nom         LIKE :kw
+            OR u.prenom      LIKE :kw
+            OR EXISTS (
+                SELECT 1
+                FROM service_categorie sc2
+                INNER JOIN categorie c2 ON sc2.ID_Categorie = c2.ID
+                WHERE sc2.ID_Service = s.ID
+                AND c2.titre LIKE :kw
+            )
         )
 
         GROUP BY s.ID
@@ -88,15 +93,8 @@ try {
     $stmtServices->execute($serviceParams);
     $services = $stmtServices->fetchAll(PDO::FETCH_ASSOC);
 
-    // ── UTILISATEURS — recherche par nom / prénom / spécialité ──
     $stmtUsers = $pdo->prepare("
-        SELECT
-            ID,
-            nom,
-            prenom,
-            photo_profil,
-            specialite,
-            niveau
+        SELECT ID, nom, prenom, photo_profil, specialite, niveau
         FROM utilisateur
         WHERE
             nom           LIKE :kw1
@@ -131,11 +129,6 @@ try {
     ]);
 
 } catch (PDOException $e) {
-
     http_response_code(500);
-
-    echo json_encode([
-        'success' => false,
-        'message' => $e->getMessage()
-    ]);
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }

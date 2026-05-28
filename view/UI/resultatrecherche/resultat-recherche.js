@@ -5,6 +5,11 @@ let currentQ    = params.get('q') || '';
 let currentSort = 'recent';
 let currentCat  = null;
 
+window.setCategory = (encoded) => {
+    currentCat = encoded ? decodeURIComponent(encoded) : null;
+    fetchResults();
+};
+
 document.addEventListener('DOMContentLoaded', () => {
 
     const input = document.getElementById('navSearchInput');
@@ -13,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sortSelect = document.querySelector('.sort-select');
     if (sortSelect) {
         sortSelect.addEventListener('change', () => {
-            currentSort = sortSelect.value; // 'recent' ou 'popular'
+            currentSort = sortSelect.value;
             fetchResults();
         });
     }
@@ -41,12 +46,10 @@ async function fetchResults() {
             return;
         }
 
-        // Compteur
         const total = data.count.services + data.count.utilisateurs;
         document.querySelector('.results-count').textContent =
             `${total} résultat(s) pour "${currentQ}"`;
 
-        // Render
         renderPeopleCarousel(data.results.utilisateurs);
         renderServicesFeed(data.results.services);
 
@@ -56,7 +59,6 @@ async function fetchResults() {
     }
 }
 
-/* ══ CAROUSEL UTILISATEURS ══ */
 function renderPeopleCarousel(users) {
     const carousel = document.querySelector('.people-carousel');
     carousel.innerHTML = '';
@@ -85,7 +87,7 @@ function renderPeopleCarousel(users) {
             <div class="people-role">${u.specialite || u.niveau || 'Utilisateur'}</div>
             <button class="people-msg-btn"
                 onclick="event.stopPropagation();
-                         window.location.href='../messagerie/messagerie.html?id=${u.ID}'">
+                         window.location.href='../profile/profile.html?id=${u.ID}'">
                 envoyer un message
             </button>
         `;
@@ -108,7 +110,6 @@ function renderPeopleCarousel(users) {
     carousel.appendChild(voirPlus);
 }
 
-/* ══ FEED SERVICES ══ */
 function renderServicesFeed(services) {
     const feed = document.querySelector('.feed');
     feed.innerHTML = '';
@@ -119,7 +120,5 @@ function renderServicesFeed(services) {
         return;
     }
 
-    // Les champs PHP correspondent exactement à ce qu'attend createServiceCard()
-    // (définie dans feed.js) — on passe directement sans remapping
     feed.innerHTML = services.map(s => createServiceCard(s)).join('');
 }

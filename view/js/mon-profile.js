@@ -1615,125 +1615,8 @@ document.getElementById('modalConfirm').addEventListener('click', async () => {
     }
   });
 
-  // ════════════════════════════════════════
-  // EDIT SERVICE MODAL
-  // ════════════════════════════════════════
-  // window.openServiceEditModal = function(service, serviceId) {
 
-  //     // Récupérer le modal existant (la photo envoyée)
-  //     const overlay = document.getElementById('postModalOverlay');
-  //     if (!overlay) { console.error('postModalOverlay introuvable'); return; }
-
-  //     // ── Pré-remplir les champs ──
-  //     const matchPrix = (service.description || '').match(/\[prix_texte:(.+?)\]/);
-  //     const cleanDesc = matchPrix
-  //         ? service.description.replace(/\[prix_texte:.+?\]/, '').trim()
-  //         : (service.description || '');
-
-  //     document.getElementById('postTitle').value = service.titre  || '';
-  //     document.getElementById('postPrice').value = matchPrix ? matchPrix[1] : (service.prix || '');
-  //     document.getElementById('postDesc').value  = cleanDesc;
-
-  //     // ── Avatar + nom dans le header du modal ──
-  //     const pmAvatar = document.getElementById('pmAvatar');
-  //     const pmName   = document.querySelector('.post-modal-name');
-  //     const pmRole   = document.querySelector('.post-modal-role');
-
-  //     if (pmAvatar && currentUser?.avatar) {
-  //         pmAvatar.src           = buildPhotoUrl(currentUser.avatar);
-  //         pmAvatar.style.display = 'block';
-  //     }
-  //     if (pmName) pmName.textContent = `${currentUser?.prenom || ''} ${currentUser?.nom || ''}`.trim();
-  //     if (pmRole) pmRole.textContent  = currentUser?.role || currentUser?.status || 'Proposeur';
-
-  //     // ── Remplacer le bouton "publier" par "Enregistrer" ──
-  //     const oldBtn = document.getElementById('postPublishBtn');
-  //     const newBtn = oldBtn.cloneNode(true);   // supprime tous les anciens listeners
-  //     newBtn.innerHTML = 'Enregistrer';
-  //     newBtn.classList.remove('scheduled');
-  //     oldBtn.parentNode.replaceChild(newBtn, oldBtn);
-
-  //     // ── Listener du bouton Enregistrer ──
-  //     newBtn.addEventListener('click', async () => {
-  //         const titre = document.getElementById('postTitle').value.trim();
-  //         const prix  = document.getElementById('postPrice').value.trim();
-  //         const desc  = document.getElementById('postDesc').value.trim();
-
-  //         if (!titre) { showNotification('⚠️ Le titre est obligatoire'); return; }
-
-  //         const formData = new FormData();
-  //         formData.append('id',             serviceId);
-  //         formData.append('titre',          titre);
-  //         formData.append('description',    desc);
-  //         formData.append('prix',           isNaN(parseFloat(prix)) ? 0 : parseFloat(prix));
-  //         formData.append('prix_affichage', prix);
-  //         formData.append('status',         'disponible');
-
-  //         // Photos éventuelles ajoutées via pmPhotoInput
-  //         if (attachedPhotos && attachedPhotos.length > 0) {
-  //             try {
-  //                 const blobs = await Promise.all(attachedPhotos.map(p => fileToBlob(p.file)));
-  //                 blobs.forEach((blob, i) => formData.append('photos[]', blob, `photo_${i+1}.jpg`));
-  //             } catch { showNotification('❌ Erreur traitement image'); return; }
-  //         }
-
-  //         try {
-  //             const res    = await fetch('../../api/update-service.php',
-  //                               { method: 'POST', credentials: 'include', body: formData });
-  //             const result = JSON.parse(await res.text());
-
-  //             if (result.success) {
-  //                 showNotification('✅ Service modifié avec succès !');
-  //                 _closeAndReset();
-  //                 await loadServices();
-  //             } else {
-  //                 showNotification('❌ ' + (result.message || 'Erreur'));
-  //             }
-  //         } catch(err) {
-  //             console.error(err);
-  //             showNotification('❌ Erreur réseau');
-  //         }
-  //     });
-
-  //     // ── Bouton Fermer — remettre "publier" si annulation ──
-  //     const oldClose = document.getElementById('postModalClose');
-  //     const newClose = oldClose.cloneNode(true);
-  //     oldClose.parentNode.replaceChild(newClose, oldClose);
-  //     newClose.addEventListener('click', _closeAndReset);
-
-  //     // ── Fermeture en cliquant sur le fond ──
-  //     overlay.addEventListener('click', function onBg(e) {
-  //         if (e.target === overlay) {
-  //             _closeAndReset();
-  //             overlay.removeEventListener('click', onBg);
-  //         }
-  //     });
-
-  //     // ── Ouvrir le modal ──
-  //     overlay.classList.add('active');
-  //     document.body.style.overflow = 'hidden';
-
-  //     // ── Helper reset ──
-  //     function _closeAndReset() {
-  //         overlay.classList.remove('active');
-  //         document.body.style.overflow = '';
-
-  //         // Remettre le bouton "publier" original
-  //         const btn = document.getElementById('postPublishBtn');
-  //         if (btn) btn.innerHTML = 'publier';
-
-  //         // Vider les champs
-  //         const t = document.getElementById('postTitle');
-  //         const p = document.getElementById('postPrice');
-  //         const d = document.getElementById('postDesc');
-  //         if (t) t.value = '';
-  //         if (p) p.value = '';
-  //         if (d) d.value = '';
-  //     }
-  // };
-
-
-  window.openServiceEditModal = function (service, serviceId) {
+  window.openServiceEditModal = async function (service, serviceId) {
     const overlay = document.getElementById('postModalOverlay');
     if (!overlay) { console.error('postModalOverlay introuvable'); return; }
 
@@ -1780,6 +1663,31 @@ document.getElementById('modalConfirm').addEventListener('click', async () => {
     }
     if (pmName) pmName.textContent = `${currentUser?.prenom || ''} ${currentUser?.nom || ''}`.trim();
     if (pmRole) pmRole.textContent = currentUser?.role || 'Proposeur';
+
+    // ── Pré-remplir les catégories existantes ──
+  const chipsBox = document.getElementById('categoryChips');
+  if (chipsBox) {
+    chipsBox.innerHTML = '';
+    if (service.categorie) {
+      // S'assurer que les catégories BDD sont chargées avant de faire les chips
+      if (_profileCategories.length === 0) {
+        await _loadProfileCategoriesSilent();
+      }
+      const catNames = service.categorie.split(',').map(c => c.trim()).filter(Boolean);
+      catNames.forEach(catName => {
+        // Trouver l'ID correspondant au nom
+        const found = _profileCategories.find(c => c.titre === catName);
+        const catId = found ? found.ID : catName;
+        if (!chipsBox.querySelector(`[data-cat="${catId}"]`)) {
+          const chip = document.createElement('span');
+          chip.dataset.cat = catId;
+          chip.innerHTML = `${catName} <span data-remove>×</span>`;
+          chip.querySelector('[data-remove]').addEventListener('click', () => chip.remove());
+          chipsBox.appendChild(chip);
+        }
+      });
+    }
+  }
 
     // ── Marquer le bouton publier en mode édition ──
     const publishBtn = document.getElementById('postPublishBtn');
@@ -1921,36 +1829,55 @@ document.getElementById('modalConfirm').addEventListener('click', async () => {
   }
 
   // Catégories
-  const CATEGORIES = ['Design', 'Dev', 'Marketing', 'Rédaction', 'Traduction', 'Musique', 'Photo', 'Vidéo'];
-  if (pmCatBtn && !pmCatBtn._editBound) {
-    pmCatBtn._editBound = true;
-    if (catDropdown) {
-      catDropdown.innerHTML = CATEGORIES.map(c =>
-        `<div class="cat-option" data-cat="${c}" style="padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px;color:#1a1714;transition:background .15s;">${c}</div>`
-      ).join('');
-      catDropdown.querySelectorAll('.cat-option').forEach(opt => {
-        opt.addEventListener('mouseenter', () => opt.style.background = '#f3f4f6');
-        opt.addEventListener('mouseleave', () => opt.style.background = '');
-        opt.addEventListener('click', () => {
-          const cat = opt.dataset.cat;
-          const chips = document.getElementById('categoryChips');
-          if (chips && !chips.querySelector(`[data-cat="${cat}"]`)) {
-            const chip = document.createElement('span');
-            chip.dataset.cat = cat;
-            // Pas de style inline — laisser le CSS gérer
-            chip.innerHTML = `${cat} <span data-remove>×</span>`;
-            chip.querySelector('[data-remove]').addEventListener('click', () => chip.remove());
-            chips.appendChild(chip);
-          }
-          catDropdown.classList.remove('open');
-        });
-      });
-    }
-    pmCatBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      catDropdown?.classList.toggle('open');
+let _profileCategories = [];
+
+async function _loadProfileCategoriesSilent() {
+  try {
+    const res = await fetch('../../api/get-all-categories.php');
+    const result = await res.json();
+    if (result.success) { _profileCategories = result.data; }
+  } catch (err) { console.error('Erreur chargement catégories:', err); }
+}
+
+function _renderProfileCatDropdown() {
+  if (!catDropdown) return;
+  catDropdown.innerHTML = '';
+  _profileCategories.forEach(category => {
+    const opt = document.createElement('div');
+    opt.className = 'cat-option';
+    opt.dataset.cat = category.ID;
+    opt.textContent = category.titre;
+    opt.style.cssText = 'padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px;color:#1a1714;transition:background .15s;';
+    opt.addEventListener('mouseenter', () => opt.style.background = '#f3f4f6');
+    opt.addEventListener('mouseleave', () => opt.style.background = '');
+    opt.addEventListener('click', () => {
+      const chips = document.getElementById('categoryChips');
+      if (chips && !chips.querySelector(`[data-cat="${category.ID}"]`)) {
+        const chip = document.createElement('span');
+        chip.dataset.cat = category.ID;
+        chip.innerHTML = `${category.titre} <span data-remove>×</span>`;
+        chip.querySelector('[data-remove]').addEventListener('click', () => chip.remove());
+        chips.appendChild(chip);
+      }
+      catDropdown.classList.remove('open');
     });
-  }
+    catDropdown.appendChild(opt);
+  });
+}
+
+if (pmCatBtn && !pmCatBtn._editBound) {
+  pmCatBtn._editBound = true;
+  pmCatBtn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    catDropdown?.classList.toggle('open');
+    if (catDropdown?.classList.contains('open')) {
+      if (_profileCategories.length === 0) {
+        await _loadProfileCategoriesSilent();
+      }
+      _renderProfileCatDropdown();
+    }
+  });
+}
 
   // Statut
   if (pmStatusBtn && !pmStatusBtn._editBound) {
@@ -2069,7 +1996,7 @@ document.getElementById('modalConfirm').addEventListener('click', async () => {
   document.getElementById('postPublishBtn').addEventListener('click', async function () {
     const isEdit = this.dataset.editMode === 'true';
     const editId = this.dataset.editId;
-    if (!isEdit) return; // sur mon-profil, le bouton n'est utilisé qu'en mode édition
+    if (!isEdit) return;
 
     const titre = document.getElementById('postTitle').value.trim();
     const prixRaw = document.getElementById('postPrice').value.trim();
@@ -2078,6 +2005,13 @@ document.getElementById('modalConfirm').addEventListener('click', async () => {
 
     if (!titre) { showNotification('⚠️ Le titre est obligatoire'); return; }
 
+    // ── Vérification catégories ──
+    const chips = document.getElementById('categoryChips');
+    if (!chips || chips.querySelectorAll('[data-cat]').length === 0) {
+        showNotification('⚠️ Veuillez sélectionner au moins une catégorie');
+        return;
+    }
+
     const formData = new FormData();
     formData.append('id', editId);
     formData.append('titre', titre);
@@ -2085,6 +2019,11 @@ document.getElementById('modalConfirm').addEventListener('click', async () => {
     formData.append('prix', isNaN(parseFloat(prixRaw)) ? 0 : parseFloat(prixRaw));
     formData.append('prix_affichage', prixRaw);
     formData.append('status', status);
+
+    // ── Catégories ──  ← ICI, juste après le formData de base
+    chips.querySelectorAll('[data-cat]').forEach(chip => {
+        formData.append('categories[]', chip.dataset.cat);
+    });
 
     // ── Nouvelle photo ajoutée via pmPhotoInput ──
     if (attachedPhotos && attachedPhotos.length > 0) {

@@ -10,12 +10,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     let activeCategory = null;
 
     // Exposer setCategory globalement (appelé depuis les onclick des pills)
-    window.setCategory = async (encoded) => {
-        activeCategory = encoded ? decodeURIComponent(encoded) : null;
-        await loadServices(sortSelect.value, activeCategory);
-    };
+    if (!window.IS_SEARCH_PAGE) {
+        window.setCategory = async (encoded) => {
+            activeCategory = encoded ? decodeURIComponent(encoded) : null;
+            await loadServices(sortSelect.value, activeCategory);
+        };
+    }
+
+    
 
     sortSelect.addEventListener("change", async () => {
+        if (window.IS_SEARCH_PAGE) return; // ← la page recherche gère son propre tri
         await loadServices(sortSelect.value, activeCategory);
     });
 
@@ -184,7 +189,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 </div>
             </div>
         </div>
-        ${currentUser.id == (service.ID_Utilisateur || service.utilisateur_id || service.user_id) ? `
+        ${!window.IS_SEARCH_PAGE && currentUser.id == (service.ID_Utilisateur || service.utilisateur_id || service.user_id) ? `
             <button class="post-more" data-action="more">
                 <i class="fa-solid fa-ellipsis"></i>
             </button>

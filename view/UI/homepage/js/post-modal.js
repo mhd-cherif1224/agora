@@ -484,6 +484,12 @@ function fileToBlob(file) {
 
     if (!titre) { showNotification('⚠️ Le titre est obligatoire'); return; }
 
+    // Vérification catégorie ──
+    if (selectedCategories.length === 0) {
+        showNotification('⚠️ Veuillez sélectionner au moins une catégorie');
+        return;
+    }
+
     const formData = new FormData();
     formData.append("titre", titre);
     formData.append("description", description);

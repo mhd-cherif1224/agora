@@ -10,10 +10,9 @@ let currentUser = {
   avatar: null
 };
 
-
-
 let socket = null;
 let lastConv = null;
+
 // ════════════════════════════════════════
 // PATH HELPER
 // ════════════════════════════════════════
@@ -22,9 +21,6 @@ function buildPhotoUrl(path) {
   if (path.startsWith('/') || path.startsWith('http')) return path;
   return `../../../${path}`;
 }
-
-
-// Chat socket helpers are initialized inside DOMContentLoaded so they can access the page elements.
 
 // ════════════════════════════════════════
 // LOAD PROFILE FROM SESSION (PHP API)
@@ -39,14 +35,12 @@ async function loadProfile() {
       : `../../../api/get-profile.php`;
 
     const res = await fetch(url);
-    
     if (res.status === 401) {
       window.location.href = '../../../html/login-user.html';
       return;
     }
 
     const data = await res.json();
-    console.log("the data :"+data)
     if (!data.success) return;
 
     const user = data.user || data;
@@ -67,15 +61,10 @@ async function loadProfile() {
     if (displayLocation)
       displayLocation.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${user.localisation || 'Algérie'}`;
 
-    const letter = document.getElementById('navAvatarLetter');
-    const img    = document.getElementById('navAvatarImg');
-
-
     const profilePreview = document.getElementById('profilePreview');
     if (profilePreview && user.photo_profil)
       profilePreview.src = buildPhotoUrl(user.photo_profil);
 
-    // Banner image
     const bannerTop = document.getElementById('bannerTop');
     if (bannerTop && user.photo_banniere) {
       bannerTop.style.backgroundImage    = `url('${buildPhotoUrl(user.photo_banniere)}')`;
@@ -84,7 +73,6 @@ async function loadProfile() {
       bannerTop.style.backgroundRepeat   = 'no-repeat';
     }
 
-    // Banner gradient colors
     const bannerBottom = document.getElementById('bannerBottom');
     if (bannerBottom) {
       const dark  = user.banner_color_dark;
@@ -95,17 +83,13 @@ async function loadProfile() {
     }
 
     const messageBtn = document.getElementById('messageBtn');
-    
-
-if (messageBtn && user.ID) {
-  messageBtn.dataset.userId = user.ID;
-}
+    if (messageBtn && user.ID) {
+      messageBtn.dataset.userId = user.ID;
+    }
 
   } catch (err) {
     console.error('loadProfile error:', err);
   }
-
-  
 }
 
 loadProfile();
@@ -123,7 +107,7 @@ function showNotification(message, duration = 3500) {
 }
 
 // ════════════════════════════════════════
-// DOMINANT COLORS (banner auto-gradient)
+// DOMINANT COLORS
 // ════════════════════════════════════════
 function getDominantColors(source, topN = 2) {
   let canvas, ctx;
@@ -145,11 +129,8 @@ function getDominantColors(source, topN = 2) {
     canvas.height = h;
     ctx.drawImage(source, 0, 0, w, h);
   }
-
   const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
   const counts = {};
-
-  // Fixed: was `user.length`, must be `data.length`
   for (let i = 0; i < data.length; i += 4) {
     if (data[i + 3] < 128) continue;
     const r = Math.round(data[i]     / 16) * 16;
@@ -158,7 +139,6 @@ function getDominantColors(source, topN = 2) {
     const key = `${r},${g},${b}`;
     counts[key] = (counts[key] || 0) + 1;
   }
-
   return Object.entries(counts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, topN)
@@ -204,7 +184,6 @@ function changeBannerColor(color1, color2) {
 // ════════════════════════════════════════
 function updateAllPostAvatars(src) {
   currentProfileSrc = src;
-
   document.querySelectorAll('.post-avatar-dyn').forEach(el => {
     if (el.tagName === 'IMG') {
       el.src = src;
@@ -217,14 +196,12 @@ function updateAllPostAvatars(src) {
       el.replaceWith(img);
     }
   });
-
   document.querySelectorAll('.comment-input-avatar, .comment-avatar').forEach(av => {
     av.style.backgroundImage    = `url(${src})`;
     av.style.backgroundSize     = 'cover';
     av.style.backgroundPosition = 'center';
     av.textContent = '';
   });
-
   const npAv = document.getElementById('newPostAvatar');
   if (npAv) {
     npAv.style.backgroundImage    = `url(${src})`;
@@ -245,7 +222,6 @@ function openCropper(file, target, aspectRatio) {
   cropTarget = target;
   const valid = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
   if (!valid.includes(file.type)) { showNotification('Format non supporté !'); return; }
-
   const reader = new FileReader();
   reader.onload = e => {
     if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
@@ -315,7 +291,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const panel      = document.getElementById('chatPanel');
   const closeBtn   = document.getElementById('chatPanelClose');
   const fabChatBtn = document.getElementById('fabMsgBtn');
-  const navChatBtn = document.getElementById('navChat');
   const input      = document.getElementById('chatInput');
   const sendBtn    = document.getElementById('chatSendBtn');
   const messages   = document.getElementById('chatMessages');
@@ -331,17 +306,12 @@ document.addEventListener('DOMContentLoaded', () => {
   async function loadUserProfile() {
     try {
       const res = await fetch('../../../api/get-profile.php');
-
       if (res.status === 401) {
         window.location.href = '../../../html/login.html';
         return;
       }
-
       const data = await res.json();
-      if (!data.success || !data.id) {
-        console.error('Invalid profile response', data);
-        return;
-      }
+      if (!data.success || !data.id) return;
 
       currentUser = {
         id: data.id,
@@ -350,14 +320,11 @@ document.addEventListener('DOMContentLoaded', () => {
         avatar: data.avatar
       };
 
-      const navImg = document.getElementById('navAvatarImg');
+      const navImg    = document.getElementById('navAvatarImg');
       const navLetter = document.getElementById('navAvatarLetter');
 
       if (data.avatar) {
-        if (navImg) {
-          navImg.src = buildPhotoUrl(data.avatar);
-          navImg.style.display = 'block';
-        }
+        if (navImg) { navImg.src = buildPhotoUrl(data.avatar); navImg.style.display = 'block'; }
         if (navLetter) navLetter.style.display = 'none';
       } else {
         if (navLetter) {
@@ -375,9 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!currentUser?.id || !lastConv) return;
     if (socket) return;
 
-    socket = io('http://localhost:3000', {
-      query: { userId: currentUser.id }
-    });
+    socket = io('http://localhost:3000', { query: { userId: currentUser.id } });
 
     socket.on('connect', () => {
       socket.emit('get_history', { otherUserId: lastConv.id });
@@ -385,24 +350,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     socket.on('conversation_history', ({ otherUserId, messages: msgs }) => {
       if (!lastConv || otherUserId !== lastConv.id) return;
-
       lastConv.messages = msgs.map(m => ({
         text: m.contenue,
         time: m.DateEnvoie,
         sent: m.ID_Expediteur === currentUser.id
       }));
-
       renderMessages();
     });
 
     socket.on(`msg_${currentUser.id}`, msg => {
       if (!lastConv) return;
-      const otherId = msg.ID_Expediteur === currentUser.id
-        ? msg.ID_Destinataire
-        : msg.ID_Expediteur;
-
+      const otherId = msg.ID_Expediteur === currentUser.id ? msg.ID_Destinataire : msg.ID_Expediteur;
       if (otherId !== lastConv.id) return;
-
       lastConv.messages.push({
         text: msg.contenue,
         time: msg.DateEnvoie,
@@ -414,7 +373,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderMessages() {
     if (!lastConv || !messages) return;
-
     messages.innerHTML = '';
     lastConv.messages.forEach(msg => {
       const div = document.createElement('div');
@@ -425,11 +383,9 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
       messages.appendChild(div);
     });
-
     scrollToBottom();
   }
 
-  // ── Open / Close ──
   function openChat()    { panel.classList.add('active'); }
   function closeChat()   { panel.classList.remove('active'); }
   function openBotChat() { botPanel.classList.add('active'); }
@@ -440,7 +396,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (fabHelpBtn)  fabHelpBtn.addEventListener('click', openBotChat);
   if (botCloseBtn) botCloseBtn.addEventListener('click', closeBotChat);
 
-  // ── Bootstrap ──
   initChat();
 
   async function initChat() {
@@ -448,16 +403,11 @@ document.addEventListener('DOMContentLoaded', () => {
     await loadLastConversation();
   }
 
-
-  //scroll to bottom of chat func
   function scrollToBottom() {
-  if (!messages) return;
-  messages.scrollTop = messages.scrollHeight;
-}
+    if (!messages) return;
+    messages.scrollTop = messages.scrollHeight;
+  }
 
-  // ─────────────────────────────────────────
-  // 2. LOAD LAST CONVERSATION
-  // ─────────────────────────────────────────
   async function loadLastConversation() {
     try {
       const res  = await fetch('../../../api/get-conversations.php');
@@ -465,7 +415,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
       if (!Array.isArray(data) || data.length === 0) return;
 
-      // API returns convos sorted by last_message_time — first = most recent
       const u = data[0];
       lastConv = {
         id:       u.ID,
@@ -475,167 +424,91 @@ document.addEventListener('DOMContentLoaded', () => {
         gradient: randomGradient(u.ID),
         messages: []
       };
-
       updateChatPanelHeader();
       initWebSocket();
-
     } catch (err) {
-      console.warn('chat.js: could not load conversations', err);
+      console.warn('could not load conversations', err);
     }
   }
-
-  // ─────────────────────────────────────────
-  // 3. UPDATE CHAT PANEL HEADER
-  // ─────────────────────────────────────────
 
   async function switchConversation(userId) {
-  try {
-    console.log('switching to:', userId);
-    const res = await fetch(`../../../api/get-user.php?id=${userId}`);
-    const data = await res.json();
+    try {
+      const res = await fetch(`../../../api/get-user.php?id=${userId}`);
+      const data = await res.json();
+      if (!data.success) return;
+      const user = data.user || data;
 
-    if (!data.success) return;
+      if (!lastConv) {
+        lastConv = { id: null, name: '', avatar: null, initials: '', gradient: '', messages: [] };
+      }
+      lastConv.id       = user.ID;
+      lastConv.name     = `${user.prenom} ${user.nom}`;
+      lastConv.avatar   = user.photo_profil || null;
+      lastConv.initials = (user.prenom[0] + user.nom[0]).toUpperCase();
+      lastConv.messages = [];
 
-    const user = data.user || data;
-
-    if (!lastConv) {
-      lastConv = { id: null, name: '', avatar: null, initials: '', gradient: '', messages: [] };
+      updateChatPanelHeader();
+      const msgs = document.getElementById('chatMessages');
+      if (msgs) msgs.innerHTML = '';
+      if (socket) socket.emit('get_history', { otherUserId: user.ID });
+      document.getElementById('chatPanel')?.classList.add('active');
+    } catch (err) {
+      console.error(err);
     }
-
-    // ✅ ONLY update lastConv (no socket reset)
-    lastConv.id = user.ID;
-    lastConv.name = `${user.prenom} ${user.nom}`;
-    lastConv.avatar = user.photo_profil || null;
-    lastConv.initials = (user.prenom[0] + user.nom[0]).toUpperCase();
-    lastConv.messages = [];
-
-    console.log(lastConv)
-
-
-    updateChatPanelHeader();
-
-    // clear UI
-    const messages = document.getElementById('chatMessages');
-    if (messages) messages.innerHTML = '';
-
-    // ✅ request new messages from existing socket
-    if (socket) {
-      socket.emit('get_history', { otherUserId: user.ID });
-    }
-
-    // open panel
-    document.getElementById('chatPanel')?.classList.add('active');
-
-  } catch (err) {
-    console.error(err);
   }
-}
 
-if (messageBtn) {
-  messageBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-
-    const userId = messageBtn.dataset.userId;
-    console.log('userId:', userId);
-
-    if (!userId) return;
-
-    switchConversation(userId);
-  });
-}
-
+  if (messageBtn) {
+    messageBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const userId = messageBtn.dataset.userId;
+      if (!userId) return;
+      switchConversation(userId);
+    });
+  }
 
   function updateChatPanelHeader() {
     if (!lastConv) return;
-
     const nameEl   = panel.querySelector('.chat-panel-name');
     const avatarEl = panel.querySelector('.chat-panel-avatar');
-   
-
     if (nameEl) nameEl.textContent = lastConv.name;
-    //  lastConv.avatar = user.photo_profil || null;
-    console.log(lastConv.avatar)
-    
-    
-      if (lastConv.avatar) {
-        avatarEl.innerHTML = `<img src="../../../${lastConv.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-        avatarEl.style.background = 'none';
-      } else {
-        avatarEl.textContent = lastConv.initials;
-        avatarEl.style.background = lastConv.gradient;
-      }
-   
+    if (lastConv.avatar) {
+      avatarEl.innerHTML = `<img src="../../../${lastConv.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      avatarEl.style.background = 'none';
+    } else {
+      avatarEl.textContent = lastConv.initials;
+      avatarEl.style.background = lastConv.gradient;
+    }
   }
 
-
-  
-
-
-
-
-  // ─────────────────────────────────────────
-  // 6. SEND MESSAGE (human chat panel)
-  // ─────────────────────────────────────────
   function sendMessage() {
-  const text = input.value.trim();
-  if (!text) return;
-
-  if (!lastConv?.id || !currentUser?.id) {
-    showNotification('Conversation non initialisée.');
-    return;
-  }
-
-  // Optimistic render
-  const div = document.createElement('div');
-  div.className = 'chat-msg sent';
-  div.innerHTML = `
-    <div class="msg-bubble">${escapeHtml(text)}</div>
-    <span class="msg-time">${formatTime(new Date().toISOString())}</span>
-  `;
-  messages.appendChild(div);
-  input.value = '';
-  messages.scrollTop = messages.scrollHeight;
-
-  const payload = {
-    ID_Expediteur:   currentUser.id,
-    ID_Destinataire: lastConv.id,
-    contenue:        text
-  };
-
-  if (socket?.connected) {
-    // Socket ready — send immediately
-    socket.emit('send_message', payload);
-  } else {
-    // Socket not ready — wait for connection then send
-    if (!socket) initWebSocket();
-    socket.once('connect', () => {
+    const text = input.value.trim();
+    if (!text) return;
+    if (!lastConv?.id || !currentUser?.id) { showNotification('Conversation non initialisée.'); return; }
+    const div = document.createElement('div');
+    div.className = 'chat-msg sent';
+    div.innerHTML = `<div class="msg-bubble">${escapeHtml(text)}</div><span class="msg-time">${formatTime(new Date().toISOString())}</span>`;
+    messages.appendChild(div);
+    input.value = '';
+    messages.scrollTop = messages.scrollHeight;
+    const payload = { ID_Expediteur: currentUser.id, ID_Destinataire: lastConv.id, contenue: text };
+    if (socket?.connected) {
       socket.emit('send_message', payload);
-    });
+    } else {
+      if (!socket) initWebSocket();
+      socket.once('connect', () => socket.emit('send_message', payload));
+    }
   }
-}
 
-  // ─────────────────────────────────────────
-  // 7. CHATBOT
-  // ─────────────────────────────────────────
   function sendBotMessage() {
     const text = botInput.value.trim();
     if (!text) return;
-
     const userMsg = document.createElement('div');
     userMsg.className = 'chat-msg sent';
-    userMsg.innerHTML = `
-      <div class="msg-bubble">${escapeHtml(text)}</div>
-      <span class="msg-time">${formatTime(new Date().toISOString())}</span>
-    `;
+    userMsg.innerHTML = `<div class="msg-bubble">${escapeHtml(text)}</div><span class="msg-time">${formatTime(new Date().toISOString())}</span>`;
     botMessages.appendChild(userMsg);
     botInput.value = '';
     botMessages.scrollTop = botMessages.scrollHeight;
-
-    const userId = currentUser?.id
-      || localStorage.getItem('utilisateur_id')
-      || localStorage.getItem('admin_id')
-      || 'anonymous';
-
+    const userId = currentUser?.id || 'anonymous';
     fetch('http://localhost:5000/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -649,42 +522,26 @@ if (messageBtn) {
   function appendBotReply(text) {
     const div = document.createElement('div');
     div.className = 'chat-msg received';
-    div.innerHTML = `
-      <div class="msg-bubble">${escapeHtml(text)}</div>
-      <span class="msg-time">${formatTime(new Date().toISOString())}</span>
-    `;
+    div.innerHTML = `<div class="msg-bubble">${escapeHtml(text)}</div><span class="msg-time">${formatTime(new Date().toISOString())}</span>`;
     botMessages.appendChild(div);
     botMessages.scrollTop = botMessages.scrollHeight;
   }
 
-  // ─────────────────────────────────────────
-  // EVENT LISTENERS
-  // ─────────────────────────────────────────
   if (sendBtn) sendBtn.addEventListener('click', sendMessage);
   if (input)   input.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
-
   if (botSendBtn) botSendBtn.addEventListener('click', sendBotMessage);
   if (botInput)   botInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendBotMessage(); });
 
-  // ─────────────────────────────────────────
-  // HELPERS
-  // ─────────────────────────────────────────
   function escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
-
   function getInitials(nom, prenom) {
     return ((nom?.[0] || '') + (prenom?.[0] || '')).toUpperCase();
   }
-
   function formatTime(d) {
     if (!d) return '';
     return new Date(d).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
-
   function randomGradient(seed) {
     const gradients = [
       'linear-gradient(135deg,#e44,#f97316)',
@@ -695,17 +552,13 @@ if (messageBtn) {
     ];
     return gradients[(seed || 0) % gradients.length];
   }
-
 });
 
 // ════════════════════════════════════════
-// HELP PANEL  (separate from chatbot)
+// HELP PANEL
 // ════════════════════════════════════════
 const helpOverlay = document.getElementById('helpOverlay');
 const helpClose   = document.getElementById('helpClose');
-
-// Note: fabHelpBtn is already bound to openBotChat() inside DOMContentLoaded.
-// Only bind helpOverlay open/close here — do NOT re-bind fabHelpBtn.
 if (helpClose)   helpClose.addEventListener('click', () => helpOverlay?.classList.remove('active'));
 if (helpOverlay) helpOverlay.addEventListener('click', e => {
   if (e.target === helpOverlay) helpOverlay.classList.remove('active');
@@ -719,7 +572,7 @@ const modal         = document.getElementById('linkModal');
 const closeModalBtn = document.getElementById('closeModal');
 const saveBtn       = document.querySelector('.save-btn');
 const linkInput     = document.getElementById('modalLinkInput');
-const container     = document.getElementById('linksContainer');
+const linksContainer = document.getElementById('linksContainer');
 const emptyMsg      = document.getElementById('linksEmpty');
 const badge         = document.getElementById('linksBadge');
 const toggleBtn     = document.getElementById('linksToggleBtn');
@@ -742,8 +595,8 @@ document.addEventListener('click', e => {
 });
 
 function displayLinks() {
-  if (!container) return;
-  container.innerHTML = '';
+  if (!linksContainer) return;
+  linksContainer.innerHTML = '';
   links.forEach((link, index) => {
     const div  = document.createElement('div'); div.className = 'link-item';
     const icon = document.createElement('div'); icon.className = 'link-item-icon';
@@ -752,7 +605,6 @@ function displayLinks() {
     try { a.textContent = new URL(link).hostname.replace('www.', ''); } catch { a.textContent = link; }
     a.href = link; a.title = link; a.target = '_blank';
     a.addEventListener('click', e => e.stopPropagation());
-
     const delBtn = document.createElement('button');
     delBtn.innerHTML = '&#x2715;'; delBtn.className = 'delete-btn'; delBtn.title = 'Supprimer';
     delBtn.addEventListener('click', e => {
@@ -762,9 +614,8 @@ function displayLinks() {
       displayLinks();
     });
     div.appendChild(icon); div.appendChild(a); div.appendChild(delBtn);
-    container.appendChild(div);
+    linksContainer.appendChild(div);
   });
-
   if (emptyMsg) emptyMsg.style.display = links.length === 0 ? 'block' : 'none';
   if (badge) {
     badge.textContent   = links.length;
@@ -817,87 +668,57 @@ displayLinks();
 // ════════════════════════════════════════
 async function loadAllUsers() {
   const list = document.getElementById('usersList');
-  if (!list) {
-    console.warn('usersList container not found');
-    return;
-  }
-
+  if (!list) return;
   list.innerHTML = 'Chargement...';
-
   try {
     const res = await fetch('../../../api/get-all-users.php');
-    console.log('Fetch response status:', res.status);
-
-    if (!res.ok) {
-      list.innerHTML = 'Erreur serveur: ' + res.status;
-      return;
-    }
-
+    if (!res.ok) { list.innerHTML = 'Erreur serveur: ' + res.status; return; }
     const users = await res.json();
-    console.log('Users loaded:', users);
-
-    if (!Array.isArray(users)) {
-      list.innerHTML = 'Données invalides';
-      console.error('Expected array, got:', users);
-      return;
-    }
-
+    if (!Array.isArray(users)) { list.innerHTML = 'Données invalides'; return; }
     list.innerHTML = '';
-
     users.forEach(user => {
       const item = document.createElement('div');
       item.className = 'suggest-item';
-
       const avatarDiv = document.createElement('div');
       avatarDiv.className = 'suggest-avatar';
-
       if (user.photo_profil) {
         const img = document.createElement('img');
-        // Fixed: was `buildImagePath` (undefined) → correct function is `buildPhotoUrl`
         img.src = buildPhotoUrl(user.photo_profil);
         img.alt = user.prenom;
         img.onerror = () => {
-          avatarDiv.innerHTML   = '';
+          avatarDiv.innerHTML = '';
           avatarDiv.textContent = (user.prenom[0] + user.nom[0]).toUpperCase();
           avatarDiv.style.background = 'linear-gradient(135deg,#6366f1,#4338ca)';
         };
         avatarDiv.appendChild(img);
       } else {
-        avatarDiv.textContent  = (user.prenom[0] + user.nom[0]).toUpperCase();
+        avatarDiv.textContent = (user.prenom[0] + user.nom[0]).toUpperCase();
         avatarDiv.style.background = 'linear-gradient(135deg,#6366f1,#4338ca)';
       }
-
       const infoDiv = document.createElement('div');
       infoDiv.className = 'suggest-info';
-
       const nameDiv = document.createElement('div');
-      nameDiv.className   = 'name';
+      nameDiv.className = 'name';
       nameDiv.textContent = `${user.prenom} ${user.nom}`;
-
       const roleDiv = document.createElement('div');
-      roleDiv.className   = 'role';
+      roleDiv.className = 'role';
       roleDiv.textContent = user.specialite || user.niveau || user.role || 'Utilisateur';
-
       infoDiv.appendChild(nameDiv);
       infoDiv.appendChild(roleDiv);
       item.appendChild(avatarDiv);
       item.appendChild(infoDiv);
-
       item.style.cursor = 'pointer';
       item.addEventListener('click', () => {
         window.location.href = `profile.html?id=${user.ID}`;
       });
-
       list.appendChild(item);
     });
-
   } catch (err) {
     console.error('Fetch error:', err);
     list.innerHTML = 'Erreur connexion: ' + err.message;
   }
 }
 
-// Fixed: removed duplicate DOMContentLoaded registration
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', loadAllUsers);
 } else {
@@ -905,14 +726,13 @@ if (document.readyState === 'loading') {
 }
 
 // ════════════════════════════════════════
-// INJECT STYLES FOR POST INTERACTIONS
+// INJECT STYLES
 // ════════════════════════════════════════
 (function () {
   const s = document.createElement('style');
   s.textContent = `
     @keyframes postCardIn{from{transform:translateY(-14px);opacity:0}to{transform:translateY(0);opacity:1}}
     @keyframes postCardOut{to{opacity:0;transform:translateX(30px)}}
-
     .post-ctx-menu{display:none;position:absolute;top:34px;right:0;width:185px;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.14);z-index:500;padding:6px;animation:ctxIn .18s cubic-bezier(.34,1.3,.64,1) both}
     .post-ctx-menu.open{display:block}
     @keyframes ctxIn{from{transform:translateY(-6px) scale(.97);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
@@ -921,144 +741,21 @@ if (document.readyState === 'loading') {
     .ctx-item i{width:16px;text-align:center;color:var(--muted);font-size:12px}
     .ctx-item.danger{color:#dc2626}.ctx-item.danger i{color:#dc2626}
     .post-menu-btn{position:relative}
-
-    .comments-section{border-top:1px solid var(--border);padding:12px 0 4px;margin-top:4px;display:none}
-    .comments-section.open{display:block}
-    .comment-list{display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
-    .comment-item{display:flex;gap:8px;align-items:flex-start}
-    .comment-avatar{width:28px;height:28px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#e8734a,#c9543a);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:10px;color:#fff;border:1.5px solid var(--border);overflow:hidden;background-size:cover;background-position:center}
+    .comment-item{display:flex;gap:8px;align-items:flex-start;padding:8px 18px}
+    .comment-avatar{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;overflow:hidden;}
     .comment-avatar img{width:100%;height:100%;object-fit:cover;display:block}
-    .comment-bubble{flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:12px;padding:8px 12px}
-    .comment-author{font-weight:700;font-size:11px;color:var(--text);margin-bottom:2px}
-    .comment-text{font-size:12px;color:var(--text);line-height:1.45}
-    .comment-time{font-size:10px;color:var(--muted);margin-top:3px}
-    .comment-input-row{display:flex;align-items:center;gap:8px}
-    .comment-input-avatar{width:28px;height:28px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#e8734a,#c9543a);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:10px;color:#fff;border:1.5px solid var(--border);overflow:hidden;background-size:cover;background-position:center}
-    .comment-input{flex:1;padding:7px 14px;border:1.5px solid var(--border);border-radius:20px;background:var(--input-bg);font-family:'DM Sans',sans-serif;font-size:12.5px;color:var(--text);outline:none;transition:border-color .2s}
-    .comment-input:focus{border-color:var(--accent)}
-    .comment-send{width:30px;height:30px;border:none;border-radius:50%;background:var(--accent);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;transition:background .2s,transform .1s;flex-shrink:0}
-    .comment-send:hover{background:#0e2e6e}.comment-send:active{transform:scale(.93)}
-
-    .edit-post-overlay{display:none;position:fixed;inset:0;background:rgba(26,23,20,.55);backdrop-filter:blur(6px);z-index:1300;justify-content:center;align-items:center}
-    .edit-post-overlay.active{display:flex}
-    .edit-post-modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;width:100%;max-width:480px;padding:24px;box-shadow:0 24px 64px rgba(0,0,0,.2);animation:postModalIn .25s cubic-bezier(.34,1.3,.64,1) both}
-    @keyframes postModalIn{from{transform:translateY(-16px) scale(.97);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
-    .edit-post-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:14px}
-    .edit-post-textarea{width:100%;min-height:120px;padding:12px;border:1.5px solid var(--border);border-radius:12px;background:var(--input-bg);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;resize:none;transition:border-color .2s;margin-bottom:14px}
-    .edit-post-textarea:focus{border-color:var(--accent)}
-    .edit-post-actions{display:flex;gap:10px;justify-content:flex-end}
-    .edit-cancel-btn{padding:8px 20px;border:1px solid var(--border);border-radius:20px;background:transparent;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:background .2s}
-    .edit-cancel-btn:hover{background:var(--input-bg)}
-    .edit-save-btn{padding:8px 20px;border:none;border-radius:20px;background:var(--text);color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:background .2s}
-    .edit-save-btn:hover{background:var(--accent)}
-
-    .share-overlay{display:none;position:fixed;inset:0;background:rgba(26,23,20,.45);backdrop-filter:blur(5px);z-index:1300;justify-content:center;align-items:flex-end;padding-bottom:20px}
-    .share-overlay.active{display:flex}
-    .share-sheet{background:var(--surface);border:1px solid var(--border);border-radius:20px;width:100%;max-width:420px;padding:20px 20px 14px;box-shadow:0 -4px 32px rgba(0,0,0,.15);animation:shareUp .28s cubic-bezier(.34,1.3,.64,1) both}
-    @keyframes shareUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
-    .share-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:16px;text-align:center;color:var(--text)}
-    .share-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
-    .share-item{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;padding:8px;border-radius:12px;transition:background .18s}
-    .share-item:hover{background:var(--input-bg)}
-    .share-icon{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff}
-    .share-label{font-size:10px;color:var(--muted);font-family:'DM Sans',sans-serif;text-align:center}
-    .share-copy-btn{width:100%;padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--input-bg);font-family:'Syne',sans-serif;font-weight:700;font-size:12.5px;cursor:pointer;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:6px}
-    .share-copy-btn:hover{background:var(--border)}
-    .share-close-btn{width:100%;padding:8px;border:none;border-radius:12px;background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--muted);cursor:pointer;transition:background .2s}
-    .share-close-btn:hover{background:var(--input-bg)}
-
+    .comment-body{flex:1}
+    .comment-header{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+    .comment-name{font-weight:700;font-size:12px;color:var(--text)}
+    .comment-stars{font-size:10px;color:#f59e0b}
+    .comment-date{font-size:10px;color:var(--muted);margin-left:auto}
+    .comment-text{font-size:12px;color:var(--text);line-height:1.5;margin:0}
     .post-pin-badge{display:none;position:absolute;top:12px;right:48px;background:#fef3e2;border:1px solid #fed7aa;border-radius:8px;padding:2px 8px;font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:#d97706;align-items:center;gap:4px}
     .post-pin-badge.visible{display:flex}
     .post-card{position:relative}
-
-    .file-dl-link{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;font-size:12px;color:var(--text);text-decoration:none;transition:background .15s;cursor:pointer}
-    .file-dl-link:hover{background:var(--border)}
-    .file-dl-link i:first-child{color:var(--accent);font-size:14px}
-    .dl-icon{margin-left:auto;color:var(--muted);font-size:12px}
   `;
   document.head.appendChild(s);
 })();
-
-// ════════════════════════════════════════
-// SHARE SHEET
-// ════════════════════════════════════════
-const shareOverlay = document.createElement('div');
-shareOverlay.className = 'share-overlay';
-shareOverlay.id        = 'shareOverlay';
-
-const SHARE_PLATFORMS = [
-  { label: 'Facebook',  color: '#1877F2', icon: 'fa-brands fa-facebook-f',   url: t => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(location.href)}&quote=${encodeURIComponent(t)}` },
-  { label: 'WhatsApp',  color: '#25D366', icon: 'fa-brands fa-whatsapp',     url: t => `https://api.whatsapp.com/send?text=${encodeURIComponent(t)}` },
-  { label: 'Twitter/X', color: '#000',    icon: 'fa-brands fa-x-twitter',    url: t => `https://twitter.com/intent/tweet?text=${encodeURIComponent(t)}` },
-  { label: 'LinkedIn',  color: '#0A66C2', icon: 'fa-brands fa-linkedin-in',  url: t => `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(location.href)}` },
-  { label: 'Telegram',  color: '#26A5E4', icon: 'fa-brands fa-telegram',     url: t => `https://t.me/share/url?url=${encodeURIComponent(location.href)}&text=${encodeURIComponent(t)}` },
-  { label: 'Gmail',     color: '#EA4335', icon: 'fa-solid fa-envelope',      url: t => `mailto:?subject=Post intéressant&body=${encodeURIComponent(t)}` },
-  { label: 'Reddit',    color: '#FF4500', icon: 'fa-brands fa-reddit-alien', url: t => `https://www.reddit.com/submit?url=${encodeURIComponent(location.href)}&title=${encodeURIComponent(t)}` },
-  { label: 'Snapchat',  color: '#FFFC00', icon: 'fa-brands fa-snapchat',     url: t => `https://www.snapchat.com/scan?attachmentUrl=${encodeURIComponent(location.href)}`, textColor: '#000' },
-];
-
-shareOverlay.innerHTML = `
-  <div class="share-sheet">
-    <div class="share-title">Partager ce post</div>
-    <div class="share-grid" id="shareGrid"></div>
-    <button class="share-copy-btn" id="shareCopyBtn"><i class="fa-regular fa-copy"></i> Copier le lien</button>
-    <button class="share-close-btn" id="shareCloseBtn">Fermer</button>
-  </div>`;
-document.body.appendChild(shareOverlay);
-
-let shareText = '';
-SHARE_PLATFORMS.forEach(p => {
-  const div = document.createElement('div');
-  div.className = 'share-item';
-  div.innerHTML = `<div class="share-icon" style="background:${p.color};color:${p.textColor || '#fff'}"><i class="${p.icon}"></i></div><span class="share-label">${p.label}</span>`;
-  div.addEventListener('click', () => { window.open(p.url(shareText), '_blank'); shareOverlay.classList.remove('active'); });
-  document.getElementById('shareGrid').appendChild(div);
-});
-document.getElementById('shareCopyBtn').addEventListener('click', () => {
-  navigator.clipboard.writeText(location.href).catch(() => {});
-  showNotification('✓ Lien copié dans le presse-papiers !');
-  shareOverlay.classList.remove('active');
-});
-document.getElementById('shareCloseBtn').addEventListener('click', () => shareOverlay.classList.remove('active'));
-shareOverlay.addEventListener('click', e => { if (e.target === shareOverlay) shareOverlay.classList.remove('active'); });
-
-// ════════════════════════════════════════
-// EDIT POST MODAL
-// ════════════════════════════════════════
-const oldEditOverlay = document.getElementById('editPostOverlay');
-if (oldEditOverlay) oldEditOverlay.remove();
-
-const editPostOverlay = document.createElement('div');
-editPostOverlay.className = 'edit-post-overlay';
-editPostOverlay.id        = 'editPostOverlay';
-editPostOverlay.innerHTML = `
-  <div class="edit-post-modal">
-    <div class="edit-post-title">✏️ Modifier le post</div>
-    <textarea class="edit-post-textarea" id="editPostTextarea" placeholder="Contenu du post…"></textarea>
-    <div class="edit-post-actions">
-      <button class="edit-cancel-btn" id="editCancelBtn">Annuler</button>
-      <button class="edit-save-btn"   id="editSaveBtn">Enregistrer</button>
-    </div>
-  </div>`;
-document.body.appendChild(editPostOverlay);
-
-let editTargetCard = null;
-function openEditModal(card) {
-  editTargetCard = card;
-  const body = card.querySelector('.post-body');
-  document.getElementById('editPostTextarea').value = body ? body.textContent.trim() : '';
-  editPostOverlay.classList.add('active');
-  setTimeout(() => document.getElementById('editPostTextarea').focus(), 80);
-}
-document.getElementById('editCancelBtn').addEventListener('click', () => editPostOverlay.classList.remove('active'));
-editPostOverlay.addEventListener('click', e => { if (e.target === editPostOverlay) editPostOverlay.classList.remove('active'); });
-document.getElementById('editSaveBtn').addEventListener('click', () => {
-  if (!editTargetCard) return;
-  const body = editTargetCard.querySelector('.post-body');
-  if (body) body.textContent = document.getElementById('editPostTextarea').value.trim();
-  editPostOverlay.classList.remove('active');
-  showNotification('✓ Post modifié avec succès !');
-});
 
 // ════════════════════════════════════════
 // BUILD HELPERS
@@ -1081,8 +778,8 @@ function buildDynAvatar(src, size) {
 function buildCommentSection(card) {
   const sec = document.createElement('div');
   sec.className = 'comments-section';
-  const initiales   = currentUser.initiales || '?';
-  const cmtAvStyle  = currentProfileSrc
+  const initiales  = currentUser.initiales || '?';
+  const cmtAvStyle = currentProfileSrc
     ? `background-image:url(${currentProfileSrc});background-size:cover;background-position:center`
     : '';
   sec.innerHTML = `
@@ -1093,11 +790,9 @@ function buildCommentSection(card) {
       <button class="comment-send"><i class="fa-solid fa-paper-plane"></i></button>
     </div>`;
   card.appendChild(sec);
-
   const cmtInput = sec.querySelector('.comment-input');
   const cmtSend  = sec.querySelector('.comment-send');
   const cmtList  = sec.querySelector('.comment-list');
-
   function addComment() {
     const txt = cmtInput.value.trim();
     if (!txt) return;
@@ -1112,19 +807,44 @@ function buildCommentSection(card) {
     item.innerHTML = `${avHTML}<div class="comment-bubble"><div class="comment-author">${fullName}</div><div class="comment-text">${txt.replace(/</g, '&lt;')}</div><div class="comment-time">${time}</div></div>`;
     cmtList.appendChild(item);
     cmtInput.value = '';
-    const cBtn = card.querySelector('.comment-btn');
-    if (cBtn) {
-      const n = parseInt(cBtn.textContent.match(/\d+/)?.[0] || '0');
-      cBtn.innerHTML = `<i class="fa-regular fa-comment"></i> ${n + 1}`;
-    }
     showNotification('💬 Commentaire ajouté avec succès !');
   }
-
   cmtSend.addEventListener('click', addComment);
   cmtInput.addEventListener('keydown', e => { if (e.key === 'Enter') addComment(); });
   return sec;
 }
 
+// ════════════════════════════════════════
+// BUILD COMMENT ITEM (ratings from API)
+// ════════════════════════════════════════
+function buildProfileCommentItem(name, note, text, date, photoProfile) {
+  const item = document.createElement('div');
+  item.className = 'comment-item';
+  const initials  = name.slice(0, 2).toUpperCase();
+  const starsHtml = Array.from({ length: 5 }, (_, i) =>
+    `<i class="${i < note ? 'fa-solid' : 'fa-regular'} fa-star"></i>`
+  ).join('');
+  const avatarHtml = photoProfile
+    ? `<img src="../../../${photoProfile}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+    : initials;
+  item.innerHTML = `
+    <div class="comment-avatar" style="${photoProfile ? '' : 'background:linear-gradient(135deg,#4b48ec,#7299f4);'}">
+        ${avatarHtml}
+    </div>
+    <div class="comment-body">
+        <div class="comment-header">
+            <span class="comment-name">${name}</span>
+            <div class="comment-stars">${starsHtml}</div>
+            <span class="comment-date">${date}</span>
+        </div>
+        ${text ? `<p class="comment-text">${text}</p>` : ''}
+    </div>`;
+  return item;
+}
+
+// ════════════════════════════════════════
+// RATING HELPERS
+// ════════════════════════════════════════
 function renderPickerStars(picker, upTo, isHover = false) {
   picker.querySelectorAll('[data-star]').forEach(s => {
     const n = parseInt(s.dataset.star);
@@ -1174,40 +894,21 @@ async function submitRating(card) {
   try {
     const response = await fetch('../../../api/submit-rating.php', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-
     const result = await response.json();
-    if (!result.success) {
-      throw new Error(result.message || 'Erreur lors de la soumission');
-    }
-
-    const commentsList = card.querySelector('.comments-list');
-    if (commentaire && commentsList) {
-      const item = document.createElement('div');
-      item.className = 'comment-item';
-      const starsHtml = Array.from({ length: 5 }, (_, i) =>
-        `<i class="${i < note ? 'fa-solid' : 'fa-regular'} fa-star"></i>`
-      ).join('');
-      item.innerHTML = `
-        <div class="comment-avatar" style="background:linear-gradient(135deg,#4b48ec,#7299f4);">Moi</div>
-        <div class="comment-body">
-          <div class="comment-header">
-            <span class="comment-name">Moi</span>
-            <div class="comment-stars">${starsHtml}</div>
-            <span class="comment-date">${dateEval}</span>
-          </div>
-          <p class="comment-text">${commentaire}</p>
-        </div>`;
-      commentsList.appendChild(item);
-      commentsList.hidden = false;
-    }
+    if (!result.success) throw new Error(result.message || 'Erreur');
 
     updateRatingSummary(card, note);
     closeRatingPanel(card);
+
+    const commentsList = card.querySelector('.comments-list');
+    if (commentsList) {
+      commentsList.dataset.loaded = 'false';
+      commentsList.innerHTML = '';
+      commentsList.hidden = true;
+    }
 
     const rateBtn = card.querySelector('.post-action-btn[data-action="rate"]');
     if (rateBtn) {
@@ -1228,7 +929,7 @@ async function submitRating(card) {
 }
 
 function updateRatingSummary(card, newNote) {
-  const summary  = card.querySelector('.post-rating-summary');
+  const summary = card.querySelector('.post-rating-summary');
   if (!summary) return;
   const scoreEl  = summary.querySelector('.rating-score');
   const countEl  = summary.querySelector('.rating-count');
@@ -1249,7 +950,7 @@ function updateRatingSummary(card, newNote) {
 }
 
 // ════════════════════════════════════════
-// BIND POST INTERACTIONS
+// ENRICH CARD
 // ════════════════════════════════════════
 function enrichCard(card) {
   // Pin badge
@@ -1260,11 +961,11 @@ function enrichCard(card) {
     card.insertBefore(pinBadge, card.firstChild);
   }
 
-  // Dynamic avatar in post-top
+  // Dynamic avatar
   const oldAv = card.querySelector('.post-top .post-avatar-placeholder:not(.post-avatar-dyn)');
   if (oldAv) { const dyn = buildDynAvatar(currentProfileSrc, 36); oldAv.replaceWith(dyn); }
 
-  // Classify footer buttons
+  // Footer buttons classification
   const footer = card.querySelector('.post-footer');
   if (footer) {
     footer.querySelectorAll('.post-action').forEach(btn => {
@@ -1294,18 +995,17 @@ function enrichCard(card) {
         e.stopPropagation();
         ctx.classList.remove('open');
         const action = item.dataset.action;
-
         if (action === 'delete') {
           const confirmOverlay = document.createElement('div');
           confirmOverlay.style.cssText = 'position:fixed;inset:0;background:rgba(26,23,20,.6);backdrop-filter:blur(6px);z-index:2000;display:flex;justify-content:center;align-items:center;';
           confirmOverlay.innerHTML = `
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:28px 24px;width:100%;max-width:320px;box-shadow:0 24px 64px rgba(0,0,0,.22);text-align:center;animation:postModalIn .22s cubic-bezier(.34,1.3,.64,1) both;">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:28px 24px;width:100%;max-width:320px;box-shadow:0 24px 64px rgba(0,0,0,.22);text-align:center;">
               <div style="width:48px;height:48px;background:#fee2e2;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:22px;">🗑️</div>
               <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--text);margin-bottom:8px;">Supprimer ce post ?</div>
-              <div style="font-size:12px;color:var(--muted);margin-bottom:22px;line-height:1.55;">Cette action est irréversible.<br>Le post sera définitivement supprimé.</div>
+              <div style="font-size:12px;color:var(--muted);margin-bottom:22px;line-height:1.55;">Cette action est irréversible.</div>
               <div style="display:flex;gap:10px;">
-                <button id="delCancelBtn" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:12px;background:transparent;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:background .2s;">Annuler</button>
-                <button id="delConfirmBtn" style="flex:1;padding:10px;border:none;border-radius:12px;background:#dc2626;color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:background .2s;">Supprimer</button>
+                <button id="delCancelBtn" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:12px;background:transparent;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;">Annuler</button>
+                <button id="delConfirmBtn" style="flex:1;padding:10px;border:none;border-radius:12px;background:#dc2626;color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;">Supprimer</button>
               </div>
             </div>`;
           document.body.appendChild(confirmOverlay);
@@ -1317,10 +1017,8 @@ function enrichCard(card) {
             setTimeout(() => card.remove(), 280);
             showNotification('Post supprimé');
           });
-
         } else if (action === 'edit') {
           openEditModal(card);
-
         } else if (action === 'pin') {
           const pinBadge = card.querySelector('.post-pin-badge');
           if (pinBadge) {
@@ -1328,10 +1026,6 @@ function enrichCard(card) {
             const isPinned = pinBadge.classList.contains('visible');
             item.innerHTML = `<i class="fa-solid fa-thumbtack"></i> ${isPinned ? 'Désépingler' : 'Épingler'}`;
             showNotification(isPinned ? '📌 Post épinglé' : '📌 Post désépinglé');
-            if (isPinned) {
-              const newPostBox = document.querySelector('.new-post-box');
-              newPostBox?.insertAdjacentElement('afterend', card);
-            }
           }
         }
       });
@@ -1345,19 +1039,17 @@ function enrichCard(card) {
     likeBtn.addEventListener('click', function () {
       this.classList.toggle('liked');
       const n = parseInt(this.textContent.match(/\d+/)?.[0] || '0');
-      if (this.classList.contains('liked')) {
-        this.innerHTML = `<i class="fa-solid fa-heart"></i> ${n + 1}`;
-      } else {
-        this.innerHTML = `<i class="fa-regular fa-heart"></i> ${Math.max(0, n - 1)}`;
-      }
+      this.innerHTML = this.classList.contains('liked')
+        ? `<i class="fa-solid fa-heart"></i> ${n + 1}`
+        : `<i class="fa-regular fa-heart"></i> ${Math.max(0, n - 1)}`;
     });
   }
 
-  // Comment
-  const commentBtn = card.querySelector('.comment-btn');
-  if (commentBtn && !commentBtn._bound) {
-    commentBtn._bound = true;
-    commentBtn.addEventListener('click', () => {
+  // Comment (legacy .comment-btn)
+  const commentSectionBtn = card.querySelector('.comment-btn');
+  if (commentSectionBtn && !commentSectionBtn._bound) {
+    commentSectionBtn._bound = true;
+    commentSectionBtn.addEventListener('click', () => {
       let sec = card.querySelector('.comments-section');
       if (!sec) { sec = buildCommentSection(card); }
       sec.classList.toggle('open');
@@ -1377,17 +1069,87 @@ function enrichCard(card) {
     });
   }
 
-  const rateBtn = card.querySelector('.post-action-btn[data-action="rate"]');
+  // ── Rating & Comments buttons ──
+  const rateBtn     = card.querySelector('.post-action-btn[data-action="rate"]');
+  const commentBtn  = card.querySelector('.post-action-btn[data-action="comment"]');
   const ratingPanel = card.querySelector('.rating-panel');
-  const starPicker = card.querySelector('.star-picker');
-  const cancelBtn = card.querySelector('.rating-cancel-btn');
-  const submitBtn = card.querySelector('.rating-submit-btn');
+  const starPicker  = card.querySelector('.star-picker');
+  const cancelBtn   = card.querySelector('.rating-cancel-btn');
+  const submitBtn   = card.querySelector('.rating-submit-btn');
 
   if (rateBtn && !rateBtn._bound) {
     rateBtn._bound = true;
     rateBtn.addEventListener('click', () => {
       if (!ratingPanel) return;
+      const commentsList = card.querySelector('.comments-list');
       ratingPanel.hidden = !ratingPanel.hidden;
+      if (!ratingPanel.hidden && commentsList && !commentsList.hidden) commentsList.hidden = true;
+    });
+  }
+
+  if (commentBtn && !commentBtn._bound) {
+    commentBtn._bound = true;
+    commentBtn.addEventListener('click', async () => {
+      const commentsList = card.querySelector('.comments-list');
+      if (!commentsList) return;
+
+      const isOpen = !commentsList.hidden;
+      if (ratingPanel && !ratingPanel.hidden) ratingPanel.hidden = true;
+
+      if (isOpen) {
+        commentsList.hidden = true;
+        return;
+      }
+
+      if (commentsList.dataset.loaded === 'false') {
+        commentsList.dataset.loaded = 'loading';
+        commentsList.hidden = false;
+        commentsList.innerHTML = `
+          <div style="padding:14px 18px;color:#8c8580;font-size:12px;
+                      font-family:'Space Grotesk',sans-serif;display:flex;
+                      align-items:center;gap:8px;">
+            <i class="fa-solid fa-spinner fa-spin"></i> Chargement des avis...
+          </div>`;
+
+        const serviceId = card.dataset.serviceId;
+        try {
+          const res  = await fetch(`../../../api/get-ratings.php?service_id=${serviceId}`);
+          const data = await res.json();
+          commentsList.innerHTML = '';
+          if (!data.success || !data.ratings || data.ratings.length === 0) {
+            commentsList.innerHTML = `
+              <div style="padding:14px 18px;color:#8c8580;font-size:12px;
+                          font-family:'Space Grotesk',sans-serif;text-align:center;">
+                <i class="fa-regular fa-comment-dots" style="font-size:20px;display:block;margin-bottom:6px;"></i>
+                Aucun avis pour l'instant
+              </div>`;
+          } else {
+            data.ratings.forEach(r => {
+              const dateStr = new Date(r.DateEval).toLocaleDateString('fr-FR', {
+                day: '2-digit', month: 'short', year: 'numeric'
+              });
+              commentsList.appendChild(buildProfileCommentItem(
+                `${r.prenom} ${r.nom}`,
+                parseInt(r.note),
+                r.commentaire || '',
+                dateStr,
+                r.photo_profil
+              ));
+            });
+          }
+          commentsList.dataset.loaded = 'true';
+        } catch (err) {
+          console.error(err);
+          commentsList.innerHTML = `
+            <div style="padding:14px 18px;color:#ef4444;font-size:12px;
+                        font-family:'Space Grotesk',sans-serif;">
+              <i class="fa-solid fa-triangle-exclamation"></i> Erreur de chargement
+            </div>`;
+          commentsList.dataset.loaded = 'false';
+        }
+      } else {
+        commentsList.hidden = false;
+      }
     });
   }
 
@@ -1410,249 +1172,152 @@ function enrichCard(card) {
     submitBtn._bound = true;
     submitBtn.addEventListener('click', () => submitRating(card));
   }
-
-  const messageBtn = document.getElementById('messageBtn');
-
-
-
-
 }
 
+// ════════════════════════════════════════
+// LOAD SERVICES
+// ════════════════════════════════════════
 document.addEventListener("DOMContentLoaded", () => {
-    loadServices();
+  loadServices();
 });
 
 async function loadServices() {
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get("id");
 
-    try {
-      
-        
-        const urlParams = new URLSearchParams(window.location.search);
-        const userId = urlParams.get("id");
-        console.log(userId)
+    const response = await fetch(`../../../api/get-user-service.php?id=${userId}`);
+    const data = await response.json();
+    if (!data.success) return;
 
-        const response = await fetch(
-            `../../../api/get-user-service.php?id=${userId}`
-        );
+    const container = document.getElementById("servicesContainer");
+    if (!container) return;
 
-        const data = await response.json();
-        
-        console.log("Services loaded:", data);
-        
-        if (!data.success) return;
-
-        const container = document.getElementById("servicesContainer");
-
-        if (!container) {
-            console.log("Container not found");
-            return;
-        }
-
-        container.innerHTML = "";
-
-        data.services.forEach(service => {
-            // Pass userId to createServiceCard so it can decide whether to show the eval button
-            container.innerHTML += createServiceCard(service, userId);
-        });
-
-        container.querySelectorAll('.post-card').forEach(enrichCard);
-
-    } catch (error) {
-        console.error(error);
-    }
+    container.innerHTML = "";
+    data.services.forEach(service => {
+      container.innerHTML += createServiceCard(service);
+    });
+    container.querySelectorAll('.post-card').forEach(enrichCard);
+  } catch (error) {
+    console.error(error);
+  }
 }
 
-
+// ════════════════════════════════════════
+// CREATE SERVICE CARD
+// ════════════════════════════════════════
 function createServiceCard(service) {
+  const profileImage = service.photo_profil ? `../../../${service.photo_profil}` : "";
+  const serviceImage = service.service_photo ? `../../../${service.service_photo}` : null;
+  const categories   = service.categorie ? service.categorie.split(",") : [];
 
-    const profileImage = service.photo_profil
-        ? `../../../${service.photo_profil}`
-        : "";
-
-    console.log(service)
-
-    const serviceImage = service.service_photo
-        ? `../../../${service.service_photo}`
-        : null;
-
-    const categories = service.categorie
-        ? service.categorie.split(",")
-        : [];
-
-    return `
-
-    <article class="post-card" data-service-id="${service.ID}">
-        
-        <div class="post-header">
-
-            <div class="post-avatar">
-                <img 
-                    src="${profileImage}" 
-                    style="width:100%;height:100%;object-fit:cover;border-radius:50%;"
-                >
-            </div>
-
-            <div class="post-meta">
-
-                <div class="post-name">
-                    ${service.nom} ${service.prenom}
-                </div>
-
-                <div class="post-time-row">
-                    <span class="post-time">
-                        ${getTimeAgo(service.DateDePublication)}
-                    </span>
-                </div>
-
-            </div>
-
+  return `
+  <article class="post-card" data-service-id="${service.ID}">
+    <div class="post-header">
+      <div class="post-avatar">
+        <img src="${profileImage}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+      </div>
+      <div class="post-meta">
+        <div class="post-name">${service.nom} ${service.prenom}</div>
+        <div class="post-time-row">
+          <span class="post-time">${getTimeAgo(service.DateDePublication)}</span>
         </div>
+      </div>
+    </div>
 
-        <div class="post-title">
-            ${service.titre}
-        </div>
+    <div class="post-title">${service.titre}</div>
 
-        <div class="post-tags">
-          <span class="post-tag ">
-            ${categories.map(cat => `
-                <span class="category-pill green" style="cursor:pointer"
-                      onclick="window.location.href='../categorie-services/categorie-services.html?cat=${encodeURIComponent(cat.trim())}'">
-                    ${cat.trim()}
-                </span>
-            `).join("")}
+    <div class="post-tags">
+      <span class="post-tag">
+        ${categories.map(cat => `
+          <span class="category-pill green" style="cursor:pointer"
+                onclick="window.location.href='../categorie-services/categorie-services.html?cat=${encodeURIComponent(cat.trim())}'">
+            ${cat.trim()}
           </span>
-        </div>
+        `).join("")}
+      </span>
+    </div>
 
-        <div class="post-body">
-            ${service.description}
-            <br>
-            prix : ${service.prix} DZD
-        </div>
-        <div class="post-body">${service.status}</div>
+    <div class="post-body">
+      ${service.description}<br>
+      prix : ${service.prix} DZD
+    </div>
+    <div class="post-body">${service.status}</div>
 
-        ${
-            serviceImage
-            ? `
-                <img 
-                    class="post-image"
-                    src="${serviceImage}"
-                >
-            `
-            : ""
-        }
-        
-        
-        <div class="post-rating-summary">
+    ${serviceImage ? `<img class="post-image" src="${serviceImage}">` : ""}
 
-        <div class="rating-stars-display">
-            ${generateStars(service.note_moyenne)}
-        </div>
-
-        <span class="rating-score">
-            ${service.note_moyenne}
-        </span>
-
-        <span class="rating-count">
-            (${service.nb_avis} évaluations)
-        </span>
-
+    <div class="post-rating-summary">
+      <div class="rating-stars-display">${generateStars(service.note_moyenne)}</div>
+      <span class="rating-score">${service.note_moyenne}</span>
+      <span class="rating-count">(${service.nb_avis} évaluations)</span>
     </div>
 
     <div class="post-actions">
-
-        <button class="post-action-btn" data-action="rate">
-            <i class="fa-regular fa-star"></i>
-            Évaluer
-        </button>
-
+      <button class="post-action-btn" data-action="rate">
+        <i class="fa-regular fa-star"></i> Évaluer
+      </button>
+      <button class="post-action-btn" data-action="comment">
+        <i class="fa-regular fa-comment"></i> Commentaires
+        <span style="background:rgba(75,72,236,0.15);color:#4b48ec;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px;">${service.nb_avis || 0}</span>
+      </button>
     </div>
 
     <div class="rating-panel" hidden>
-
-        <div class="rating-panel-inner">
-
-            <p class="rating-panel-label">
-                Votre évaluation
-            </p>
-
-            <div class="star-picker">
-                <i class="fa-regular fa-star" data-star="1"></i>
-                <i class="fa-regular fa-star" data-star="2"></i>
-                <i class="fa-regular fa-star" data-star="3"></i>
-                <i class="fa-regular fa-star" data-star="4"></i>
-                <i class="fa-regular fa-star" data-star="5"></i>
-            </div>
-
-            <textarea 
-                class="rating-comment-input"
-                placeholder="Commentaire..."
-            ></textarea>
-
-            <div class="rating-panel-actions">
-
-                <button class="rating-cancel-btn">
-                    Annuler
-                </button>
-
-                <button class="rating-submit-btn">
-                    Soumettre
-                </button>
-
-            </div>
-
+      <div class="rating-panel-inner">
+        <p class="rating-panel-label">Votre évaluation</p>
+        <div class="star-picker">
+          <i class="fa-regular fa-star" data-star="1"></i>
+          <i class="fa-regular fa-star" data-star="2"></i>
+          <i class="fa-regular fa-star" data-star="3"></i>
+          <i class="fa-regular fa-star" data-star="4"></i>
+          <i class="fa-regular fa-star" data-star="5"></i>
         </div>
-
+        <textarea class="rating-comment-input" placeholder="Commentaire..."></textarea>
+        <div class="rating-panel-actions">
+          <button class="rating-cancel-btn">Annuler</button>
+          <button class="rating-submit-btn">Soumettre</button>
+        </div>
+      </div>
     </div>
 
-    <div class="comments-list" hidden></div>
-
-</article>
-
-    `;
+    <div class="comments-list" hidden data-loaded="false"></div>
+  </article>`;
 }
 
-
+// ════════════════════════════════════════
+// UTILITIES
+// ════════════════════════════════════════
 function getTimeAgo(dateString) {
-    const now = new Date();
-    const date = new Date(
-        dateString.includes('Z') || dateString.includes('+')
-            ? dateString
-            : dateString.replace(' ', 'T') + 'Z'
-    );
-    const diffMs = now - date;
-    const minutes = Math.floor(diffMs / 60000);
-    const hours   = Math.floor(diffMs / 3600000);
-    const days    = Math.floor(diffMs / 86400000);
-    const months  = Math.floor(days / 30);
-    const years   = Math.floor(months / 12);
-
-    if (minutes < 1)   return `à l'instant`;
-    if (minutes < 60)  return `il y a ${minutes} min`;
-    if (hours < 24)    return `il y a ${hours} h`;
-    if (days < 30)     return `il y a ${days} jours`;
-    if (months < 12)   return `il y a ${months} mois`;
-    return `il y a ${years} an(s)`;
+  const now = new Date();
+  const date = new Date(
+    dateString.includes('Z') || dateString.includes('+')
+      ? dateString
+      : dateString.replace(' ', 'T') + 'Z'
+  );
+  const diffMs  = now - date;
+  const minutes = Math.floor(diffMs / 60000);
+  const hours   = Math.floor(diffMs / 3600000);
+  const days    = Math.floor(diffMs / 86400000);
+  const months  = Math.floor(days / 30);
+  const years   = Math.floor(months / 12);
+  if (minutes < 1)  return `à l'instant`;
+  if (minutes < 60) return `il y a ${minutes} min`;
+  if (hours < 24)   return `il y a ${hours} h`;
+  if (days < 30)    return `il y a ${days} jours`;
+  if (months < 12)  return `il y a ${months} mois`;
+  return `il y a ${years} an(s)`;
 }
 
 function generateStars(note) {
-
-    note = parseFloat(note);
-
-    const fullStars = Math.floor(note);
-
-    let html = "";
-
-    for(let i = 0; i < 5; i++){
-
-        if(i < fullStars){
-            html += `<i class="fa-solid fa-star"></i>`;
-        } else {
-            html += `<i class="fa-regular fa-star"></i>`;
-        }
-
-    }
-
-    return html;
+  note = parseFloat(note);
+  const fullStars = Math.floor(note);
+  let html = "";
+  for (let i = 0; i < 5; i++) {
+    html += i < fullStars
+      ? `<i class="fa-solid fa-star"></i>`
+      : `<i class="fa-regular fa-star"></i>`;
+  }
+  return html;
 }
 
 /* Close ctx menus on outside click */
@@ -1660,70 +1325,47 @@ document.addEventListener('click', () =>
   document.querySelectorAll('.post-ctx-menu.open').forEach(m => m.classList.remove('open'))
 );
 
-/* Enrich all existing cards */
+/* Enrich existing cards */
 document.querySelectorAll('.post-card').forEach(enrichCard);
 
 // ════════════════════════════════════════
-// NOTIFICATIONS TOAST
+// NAV DROPDOWN
 // ════════════════════════════════════════
-function showNotification1(message, color = '#16376E') {
-    const notif = document.getElementById('notification');
-    if (!notif) return;
-    notif.innerText = message;
-    notif.style.background = color; 
-    notif.style.display = 'flex';
-    clearTimeout(notif._t);
-    notif._t = setTimeout(() => { notif.style.display = 'none'; }, 3000); 
-}
-// ── Nav dropdown (menu burger) ──
 const navMenuBtn  = document.getElementById('navMenuBtn');
 const navDropdown = document.getElementById('navDropdown');
 
 navMenuBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    navDropdown.hidden = !navDropdown.hidden;
+  e.stopPropagation();
+  navDropdown.hidden = !navDropdown.hidden;
 });
 
-// Fermer si on clique ailleurs
-document.addEventListener('click', () => {
-    navDropdown.hidden = true;
-});
+document.addEventListener('click', () => { navDropdown.hidden = true; });
 
-
-// Suppression du compte
-document.getElementById('btnSupprimerCompte').addEventListener('click', () => {
-    navDropdown.hidden = true;
-    document.getElementById('modalSupprimer').hidden = false;
-});
-
-// Annuler
-document.getElementById('modalCancel').addEventListener('click', () => {
-    document.getElementById('modalSupprimer').hidden = true;
-});
-
-// Fermer en cliquant sur l'overlay
-document.getElementById('modalOverlay').addEventListener('click', () => {
-    document.getElementById('modalSupprimer').hidden = true;
-});
-
-// Déconnexion
 document.getElementById('btnDeconnexion').addEventListener('click', () => {
-    window.location.href = '../../html/login-user.html'; 
+  window.location.href = '../../html/login-user.html';
 });
 
-// Confirmer suppression
+document.getElementById('btnSupprimerCompte').addEventListener('click', () => {
+  navDropdown.hidden = true;
+  document.getElementById('modalSupprimer').hidden = false;
+});
+
+document.getElementById('modalCancel').addEventListener('click', () => {
+  document.getElementById('modalSupprimer').hidden = true;
+});
+
+document.getElementById('modalOverlay').addEventListener('click', () => {
+  document.getElementById('modalSupprimer').hidden = true;
+});
+
 document.getElementById('modalConfirm').addEventListener('click', async () => {
-    document.getElementById('modalSupprimer').hidden = true;
-
-    const res  = await fetch('../../../api/delete-account.php', { method: 'POST' });
-    const data = await res.json();
-
-    if (data.success) {
-        showNotification1('Compte supprimé. Redirection...', '#16376E');
-        setTimeout(() => {
-            window.location.href = '../../html/signUp-user.html'; // 
-        }, 2000);
-    } else {
-        showNotification1('Erreur : ' + (data.message || 'Impossible de supprimer le compte.'), '#b91c1c');
-    }
+  document.getElementById('modalSupprimer').hidden = true;
+  const res  = await fetch('../../../api/delete-account.php', { method: 'POST' });
+  const data = await res.json();
+  if (data.success) {
+    showNotification('Compte supprimé. Redirection...');
+    setTimeout(() => { window.location.href = '../../html/signUp-user.html'; }, 2000);
+  } else {
+    showNotification('Erreur : ' + (data.message || 'Impossible de supprimer le compte.'));
+  }
 });

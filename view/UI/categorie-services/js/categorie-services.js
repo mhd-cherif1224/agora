@@ -332,7 +332,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         loadServices(sortSelect.value, selected);
     });
 
-    sortSelect.addEventListener("change", () => loadServices(sortSelect.value, categorySelect.value));
+    sortSelect.addEventListener("change", () => {
+        const cat = categorySelect.value || initialCategory || null;
+        loadServices(sortSelect.value, cat);
+    });
 
     await loadCategories(initialCategory);
     updateCategoryHeader(initialCategory);
@@ -376,7 +379,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     async function loadServices(sort = "recent", category = undefined) {
         const container = document.getElementById("servicesContainer");
-        const currentCategory = category !== undefined ? category : initialCategory;
+        const currentCategory = (category !== undefined && category !== null)
+            ? category
+            : categorySelect.value || initialCategory;
 
         container.innerHTML = `
             <div class="posts-header">
@@ -387,7 +392,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         try {
             let url = "../../../api/get-services.php?sort=" + sort;
             if (currentCategory) {
-                url += "&cat=" + encodeURIComponent(currentCategory);
+                url += "&categorie=" + encodeURIComponent(currentCategory);
             }
 
             const response = await fetch(url);
