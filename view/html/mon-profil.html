@@ -5,22 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mon Profil — AGORA</title>
 
-<!-- Fonts (same as edit-profile) -->
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<link rel="stylesheet" href="../UI/homepage/css/post-modal.css">
 <link rel="stylesheet" href="../css/mon-profil.css">
-  <link rel="stylesheet" href="../UI/homepage/css/nav.css">
-
-
+<link rel="stylesheet" href="../UI/homepage/css/nav.css">
 </head>
 <body>
   <script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
+
   <!-- ══ NAV ══ -->
   <nav>
     <div class="nav-logo" onclick="window.location.href='../UI/homepage/home-page.html'">
-    <img src="../images/logo.svg" width="100px" alt="">
-  </div>
-   
+      <img src="../images/logo.svg" width="100px" alt="">
+    </div>
+
     <div class="nav-icons">
       <button class="nav-icon-btn" title="Accueil" onclick="window.location.href='../UI/homepage/home-page.html'">
         <svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
@@ -28,23 +28,21 @@
       <button class="nav-icon-btn" title="Messages" onclick="window.location.href='../UI/messagerie/messagerie.html'">
         <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
       </button>
-      <button class="nav-icon-btn" title="Notifications"  onclick="window.location.href='../UI/notification/notification.html'">
+      <button class="nav-icon-btn" title="Notifications" onclick="window.location.href='../UI/notification/notification.html'">
         <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
         <span class="notif-dot"></span>
       </button>
-
-      <button class="nav-icon-btn" title="Catégories"  onclick="window.location.href='../UI/categorie-services/categorie-services.html'">
-      <svg viewBox="0 0 24 24" stroke-width="2">
-        <path d="M20 13L11 22L2 13V4h9l9 9z"/>
-        <circle cx="15" cy="8" r="1"/>
-      </svg>
-    </button>
+      <button class="nav-icon-btn" title="Catégories" onclick="window.location.href='../UI/categorie-services/categorie-services.html'">
+        <svg viewBox="0 0 24 24" stroke-width="2">
+          <path d="M20 13L11 22L2 13V4h9l9 9z"/>
+          <circle cx="15" cy="8" r="1"/>
+        </svg>
+      </button>
       <div class="nav-divider"></div>
       <div class="nav-avatar" id="navAvatar" onclick="window.location.href='mon-profil.html'" title="Mon Profil">
         <img id="navAvatarImg" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;">
         <span id="navAvatarLetter">M</span>
       </div>
-
       <button class="nav-menu-btn" id="navMenuBtn">
         <span></span><span></span><span></span>
       </button>
@@ -69,7 +67,6 @@
           Supprimer le compte
         </a>
       </div>
-
     </div><!-- /nav-icons -->
   </nav>
 
@@ -84,7 +81,6 @@
           <!-- TOP -->
           <div class="banner-top" id="bannerTop">
             <input type="file" id="bannerInput" hidden accept="image/png,image/jpeg,image/jpg,image/gif">
-            
           </div>
 
           <!-- BOTTOM -->
@@ -96,24 +92,19 @@
                   <input type="file" id="cvInput" hidden accept=".pdf,.doc,.docx">
                   <label for="cvInput">+ Ajouter Votre CV</label>
                 </button>
-                <!-- Affichage du fichier -->
                 <span id="cvName"></span>
               </div>
               <div class="banner-role" id="displayRole">Etudiant a l'univ d'abderrahmane mira</div>
               <div class="banner-location" id="displayLocation">
                 <i class="fa-solid fa-location-dot"></i> Bejaia, Algeria
               </div>
-              
-              <!-- Icône lien dans la bannière -->
-              <div class="links-widget">
 
-                <!-- Bouton icône avec badge -->
+              <!-- Liens widget -->
+              <div class="links-widget">
                 <button class="links-icon-btn" id="linksToggleBtn" title="Mes liens">
                   <i class="fa-solid fa-link"></i>
                   <span class="links-badge" id="linksBadge" style="display:none;">0</span>
                 </button>
-
-                <!-- Dropdown liste des liens -->
                 <div class="links-dropdown" id="linksDropdown">
                   <div class="links-dropdown-header">
                     <span>Mes liens</span>
@@ -126,17 +117,6 @@
                   </div>
                   <p class="links-empty" id="linksEmpty">Aucun lien ajouté</p>
                 </div>
-
-              </div>
-
-              <!-- MODAL AJOUTER UN LIEN -->
-              <div id="linkModal" class="modal">
-                <div class="modal-content">
-                  <button class="close-btn" id="closeModal">&times;</button>
-                  <h2>Ajouter un lien</h2>
-                  <input type="url" id="modalLinkInput" placeholder="https://exemple.com">
-                  <button class="save-btn">Enregistrer</button>
-                </div>
               </div>
             </div>
             <a href="../UI/profile/edit-profile.html" class="edit-profile-btn">
@@ -146,35 +126,28 @@
 
           <!-- PROFILE CIRCLE -->
           <div class="profile">
-            
-            
-              <img src="../images/person.png" id="profilePreview">
-              
-            </label>
+            <img src="../images/person.png" id="profilePreview">
           </div>
 
         </div>
       </div>
       <br>
-      <!-- ══ POSTS ══ -->
-      <div class="posts-section feed"  id="servicesContainer">
-        <div class="posts-header"><h3>Vos Postes</h3></div>
 
+      <!-- ══ POSTS ══ -->
+      <div class="posts-section feed" id="servicesContainer">
+        <div class="posts-header"><h3>Vos Postes</h3></div>
       </div><!-- /posts-section -->
+
     </div><!-- /main-col -->
 
     <!-- ══ SIDEBAR ══ -->
     <div class="sidebar">
-      <div class="sidebar">
-      <div class="suggest-card " id="suggestCard">
+      <div class="suggest-card" id="suggestCard">
         <h3>CONNAISSEZ - VOUS ?</h3>
-        <!-- LIST OF ALL USERS -->
         <div class="suggest-list" id="usersList">
           <!-- Populated by JS -->
         </div>
       </div>
-      <!-- <a href="#" class="see-all-link see-all" id="seeAllBtn"><u>voir tous les suggestions </u>→</a> -->
-
 
       <p class="footer-note">© 2026 AGORA . All rights reserved.</p>
 
@@ -207,141 +180,158 @@
         </div>
       </div>
     </div><!-- /sidebar -->
+
   </div><!-- /layout -->
 
   <!-- ══ CHATBOT PANEL ══ -->
-<div class="chat-panel" id="chatbotPanel">
-  <div class="chat-panel-header">
-    <div class="chat-panel-user">
-      <div class="chat-panel-avatar" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa);">
-        <i class="fa-solid fa-robot"></i>
+  <div class="chat-panel" id="chatbotPanel">
+    <div class="chat-panel-header">
+      <div class="chat-panel-user">
+        <div class="chat-panel-avatar" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa);">
+          <i class="fa-solid fa-robot"></i>
+        </div>
+        <div>
+          <div class="chat-panel-name">AGORA Assistant</div>
+          <div class="chat-panel-status"><span class="online-dot"></span> En ligne</div>
+        </div>
       </div>
-      <div>
-        <div class="chat-panel-name">AGORA Assistant</div>
-        <div class="chat-panel-status"><span class="online-dot"></span> En ligne</div>
+      <button class="chat-panel-close" id="chatbotClose"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="chat-messages" id="chatbotMessages">
+      <div class="chat-msg received">
+        <div class="msg-bubble">Salut ! Je suis AGORA, votre assistant. Comment puis-je vous aider aujourd'hui ? 🫡</div>
+        <span class="msg-time">Maintenant</span>
       </div>
     </div>
-    <button class="chat-panel-close" id="chatbotClose"><i class="fa-solid fa-xmark"></i></button>
-  </div>
-  <div class="chat-messages" id="chatbotMessages">
-    <div class="chat-msg received">
-      <div class="msg-bubble">Salut ! Je suis AGORA, votre assistant. Comment puis-je vous aider aujourd'hui ? 🫡</div>
-      <span class="msg-time">Maintenant</span>
-    </div>
-  </div>
-  <div class="chat-input-row">
-    <input type="text" id="chatbotInput" placeholder="Posez votre question...">
-    <button class="chat-send-btn" id="chatbotSend"><i class="fa-solid fa-paper-plane"></i></button>
-  </div>
-</div>
-
-<!-- ══ MAKE A POST MODAL ══ -->
-<div class="post-modal-overlay" id="postModalOverlay">
-  <div class="post-modal" id="postModal">
-    <div class="post-modal-header">
-      <div class="post-modal-avatar-placeholder" id="pmAvatarContainer">
-        <img id="pmAvatar" src="" alt="profile picture" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">
-      </div>
-      <div class="post-modal-user">
-        <div class="post-modal-name">Nom</div>
-        <div class="post-modal-role">Rôle</div>
-      </div>
-      <button class="post-modal-close" id="postModalClose"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div class="post-modal-body">
-      <input type="text" class="post-modal-input" id="postTitle" placeholder="Titre du service">
-      <input type="text" class="post-modal-input" id="postPrice" placeholder="Prix">
-      <textarea class="post-modal-textarea" id="postDesc" placeholder="Décrivez votre service..."></textarea>
-    </div>
-    <div class="location-chip" id="locationChip">
-      <i class="fa-solid fa-location-dot"></i>
-      <span id="locationText">Ma position</span>
-      <button class="location-chip-remove" id="locationRemove"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div class="category-chips" id="categoryChips"></div>
-    <div class="scheduled-chip" id="scheduledChip">
-      <i class="fa-regular fa-clock"></i>
-      <span id="scheduledText">Programmé</span>
-      <button class="scheduled-chip-remove" id="scheduledRemove"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div class="post-modal-preview" id="postPreview"></div>
-    <div class="post-modal-footer">
-  <!-- Photo -->
-  <div style="position:relative;">
-    <input type="file" id="pmPhotoInput" hidden accept="image/*">
-    <button class="post-tool-btn" id="pmPhotoBtn" title="Photo">
-      <i class="fa-regular fa-image"></i>
-    </button>
-  </div>
-
-  <!-- Location -->
-  <div style="position:relative;">
-    <button class="post-tool-btn" id="pmLocBtn" title="Localisation">
-      <i class="fa-solid fa-location-dot"></i>
-    </button>
-    <div class="loc-modal" id="locModal">
-      <input type="text" id="locInput" placeholder="Ex : Bejaia, Algeria">
-      <button class="loc-confirm-btn" id="locConfirm">Confirmer</button>
+    <div class="chat-input-row">
+      <input type="text" id="chatbotInput" placeholder="Posez votre question...">
+      <button class="chat-send-btn" id="chatbotSend"><i class="fa-solid fa-paper-plane"></i></button>
     </div>
   </div>
 
-  <!-- Catégorie -->
-  <div style="position:relative;">
-    <button class="post-tool-btn" id="pmCatBtn" title="Catégorie">
-      <i class="fa-solid fa-plus"></i>
-    </button>
-    <div class="cat-dropdown" id="catDropdown"></div>
-  </div>
+  <!-- ══ MAKE A POST MODAL ══ -->
+  <div class="post-modal-overlay" id="postModalOverlay">
+    <div class="post-modal" id="postModal">
+      <div class="post-modal-header">
+        <div class="post-modal-avatar-placeholder" id="pmAvatarContainer">
+          <img id="pmAvatar" src="" alt="profile picture" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">
+        </div>
+        <div class="post-modal-user">
+          <div class="post-modal-name">Nom</div>
+          <div class="post-modal-role">Rôle</div>
+        </div>
+        <button class="post-modal-close" id="postModalClose"><i class="fa-solid fa-xmark"></i></button>
+      </div>
 
-  <!-- Statut -->
-  <div style="position:relative;">
-    <button class="post-tool-btn" id="pmStatusBtn" title="Statut">
-      <i class="fa-solid fa-circle-dot"></i>
-    </button>
-    <div class="status-modal" id="statusModal">
-      <div class="status-option" data-value="disponible">
-        <i class="fa-solid fa-circle" style="color:#22c55e;font-size:9px;"></i> Disponible
-      </div>
-      <div class="status-option" data-value="en cours">
-        <i class="fa-solid fa-circle" style="color:#f59e0b;font-size:9px;"></i> En cours
-      </div>
-      <div class="status-option" data-value="terminé">
-        <i class="fa-solid fa-circle" style="color:#8c8580;font-size:9px;"></i> Terminé
-      </div>
-    </div>
-  </div>
+      <!-- SCROLLABLE BODY (unique, sans doublons) -->
+      <div class="post-modal-scroll" id="postModalScroll">
+        <div class="post-modal-body">
+          <input type="text" class="post-modal-input" id="postTitle" placeholder="Titre du service">
+          <input type="text" class="post-modal-input" id="postPrice" placeholder="Prix">
+          <textarea class="post-modal-textarea" id="postDesc"
+                    placeholder="Décrivez votre service..."
+                    rows="5"
+                    style="width:100%;box-sizing:border-box;min-height:110px;
+                           border:1.5px solid #e2ddd7;border-radius:12px;
+                           padding:10px 14px;background:#f7f5f2;
+                           font-family:'DM Sans',sans-serif;font-size:13px;
+                           color:#1a1714;resize:none;outline:none;"></textarea>
+        </div>
 
-  <div class="post-tool-sep"></div>
-  <div class="post-footer-push"></div>
+        <div class="location-chip" id="locationChip">
+          <i class="fa-solid fa-location-dot"></i>
+          <span id="locationText">Ma position</span>
+          <button class="location-chip-remove" id="locationRemove"><i class="fa-solid fa-xmark"></i></button>
+        </div>
 
-  <!-- Timer -->
-  <div style="position:relative;">
-    <button class="post-tool-btn" id="pmTimerBtn" title="Programmer">
-      <i class="fa-regular fa-clock"></i>
-    </button>
-    <div class="timer-modal" id="timerModal">
-      <div class="timer-modal-header">
-        <span class="timer-modal-title">Programmer un timer</span>
-        <button class="timer-modal-close" id="timerModalClose">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-      <div class="timer-field">
-        <label>Date</label>
-        <input type="date" id="timerDate">
-      </div>
-      <div class="timer-field">
-        <label>Heure</label>
-        <input type="time" id="timerTime">
-      </div>
-      <button class="timer-confirm-btn" id="timerConfirm">Confirmer</button>
-    </div>
-  </div>
+        <div class="category-chips" id="categoryChips"></div>
 
-  <button class="post-publish-btn" id="postPublishBtn">publier</button>
-</div>
-  </div>
-</div>
+        <div class="scheduled-chip" id="scheduledChip">
+          <i class="fa-regular fa-clock"></i>
+          <span id="scheduledText">Programmé</span>
+          <button class="scheduled-chip-remove" id="scheduledRemove"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="post-modal-preview" id="postPreview"></div>
+      </div><!-- /post-modal-scroll -->
+
+      <div class="post-modal-footer">
+        <!-- Photo -->
+        <div style="position:relative;">
+          <input type="file" id="pmPhotoInput" hidden accept="image/*">
+          <button class="post-tool-btn" id="pmPhotoBtn" title="Photo">
+            <i class="fa-regular fa-image"></i>
+          </button>
+        </div>
+
+        <!-- Location -->
+        <div style="position:relative;">
+          <button class="post-tool-btn" id="pmLocBtn" title="Localisation">
+            <i class="fa-solid fa-location-dot"></i>
+          </button>
+          <div class="loc-modal" id="locModal">
+            <input type="text" id="locInput" placeholder="Ex : Bejaia, Algeria">
+            <button class="loc-confirm-btn" id="locConfirm">Confirmer</button>
+          </div>
+        </div>
+
+        <!-- Catégorie -->
+        <div style="position:relative;">
+          <button class="post-tool-btn" id="pmCatBtn" title="Catégorie">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+          <div class="cat-dropdown" id="catDropdown"></div>
+        </div>
+
+        <!-- Statut -->
+        <div style="position:relative;">
+          <button class="post-tool-btn" id="pmStatusBtn" title="Statut">
+            <i class="fa-solid fa-circle-dot"></i>
+          </button>
+          <div class="status-modal" id="statusModal">
+            <div class="status-option" data-value="disponible">
+              <i class="fa-solid fa-circle" style="color:#22c55e;font-size:9px;"></i> Disponible
+            </div>
+            <div class="status-option" data-value="en cours">
+              <i class="fa-solid fa-circle" style="color:#f59e0b;font-size:9px;"></i> En cours
+            </div>
+            <div class="status-option" data-value="terminé">
+              <i class="fa-solid fa-circle" style="color:#8c8580;font-size:9px;"></i> Terminé
+            </div>
+          </div>
+        </div>
+
+        <div class="post-tool-sep"></div>
+        <div class="post-footer-push"></div>
+
+        <!-- Timer -->
+        <div style="position:relative;">
+          <button class="post-tool-btn" id="pmTimerBtn" title="Programmer">
+            <i class="fa-regular fa-clock"></i>
+          </button>
+          <div class="timer-modal" id="timerModal">
+            <div class="timer-modal-header">
+              <span class="timer-modal-title">Programmer un timer</span>
+              <button class="timer-modal-close" id="timerModalClose">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div class="timer-field">
+              <label>Date</label>
+              <input type="date" id="timerDate">
+            </div>
+            <div class="timer-field">
+              <label>Heure</label>
+              <input type="time" id="timerTime">
+            </div>
+            <button class="timer-confirm-btn" id="timerConfirm">Confirmer</button>
+          </div>
+        </div>
+
+        <button class="post-publish-btn" id="postPublishBtn">publier</button>
+      </div><!-- /post-modal-footer -->
+    </div><!-- /post-modal -->
+  </div><!-- /post-modal-overlay -->
 
   <!-- ══ FAB BAR ══ -->
   <div class="fab-bar">
@@ -384,7 +374,7 @@
   <!-- ══ NOTIFICATION ══ -->
   <div id="notification"></div>
 
-  <!-- ══ LINK MODAL ══ -->
+  <!-- ══ LINK MODAL (unique) ══ -->
   <div id="linkModal" class="modal">
     <div class="modal-content">
       <button class="close-btn" id="closeModal">&times;</button>
