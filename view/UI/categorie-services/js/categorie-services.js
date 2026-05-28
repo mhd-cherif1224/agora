@@ -1,10 +1,12 @@
 // ── Utilitaires ──
+let currentUser = {};
 
 function buildPhotoUrl(path) {
   if (!path) return null;
   if (path.startsWith('/') || path.startsWith('http')) return path;
   return `../../../${path}`;
 }
+
 // ── Barre de recherche nav ──
 const navSearchInput = document.querySelector('.nav-search input');
 const navSearchIcon  = document.querySelector('.nav-search svg');
@@ -32,12 +34,11 @@ function showNotification(message, color = '#16376E') {
     const notif = document.getElementById('notification');
     if (!notif) return;
     notif.innerText = message;
-    notif.style.background = color; 
+    notif.style.background = color;
     notif.style.display = 'flex';
     clearTimeout(notif._t);
-    notif._t = setTimeout(() => { notif.style.display = 'none'; }, 3000); 
+    notif._t = setTimeout(() => { notif.style.display = 'none'; }, 3000);
 }
-
 
 function getTimeAgo(dateString) {
     const now = new Date();
@@ -69,7 +70,35 @@ function generateStars(note) {
     ).join('');
 }
 
- function createServiceCard(service) {
+// ════════════════════════════════════════
+// BUILD COMMENT ITEM  ← au niveau global
+// ════════════════════════════════════════
+function buildCommentItem(name, note, text, date, photoProfile) {
+    const item = document.createElement('div');
+    item.className = 'comment-item';
+    const initials  = name.slice(0, 2).toUpperCase();
+    const starsHtml = Array.from({ length: 5 }, (_, i) =>
+        `<i class="${i < note ? 'fa-solid' : 'fa-regular'} fa-star"></i>`
+    ).join('');
+    const avatarHtml = photoProfile
+        ? `<img src="../../../${photoProfile}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+        : initials;
+    item.innerHTML = `
+        <div class="comment-avatar" style="${photoProfile ? '' : 'background:linear-gradient(135deg,#4b48ec,#7299f4);'}">
+            ${avatarHtml}
+        </div>
+        <div class="comment-body">
+            <div class="comment-header">
+                <span class="comment-name">${name}</span>
+                <div class="comment-stars">${starsHtml}</div>
+                <span class="comment-date">${date}</span>
+            </div>
+            ${text ? `<p class="comment-text">${text}</p>` : ''}
+        </div>`;
+    return item;
+}
+
+function createServiceCard(service) {
 
     const profileImage = service.photo_profil
         ? `../../../${service.photo_profil}`
@@ -151,6 +180,18 @@ function generateStars(note) {
             <i class="fa-regular fa-star"></i> Évaluer
         </button>
         ` : ''}
+        <button class="post-action-btn" data-action="comment">
+            <i class="fa-regular fa-comment"></i> Commentaires
+            <span class="comments-count-badge" style="
+                background:rgba(75,72,236,0.15);
+                color:#4b48ec;
+                font-size:10px;
+                font-weight:700;
+                padding:1px 6px;
+                border-radius:10px;
+                margin-left:4px;
+            ">${service.nb_avis || 0}</span>
+        </button>
     </div>
 
     <div class="rating-panel" hidden>
@@ -171,18 +212,16 @@ function generateStars(note) {
         </div>
     </div>
 
-    <div class="comments-list" hidden></div>
+    <div class="comments-list" hidden data-loaded="false"></div>
 
 </article>`;
 }
-
-
 
 // ── Page catégorie ──
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-    const params        = new URLSearchParams(window.location.search);
+    const params          = new URLSearchParams(window.location.search);
     const initialCategory = params.get("cat");
     const categorySelect  = document.getElementById("categorySelect");
     const sortSelect      = document.getElementById("sortSelect");
@@ -255,18 +294,17 @@ document.addEventListener("DOMContentLoaded", async () => {
                 avatar: data.avatar
             };
 
-            const navImg      = document.getElementById('navAvatarImg');
-            const navLetter   = document.getElementById('navAvatarLetter');
-            
+            const navImg    = document.getElementById('navAvatarImg');
+            const navLetter = document.getElementById('navAvatarLetter');
 
             if (data.avatar) {
-                navImg.src             = buildPhotoUrl(data.avatar);
-                navImg.style.display   = 'block';
-                navLetter.style.display = 'none'
+                navImg.src              = buildPhotoUrl(data.avatar);
+                navImg.style.display    = 'block';
+                navLetter.style.display = 'none';
             } else {
-                navLetter.textContent     = (data.prenom[0] + data.nom[0]).toUpperCase();
-                navImg.style.display      = 'none';
-                navLetter.style.display   = 'block'
+                navLetter.textContent   = (data.prenom[0] + data.nom[0]).toUpperCase();
+                navImg.style.display    = 'none';
+                navLetter.style.display = 'block';
             }
 
         } catch (err) {
@@ -277,7 +315,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     function updateCategoryHeader(selectedCategory) {
         document.getElementById("pageTitle").textContent =
             selectedCategory || "Tous les services";
-
         document.getElementById("categoryIcon").textContent =
             icons[selectedCategory] || "🏷️";
     }
@@ -285,19 +322,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     categorySelect.addEventListener("change", () => {
         const selected = categorySelect.value;
         const url = new URL(window.location.href);
-
         if (selected) {
             url.searchParams.set("cat", selected);
         } else {
             url.searchParams.delete("cat");
         }
-
         window.history.replaceState(null, "", url);
         updateCategoryHeader(selected);
         loadServices(sortSelect.value, selected);
     });
 
-    // Écouter le changement de tri
     sortSelect.addEventListener("change", () => loadServices(sortSelect.value, categorySelect.value));
 
     await loadCategories(initialCategory);
@@ -351,56 +385,48 @@ document.addEventListener("DOMContentLoaded", async () => {
         `;
 
         try {
-
-            // Goes up from current JS/page location to api folder
             let url = "../../../api/get-services.php?sort=" + sort;
-
             if (currentCategory) {
-                url += "&categorie=" + encodeURIComponent(currentCategory);
+                url += "&cat=" + encodeURIComponent(currentCategory);
             }
 
-        const response = await fetch(url);
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
+            const data = await response.json();
 
-        const data = await response.json();
+            if (!data.success || data.services.length === 0) {
+                container.innerHTML += `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" stroke-width="1.5">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <p>Aucun service trouvé pour cette catégorie.</p>
+                    </div>
+                `;
+                document.getElementById("postsCount").textContent = "0 service";
+                return;
+            }
 
-        if (!data.success || data.services.length === 0) {
+            document.getElementById("postsCount").textContent =
+                `${data.services.length} service${data.services.length > 1 ? "s" : ""}`;
+
+            container.innerHTML += data.services
+                .map(service => createServiceCard(service))
+                .join("");
+
+            attachRatingEvents(container);
+
+        } catch (err) {
+            console.error("Erreur:", err);
             container.innerHTML += `
-                <div class="empty-state">
-                    <svg viewBox="0 0 24 24" stroke-width="1.5">
-                        <circle cx="11" cy="11" r="8"/>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    </svg>
-                    <p>Aucun service trouvé pour cette catégorie.</p>
-                </div>
+                <p style="color:var(--color-muted);padding:20px;text-align:center">
+                    Erreur de chargement.
+                </p>
             `;
-
-            document.getElementById("postsCount").textContent = "0 service";
-            return;
         }
-
-        document.getElementById("postsCount").textContent =
-            `${data.services.length} service${data.services.length > 1 ? "s" : ""}`;
-
-        container.innerHTML += data.services
-            .map(service => createServiceCard(service))
-            .join("");
-
-        attachRatingEvents(container);
-
-    } catch (err) {
-        console.error("Erreur:", err);
-
-        container.innerHTML += `
-            <p style="color:var(--color-muted);padding:20px;text-align:center">
-                Erreur de chargement.
-            </p>
-        `;
     }
-}
 
 });
 
@@ -408,12 +434,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 // ── Attacher les événements rating sur un conteneur ──
 function attachRatingEvents(container) {
 
-    container.addEventListener('click', (e) => {
+    container.addEventListener('click', async (e) => {
 
         const ownerClick = e.target.closest('.post-owner');
         if (ownerClick) {
             const userId = ownerClick.dataset.ownerId;
-            
             if (userId && userId != currentUser.id) {
                 window.location.href = '../profile/profile.html?id=' + encodeURIComponent(userId);
             }
@@ -423,7 +448,77 @@ function attachRatingEvents(container) {
         if (e.target.closest('.post-action-btn[data-action="rate"]')) {
             const card  = e.target.closest('.post-card');
             const panel = card.querySelector('.rating-panel');
+            const commentsList = card.querySelector('.comments-list');
             panel.hidden = !panel.hidden;
+            if (!panel.hidden && !commentsList.hidden) commentsList.hidden = true;
+            return;
+        }
+
+        if (e.target.closest('.post-action-btn[data-action="comment"]')) {
+            const card         = e.target.closest('.post-card');
+            const commentsList = card.querySelector('.comments-list');
+            const panel        = card.querySelector('.rating-panel');
+
+            const isOpen = !commentsList.hidden;
+            if (!panel.hidden) panel.hidden = true;
+
+            if (isOpen) {
+                commentsList.hidden = true;
+                return;
+            }
+
+            if (commentsList.dataset.loaded === 'false') {
+                commentsList.dataset.loaded = 'loading';
+                commentsList.hidden = false;
+                commentsList.innerHTML = `
+                    <div style="padding:14px 18px;color:#8c8580;font-size:12px;
+                                font-family:'Space Grotesk',sans-serif;display:flex;
+                                align-items:center;gap:8px;">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Chargement des avis...
+                    </div>`;
+
+                const serviceId = card.dataset.serviceId;
+                try {
+                    const res  = await fetch(`../../../api/get-ratings.php?service_id=${serviceId}`);
+                    const data = await res.json();
+                    commentsList.innerHTML = '';
+
+                    if (!data.success || !data.ratings || data.ratings.length === 0) {
+                        commentsList.innerHTML = `
+                            <div style="padding:14px 18px;color:#8c8580;font-size:12px;
+                                        font-family:'Space Grotesk',sans-serif;text-align:center;">
+                                <i class="fa-regular fa-comment-dots" style="font-size:20px;display:block;margin-bottom:6px;"></i>
+                                Aucun avis pour l'instant
+                            </div>`;
+                    } else {
+                        data.ratings.forEach(r => {
+                            const dateStr = new Date(r.DateEval).toLocaleDateString('fr-FR', {
+                                day: '2-digit', month: 'short', year: 'numeric'
+                            });
+                            commentsList.appendChild(
+                                buildCommentItem(
+                                    `${r.prenom} ${r.nom}`,
+                                    parseInt(r.note),
+                                    r.commentaire || '',
+                                    dateStr,
+                                    r.photo_profil
+                                )
+                            );
+                        });
+                    }
+                    commentsList.dataset.loaded = 'true';
+                } catch (err) {
+                    console.error(err);
+                    commentsList.innerHTML = `
+                        <div style="padding:14px 18px;color:#ef4444;font-size:12px;
+                                    font-family:'Space Grotesk',sans-serif;">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Erreur de chargement
+                        </div>`;
+                    commentsList.dataset.loaded = 'false';
+                }
+            } else {
+                commentsList.hidden = false;
+            }
             return;
         }
 
@@ -512,9 +607,7 @@ async function submitRating(card) {
     try {
         const response = await fetch('../../../api/submit-rating.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
@@ -523,29 +616,14 @@ async function submitRating(card) {
             throw new Error(result.message || 'Erreur lors de la soumission');
         }
 
-        const commentsList = card.querySelector('.comments-list');
-        if (commentaire && commentsList) {
-            const item = document.createElement('div');
-            item.className = 'comment-item';
-            const starsHtml = Array.from({ length: 5 }, (_, i) =>
-                `<i class="${i < note ? 'fa-solid' : 'fa-regular'} fa-star"></i>`
-            ).join('');
-            item.innerHTML = `
-                <div class="comment-avatar" style="background:linear-gradient(135deg,#4b48ec,#7299f4);">Moi</div>
-                <div class="comment-body">
-                    <div class="comment-header">
-                        <span class="comment-name">Moi</span>
-                        <div class="comment-stars">${starsHtml}</div>
-                        <span class="comment-date">${dateEval}</span>
-                    </div>
-                    <p class="comment-text">${commentaire}</p>
-                </div>`;
-            commentsList.appendChild(item);
-            commentsList.hidden = false;
-        }
-
         updateRatingSummary(card, note);
         closeRatingPanel(card);
+
+        // Réinitialiser le cache pour forcer un rechargement
+        const commentsList = card.querySelector('.comments-list');
+        commentsList.dataset.loaded = 'false';
+        commentsList.innerHTML = '';
+        commentsList.hidden = true;
 
         const rateBtn = card.querySelector('.post-action-btn[data-action="rate"]');
         if (rateBtn) {
@@ -554,6 +632,7 @@ async function submitRating(card) {
         }
 
         showNotification('Évaluation soumise avec succès !', '#16a34a');
+
     } catch (err) {
         console.error('Erreur lors de la soumission :', err);
         textarea.placeholder = '⚠ Erreur lors de la soumission...';
@@ -566,7 +645,7 @@ async function submitRating(card) {
 }
 
 function updateRatingSummary(card, newNote) {
-    const summary  = card.querySelector('.post-rating-summary');
+    const summary = card.querySelector('.post-rating-summary');
     if (!summary) return;
     const scoreEl  = summary.querySelector('.rating-score');
     const countEl  = summary.querySelector('.rating-count');
@@ -595,33 +674,27 @@ navMenuBtn.addEventListener('click', (e) => {
     navDropdown.hidden = !navDropdown.hidden;
 });
 
-// Fermer si on clique ailleurs
 document.addEventListener('click', () => {
     navDropdown.hidden = true;
 });
 
-// Déconnexion
 document.getElementById('btnDeconnexion').addEventListener('click', () => {
     window.location.href = '../../html/login-user.html';
 });
 
-// Suppression du compte
 document.getElementById('btnSupprimerCompte').addEventListener('click', () => {
     navDropdown.hidden = true;
     document.getElementById('modalSupprimer').hidden = false;
 });
 
-// Annuler
 document.getElementById('modalCancel').addEventListener('click', () => {
     document.getElementById('modalSupprimer').hidden = true;
 });
 
-// Fermer en cliquant sur l'overlay
 document.getElementById('modalOverlay').addEventListener('click', () => {
     document.getElementById('modalSupprimer').hidden = true;
 });
 
-// Confirmer suppression
 document.getElementById('modalConfirm').addEventListener('click', async () => {
     document.getElementById('modalSupprimer').hidden = true;
 
