@@ -482,7 +482,10 @@ body.dark-theme .buttons {
     border: 1px solid rgba(75,72,236,0.35);
     box-shadow: 0 2px 16px rgba(0,0,0,0.35);
 }
-
+body.dark-theme #toggleBtn {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(75,72,236,0.35);
+}
 body.dark-theme .modal-content {
     background: rgba(13,13,28,0.97);
     color: #f1f0f5;

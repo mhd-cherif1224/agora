@@ -1,13 +1,9 @@
 <?php
-/* ══════════════════════════════════════════
-   LOGIN-USER.PHP
-   Authentification utilisateur via fetch JSON.
-   Retourne toujours du JSON (pas de redirect).
-══════════════════════════════════════════ */
+
 ob_start();
 require_once __DIR__ . '/session-config.php';
 require_once '../model/Database.php';
-// BUG CORRIGÉ : suppression de user.php (fichier inexistant)
+
 
 // ── Lecture du body JSON ──
 $raw      = file_get_contents('php://input');

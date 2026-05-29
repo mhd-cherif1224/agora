@@ -1,53 +1,99 @@
-<!-- login-admin interface -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ICONS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/login-admin.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/login-user.css">
+
     <title>Login Admin</title>
 </head>
-<body>
-    
-    <div class="container">
-        
-        <!-- NOTIFICATION -->
-        <div id="notification"></div>
 
-        <div class="title">
-            <h1>Bonjour </h1>
-            <h1>Admin!</h1>
+<body>
+
+<div class="container">
+
+    <!-- Notification -->
+    <div id="notification"></div>
+
+    <!-- LEFT -->
+    <div class="left">
+
+        <div class="nav-logo">
+            <img src="../images/logo.svg" width="100%" alt="logo">
         </div>
 
-        <!-- Ajout du form avec action vers le controller -->
+        <h1>Bienvenue<br> Admin</h1>
+        <p>Connectez-vous pour accéder au panneau d'administration</p>
+
         <form action="../../Controller/login-admin.php" method="POST">
 
+            <!-- EMAIL -->
             <div class="input-group">
                 <i class="fa-solid fa-envelope icon-left"></i>
-                <input type="email" name="email" id="in-email" placeholder="Entrez votre email">
+
+                <input
+                    type="email"
+                    name="email"
+                    id="in-email" placeholder="Entrez votre email"
+                    required
+                >
             </div>
 
+            <!-- PASSWORD -->
             <div class="input-group">
+
                 <i class="fa-solid fa-lock icon-left"></i>
-                <input type="password" name="password" id="password" placeholder="Entrez votre mot de passe">
+
+                <input
+                    type="password"
+                    name="password"
+                    id="password"
+                    placeholder="Entrez votre mot de passe"
+                    required
+                >
+
                 <i class="fa-solid fa-eye-slash icon-right" id="togglePassword"></i>
+
             </div>
 
+            <!-- OPTIONS -->
             <div class="options">
-                <div class="remember">
+
+                <label>
                     <input type="checkbox" id="checkbox">
-                    <label for="checkbox">remember me</label>
-                </div>
+                    Remember me
+                </label>
+
             </div>
 
-            <!-- type="submit" sur le bouton -->
-            <button type="submit">Login</button>
+            <!-- BUTTON -->
+            <button type="submit">
+                Se connecter
+            </button>
 
         </form>
+<footer>
+    
+</footer>
     </div>
 
-    <script src="../js/login-admin.js"></script>
+    <!-- RIGHT -->
+        <div class="right">
+            <h2>Contrôler toute la Plateforme</h2>
+            <span>en un seul espace.</span>
+            <div class="picture-container">
+                <img src="../images/loginAdmin.svg" alt="User-picture">
+            </div>
+        </div>
+
+</div>
+
+<script src="../js/login-admin.js"></script>
 
 </body>
 </html>
