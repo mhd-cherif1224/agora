@@ -134,11 +134,39 @@ document.addEventListener("DOMContentLoaded", async () => {
                 .map(service => createServiceCard(service))
                 .join("");
 
+
+            await applyUserEvals();
+
+
         } catch (error) {
             console.error("Error:", error);
         }
     }
 
+    async function applyUserEvals() {
+    await Promise.all(
+        [...document.querySelectorAll('.post-card')].map(async (card) => {
+            const serviceId = card.dataset.serviceId;
+            const rateBtn = card.querySelector('.post-action-btn[data-action="rate"]');
+            if (!rateBtn) return;
+            try {
+                const res  = await fetch(`../../../api/get-ratings.php?service_id=${serviceId}`);
+                const json = await res.json();
+                if (json.userEval) {
+                    const picker   = card.querySelector('.star-picker');
+                    const textarea = card.querySelector('.rating-comment-input');
+                    if (picker) { picker.dataset.selected = json.userEval.note; renderPickerStars(picker, parseInt(json.userEval.note)); }
+                    if (textarea) textarea.value = json.userEval.commentaire || '';
+                    rateBtn.classList.add('rated');
+                    rateBtn.innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Modifier l'évaluation`;
+                }
+            } catch (e) {}
+        })
+    );
+}
+
+// Exposer pour la page recherche
+window.applyUserEvals = applyUserEvals;
 
     function createServiceCard(service) {
 
@@ -273,7 +301,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>
     </div>
 
-    <div class="comments-list" hidden data-loaded="false"></div>
+    <div class="comments-list is-hidden" data-loaded="false"></div>
 
 </article>`;
 }
@@ -474,98 +502,57 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
-        if (e.target.closest('.post-action-btn[data-action="comment"]')) {
-            const card = e.target.closest('.post-card');
-            const commentsList = card.querySelector('.comments-list');
-            const panel = card.querySelector('.rating-panel');
+if (e.target.closest('.post-action-btn[data-action="comment"]')) {
+    const card         = e.target.closest('.post-card');
+    const commentsList = card.querySelector('.comments-list');
+    const panel        = card.querySelector('.rating-panel');
 
-            const isOpen = !commentsList.hidden;
+    if (!panel.hidden) panel.hidden = true;
 
-            // Fermer le panel de notation si ouvert
-            if (!panel.hidden) panel.hidden = true;
+    // Toggle : si visible → fermer
+    if (!commentsList.classList.contains('is-hidden')) {
+        commentsList.classList.add('is-hidden');
+        return;
+    }
 
-            if (isOpen) {
-                commentsList.hidden = true;
-                return;
-            }
+    // Ouvrir
+    commentsList.classList.remove('is-hidden');
 
-            // Charger les commentaires si pas encore fait
-            if (commentsList.dataset.loaded === 'false') {
-                commentsList.dataset.loaded = 'loading';
-                commentsList.hidden = false;
-                commentsList.innerHTML = `
-                    <div style="padding:14px 18px;color:#8c8580;font-size:12px;
-                                font-family:'Space Grotesk',sans-serif;display:flex;
-                                align-items:center;gap:8px;">
-                        <i class="fa-solid fa-spinner fa-spin"></i> Chargement des avis...
-                    </div>`;
+    // Ne pas relancer si déjà chargé ou en cours
+    if (commentsList.dataset.loaded === 'true' || commentsList.dataset.loaded === 'loading') return;
 
-                const serviceId = card.dataset.serviceId;
-                try {
-                    const res = await fetch(`../../../api/get-ratings.php?service_id=${serviceId}`);
-                    const data = await res.json();
+    commentsList.dataset.loaded = 'loading';
+    commentsList.innerHTML = `<div style="padding:14px 18px;color:#8c8580;font-size:12px;font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-spinner fa-spin"></i> Chargement des avis...</div>`;
 
-                    commentsList.innerHTML = '';
-
-                    if (!data.success || !data.ratings || data.ratings.length === 0) {
-                        commentsList.innerHTML = `
-                            <div style="padding:14px 18px;color:#8c8580;font-size:12px;
-                                        font-family:'Space Grotesk',sans-serif;text-align:center;">
-                                <i class="fa-regular fa-comment-dots" style="font-size:20px;display:block;margin-bottom:6px;"></i>
-                                Aucun avis pour l'instant
-                            </div>`;
-                    } else {
-                        data.ratings.forEach(r => {
-                            const dateStr = new Date(r.DateEval).toLocaleDateString('fr-FR', {
-                                day: '2-digit', month: 'short', year: 'numeric'
-                            });
-                            commentsList.appendChild(
-                                buildCommentItem(
-                                    `${r.prenom} ${r.nom}`,
-                                    parseInt(r.note),
-                                    r.commentaire || '',
-                                    dateStr,
-                                    r.photo_profil
-                                )
-                            );
-                        });
-                    }
-                    commentsList.dataset.loaded = 'true';
-
-                    if (data.userEval) {
-                        const picker   = card.querySelector('.star-picker');
-                        const textarea = card.querySelector('.rating-comment-input');
-                        const rateBtn  = card.querySelector('.post-action-btn[data-action="rate"]');
-
-                        // Pré-remplir les étoiles
-                        if (picker) {
-                            picker.dataset.selected = data.userEval.note;
-                            renderPickerStars(picker, parseInt(data.userEval.note));
-                        }
-                        // Pré-remplir le commentaire
-                        if (textarea) {
-                            textarea.value = data.userEval.commentaire || '';
-                        }
-                        // Changer le libellé du bouton
-                        if (rateBtn) {
-                            rateBtn.classList.add('rated');
-                            rateBtn.innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Modifier l'évaluation`;
-                        }
-                    }
-                                    } catch (err) {
-                    console.error(err);
-                    commentsList.innerHTML = `
-                        <div style="padding:14px 18px;color:#ef4444;font-size:12px;
-                                    font-family:'Space Grotesk',sans-serif;">
-                            <i class="fa-solid fa-triangle-exclamation"></i> Erreur de chargement
-                        </div>`;
-                    commentsList.dataset.loaded = 'false';
-                }
-            } else {
-                commentsList.hidden = false;
-            }
-            return;
+    const serviceId = card.dataset.serviceId;
+    try {
+        const res  = await fetch(`../../../api/get-ratings.php?service_id=${serviceId}`);
+        const data = await res.json();
+        commentsList.innerHTML = '';
+        if (!data.success || !data.ratings || data.ratings.length === 0) {
+            commentsList.innerHTML = `<div style="padding:14px 18px;color:#8c8580;font-size:12px;font-family:'Space Grotesk',sans-serif;text-align:center;"><i class="fa-regular fa-comment-dots" style="font-size:20px;display:block;margin-bottom:6px;"></i>Aucun avis pour l'instant</div>`;
+        } else {
+            data.ratings.forEach(r => {
+                const dateStr = new Date(r.DateEval).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+                commentsList.appendChild(buildCommentItem(`${r.prenom} ${r.nom}`, parseInt(r.note), r.commentaire || '', dateStr, r.photo_profil));
+            });
         }
+        commentsList.dataset.loaded = 'true';
+        if (data.userEval) {
+            const picker  = card.querySelector('.star-picker');
+            const textarea = card.querySelector('.rating-comment-input');
+            const rateBtn = card.querySelector('.post-action-btn[data-action="rate"]');
+            if (picker)   { picker.dataset.selected = data.userEval.note; renderPickerStars(picker, parseInt(data.userEval.note)); }
+            if (textarea)   textarea.value = data.userEval.commentaire || '';
+            if (rateBtn)  { rateBtn.classList.add('rated'); rateBtn.innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Modifier l'évaluation`; }
+        }
+    } catch (err) {
+        console.error(err);
+        commentsList.innerHTML = `<div style="padding:14px 18px;color:#ef4444;font-size:12px;font-family:'Space Grotesk',sans-serif;"><i class="fa-solid fa-triangle-exclamation"></i> Erreur de chargement</div>`;
+        commentsList.dataset.loaded = 'false';
+    }
+    return;
+}
 
         if (e.target.closest('.star-picker')) {
             const star = e.target.closest('[data-star]');
@@ -740,7 +727,7 @@ async function submitRating(card) {
         const commentsList = card.querySelector('.comments-list');
         commentsList.dataset.loaded = 'false';
         commentsList.innerHTML = '';
-        commentsList.hidden = true;
+        commentsList.classList.add('is-hidden');
 
         const rateBtn = card.querySelector('.post-action-btn[data-action="rate"]');
         if (rateBtn) {

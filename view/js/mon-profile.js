@@ -454,6 +454,7 @@ async function loadServices() {
     }
 
     container.innerHTML = data.services.map(service => createServiceCard(service)).join("");
+    attachProfileCardEvents(container);
 
   } catch (error) {
     console.error("loadServices error:", error);
@@ -528,7 +529,20 @@ function createServiceCard(service) {
     <span class="rating-score">${service.note_moyenne}</span>
     <span class="rating-count">(${service.nb_avis} évaluations)</span>
   </div>
+
+  <div class="post-actions">
+    <button class="post-action-btn" data-action="comment">
+      <i class="fa-regular fa-comment"></i> Commentaires
+      <span class="comments-count-badge" style="
+        background:rgba(75,72,236,0.15);color:#4b48ec;font-size:10px;
+        font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px;
+      ">${service.nb_avis || 0}</span>
+    </button>
+  </div>
+
+  <div class="comments-list is-hidden" data-loaded="false"></div>
 </article>`;
+
 }
 
 // ════════════════════════════════════════
@@ -563,6 +577,83 @@ function generateStars(note) {
     html += i < full ? `<i class="fa-solid fa-star"></i>` : `<i class="fa-regular fa-star"></i>`;
   }
   return html;
+}
+
+
+function buildCommentItem(name, note, text, date, photoProfile) {
+  const item = document.createElement('div');
+  item.className = 'comment-item';
+  const initials  = name.slice(0, 2).toUpperCase();
+  const starsHtml = Array.from({ length: 5 }, (_, i) =>
+    `<i class="${i < note ? 'fa-solid' : 'fa-regular'} fa-star"></i>`
+  ).join('');
+
+  const avatarSrc  = photoProfile ? buildPhotoUrl(photoProfile) : null;
+  const avatarHtml = avatarSrc
+    ? `<img src="${avatarSrc}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+    : initials;
+
+  item.innerHTML = `
+    <div class="comment-avatar" style="${avatarSrc ? '' : 'background:linear-gradient(135deg,#4b48ec,#7299f4);'}">
+      ${avatarHtml}
+    </div>
+    <div class="comment-body">
+      <div class="comment-header">
+        <span class="comment-name">${name}</span>
+        <div class="comment-stars">${starsHtml}</div>
+        <span class="comment-date">${date}</span>
+      </div>
+      ${text ? `<p class="comment-text">${text}</p>` : ''}
+    </div>`;
+  return item;
+}
+
+function attachProfileCardEvents(container) {
+  container.addEventListener('click', async (e) => {
+
+    // Bouton Commentaires
+    if (e.target.closest('.post-action-btn[data-action="comment"]')) {
+      const card = e.target.closest('.post-card');
+      const commentsList = card.querySelector('.comments-list');
+
+      if (!commentsList.classList.contains('is-hidden')) {
+        commentsList.classList.add('is-hidden');
+        return;
+      }
+
+      commentsList.classList.remove('is-hidden');
+      if (commentsList.dataset.loaded === 'true' || commentsList.dataset.loaded === 'loading') return;
+
+      commentsList.dataset.loaded = 'loading';
+      commentsList.innerHTML = `<div style="padding:14px 18px;color:#8c8580;font-size:12px;font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;gap:8px;">
+        <i class="fa-solid fa-spinner fa-spin"></i> Chargement des avis...</div>`;
+
+      const serviceId = card.dataset.serviceId;
+      try {
+        const res  = await fetch(`../../api/get-ratings.php?service_id=${serviceId}`);
+        const data = await res.json();
+        commentsList.innerHTML = '';
+
+        if (!data.success || !data.ratings || data.ratings.length === 0) {
+          commentsList.innerHTML = `<div style="padding:14px 18px;color:#8c8580;font-size:12px;font-family:'Space Grotesk',sans-serif;text-align:center;">
+            <i class="fa-regular fa-comment-dots" style="font-size:20px;display:block;margin-bottom:6px;"></i>Aucun avis pour l'instant</div>`;
+        } else {
+          data.ratings.forEach(r => {
+            const dateStr = new Date(r.DateEval).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' });
+            commentsList.appendChild(buildCommentItem(`${r.prenom} ${r.nom}`, parseInt(r.note), r.commentaire || '', dateStr, r.photo_profil));
+          });
+        }
+        commentsList.dataset.loaded = 'true';
+      } catch (err) {
+        console.error(err);
+        commentsList.innerHTML = `<div style="padding:14px 18px;color:#ef4444;font-size:12px;">
+          <i class="fa-solid fa-triangle-exclamation"></i> Erreur de chargement</div>`;
+        commentsList.dataset.loaded = 'false';
+      }
+      return;
+    }
+
+  });
 }
 
 // ════════════════════════════════════════
@@ -1389,6 +1480,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (err) { console.error(err); showNotification('❌ Erreur réseau'); }
       });
     }
+
 
     function _resetAndClose() {
       modalOverlay.classList.remove('active');

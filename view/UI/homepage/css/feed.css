@@ -272,6 +272,9 @@
   border-bottom: 1px solid var(--color-border-subtle);
   animation: fadeUp .25s ease both;
 }
+.comments-list.is-hidden {
+  display: none !important;
+}
 .comment-item:last-child { border-bottom: none; }
 
 .comment-avatar {

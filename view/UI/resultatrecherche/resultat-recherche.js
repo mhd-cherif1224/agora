@@ -51,7 +51,7 @@ async function fetchResults() {
             `${total} résultat(s) pour "${currentQ}"`;
 
         renderPeopleCarousel(data.results.utilisateurs);
-        renderServicesFeed(data.results.services);
+        await renderServicesFeed(data.results.services);
 
     } catch (err) {
         document.querySelector('.feed').innerHTML =
@@ -110,7 +110,7 @@ function renderPeopleCarousel(users) {
     carousel.appendChild(voirPlus);
 }
 
-function renderServicesFeed(services) {
+async function renderServicesFeed(services) {
     const feed = document.querySelector('.feed');
     feed.innerHTML = '';
 
@@ -121,4 +121,8 @@ function renderServicesFeed(services) {
     }
 
     feed.innerHTML = services.map(s => createServiceCard(s)).join('');
+    
+    if (typeof window.applyUserEvals === 'function') {
+        await window.applyUserEvals();
+    }
 }
