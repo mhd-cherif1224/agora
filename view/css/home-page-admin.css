@@ -380,6 +380,13 @@ img {
 #toggleBtn {
     height: 80%;
 }
+/* Admin désactivé — mode clair */
+.nav-link:disabled,
+.nav-link[style*="pointer-events: none"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* ── ANIMATIONS ── */
 @keyframes fadeUp {
     from { opacity: 0; transform: translateY(16px); }
@@ -427,6 +434,11 @@ body.dark-theme .navbar {
 
 body.dark-theme .nav-link {
     color: #8b8a99;
+}
+/* Admin désactivé — mode sombre */
+body.dark-theme .nav-link[style*="pointer-events: none"] {
+    color: #555570;
+    background: transparent;
 }
 
 body.dark-theme .nav-link:hover,

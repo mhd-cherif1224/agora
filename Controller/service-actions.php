@@ -1,4 +1,5 @@
 <?php
+
 session_start();
 
 if (!isset($_SESSION['admin_id'])) {
@@ -44,8 +45,19 @@ function supprimerService($pdo, $data) {
         return;
     }
 
-    $stmt = $pdo->prepare("DELETE FROM Service WHERE ID = :id");
-    $stmt->execute([':id' => $id]);
-    echo json_encode(['success' => true, 'message' => 'Service supprimé avec succès']);
+    try {
+        //1. Supprimer d'abord les photos liées
+        $stmt = $pdo->prepare("DELETE FROM service_photos WHERE ID_Service = :id");
+        $stmt->execute([':id' => $id]);
+
+        //2. Ensuite supprimer le service
+        $stmt = $pdo->prepare("DELETE FROM Service WHERE ID = :id");
+        $stmt->execute([':id' => $id]);
+
+        echo json_encode(['success' => true, 'message' => 'Service supprimé avec succès']);
+
+    } catch (PDOException $e) {
+        echo json_encode(['success' => false, 'message' => 'Erreur : ' . $e->getMessage()]);
+    }
 }
 ?>

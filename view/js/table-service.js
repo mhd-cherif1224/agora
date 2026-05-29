@@ -1,4 +1,18 @@
 // ==============================
+// SÉCURITÉ — ÉCHAPPEMENT HTML
+// ==============================
+function escapeHtml(text) {
+    if (!text) return '';
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/\r\n|\n/g, "<br>");
+}
+
+
+// ==============================
 // SELECTION LIGNE
 // ==============================
 let selectedRow = null;
@@ -45,7 +59,8 @@ document.querySelector(".closeConfirm").onclick = function(){
 };
 
 document.getElementById("confirmYes").onclick = function(){
-    let serviceId = selectedRow.cells[0].innerText;
+    // ✅ Récupération de l'ID via data-id (fiable peu importe le contenu des cellules)
+    let serviceId = selectedRow.getAttribute("data-id");
 
     fetch("../../Controller/service-actions.php", {
         method: "POST",
@@ -96,7 +111,24 @@ function showNotification(message){
 // ==============================
 // CHARGEMENT DES DONNÉES
 // ==============================
-window.addEventListener("load", function(){
+window.onload = function(){
+
+    // ✅ Rôle — avec null check
+    let role = localStorage.getItem("role");
+    let btn = document.getElementById("adminTableBtn");
+
+    if(btn){
+        if(role === "admin"){
+            btn.style.opacity = "0.5";
+            btn.style.pointerEvents = "none";
+            btn.style.cursor = "not-allowed";
+            btn.title = "Accès réservé au super administrateur";
+        } else if(role === "super_admin"){
+            btn.style.opacity = "1";
+            btn.style.pointerEvents = "auto";
+        }
+    }
+
     fetch("../../Controller/service-actions.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -110,13 +142,15 @@ window.addEventListener("load", function(){
 
             data.services.forEach(service => {
                 let row = tbody.insertRow();
+                // ✅ Stockage de l'ID dans data-id pour une récupération fiable
+                row.setAttribute("data-id", service.ID);
                 row.innerHTML = `
                     <td>${service.ID}</td>
-                    <td>${service.titre}</td>
-                    <td>${service.description ?? ''}</td>
-                    <td>${service.DateDePublication}</td>
-                    <td>${service.status}</td>
-                    <td>${service.prix}</td>
+                    <td>${escapeHtml(service.titre)}</td>
+                    <td>${escapeHtml(service.description)}</td>
+                    <td>${escapeHtml(service.DateDePublication)}</td>
+                    <td>${escapeHtml(service.status)}</td>
+                    <td>${escapeHtml(service.prix)}</td>
                 `;
             });
         } else {
@@ -127,7 +161,7 @@ window.addEventListener("load", function(){
         console.error(err);
         showNotification("Erreur serveur");
     });
-});
+};
 
 
 // ==============================
