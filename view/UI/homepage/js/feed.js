@@ -531,7 +531,28 @@ document.addEventListener("DOMContentLoaded", async () => {
                         });
                     }
                     commentsList.dataset.loaded = 'true';
-                } catch (err) {
+
+                    if (data.userEval) {
+                        const picker   = card.querySelector('.star-picker');
+                        const textarea = card.querySelector('.rating-comment-input');
+                        const rateBtn  = card.querySelector('.post-action-btn[data-action="rate"]');
+
+                        // Pré-remplir les étoiles
+                        if (picker) {
+                            picker.dataset.selected = data.userEval.note;
+                            renderPickerStars(picker, parseInt(data.userEval.note));
+                        }
+                        // Pré-remplir le commentaire
+                        if (textarea) {
+                            textarea.value = data.userEval.commentaire || '';
+                        }
+                        // Changer le libellé du bouton
+                        if (rateBtn) {
+                            rateBtn.classList.add('rated');
+                            rateBtn.innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Modifier l'évaluation`;
+                        }
+                    }
+                                    } catch (err) {
                     console.error(err);
                     commentsList.innerHTML = `
                         <div style="padding:14px 18px;color:#ef4444;font-size:12px;
@@ -677,7 +698,7 @@ async function submitRating(card) {
             textarea.placeholder = 'Laissez un commentaire (optionnel)...';
             textarea.classList.remove('input-error');
         }, 2000);
-        return; // ← return ajouté
+        return;
     }
 
     const commentaire = textarea.value.trim();
@@ -700,12 +721,10 @@ async function submitRating(card) {
         });
 
         const text = await response.text();
-        console.log("Raw response:", text);
         const result = JSON.parse(text);
 
         if (!result.success) {
-            console.error('Erreur:', result.message);
-            textarea.placeholder = '⚠ Erreur lors de la soumission...';
+            textarea.placeholder = '⚠ ' + (result.message || 'Erreur lors de la soumission...');
             textarea.classList.add('input-error');
             setTimeout(() => {
                 textarea.placeholder = 'Laissez un commentaire (optionnel)...';
@@ -714,15 +733,27 @@ async function submitRating(card) {
             return;
         }
 
-        console.log('Évaluation soumise avec succès :', evaluation);
-
-        updateRatingSummary(card, note);
+        // ── Tout dans le try pour avoir accès à result ──
+        updateRatingSummary(card, note, result.updated);
         closeRatingPanel(card);
 
-        // Réinitialiser la liste pour forcer un rechargement
-        const commentsList = card.querySelector('.comments-list'); // ← une seule déclaration
+        const commentsList = card.querySelector('.comments-list');
         commentsList.dataset.loaded = 'false';
         commentsList.innerHTML = '';
+        commentsList.hidden = true;
+
+        const rateBtn = card.querySelector('.post-action-btn[data-action="rate"]');
+        if (rateBtn) {
+            rateBtn.classList.add('rated');
+            rateBtn.innerHTML = result.updated
+                ? `<i class="fa-solid fa-pen-to-square"></i> Modifier l'évaluation`
+                : `<i class="fa-solid fa-star"></i> Évalué`;
+        }
+
+        showNotification(
+            result.updated ? 'Évaluation mise à jour !' : 'Évaluation soumise avec succès !',
+            '#16a34a'
+        );
 
     } catch (err) {
         console.error('Erreur lors de la soumission:', err);
@@ -732,12 +763,7 @@ async function submitRating(card) {
             textarea.placeholder = 'Laissez un commentaire (optionnel)...';
             textarea.classList.remove('input-error');
         }, 2000);
-        return;
     }
-
-    const rateBtn = card.querySelector('.post-action-btn[data-action="rate"]');
-    rateBtn.classList.add('rated');
-    rateBtn.innerHTML = `<i class="fa-solid fa-star"></i> Évalué`;
 }
 
 function buildCommentItem(name, note, text, date, photoProfile) {
@@ -767,19 +793,25 @@ function buildCommentItem(name, note, text, date, photoProfile) {
     return item;
 }
 
-function updateRatingSummary(card, newNote) {
+function updateRatingSummary(card, newNote, isUpdate = false) {
     const summary  = card.querySelector('.post-rating-summary');
+    if (!summary) return;
     const scoreEl  = summary.querySelector('.rating-score');
     const countEl  = summary.querySelector('.rating-count');
     const starsEl  = summary.querySelector('.rating-stars-display');
-    const oldScore = parseFloat(scoreEl.textContent);
-    const oldCount = parseInt(countEl.textContent.match(/\d+/)[0]);
-    const newCount = oldCount + 1;
-    const rounded  = Math.round(((oldScore * oldCount) + newNote) / newCount * 10) / 10;
+    const oldScore = parseFloat(scoreEl.textContent) || 0;
+    const oldCount = parseInt(countEl.textContent.match(/\d+/)?.[0] || '0');
+
+    let rounded;
+    if (isUpdate) {
+        rounded = oldScore; 
+    } else {
+        const newCount = oldCount + 1;
+        rounded = Math.round(((oldScore * oldCount) + newNote) / newCount * 10) / 10;
+        countEl.textContent = `(${newCount} évaluations)`;
+    }
 
     scoreEl.textContent = rounded.toFixed(1);
-    countEl.textContent = `(${newCount} évaluations)`;
-
     const full = Math.floor(rounded);
     const half = rounded - full >= 0.5;
     starsEl.innerHTML = Array.from({ length: 5 }, (_, i) => {

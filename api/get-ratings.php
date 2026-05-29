@@ -25,7 +25,24 @@ try {
     $stmt->execute([$service_id]);
     $ratings = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    echo json_encode(['success' => true, 'ratings' => $ratings]);
+    // ── Évaluation de l'utilisateur connecté (pour pré-remplir le formulaire) ──
+    $userEval = null;
+    if (isset($_SESSION['utilisateur_id'])) {
+        $userId = intval($_SESSION['utilisateur_id']);
+        $stmtMe = $pdo->prepare("
+            SELECT note, commentaire
+            FROM evaluation
+            WHERE ID_Evaluateur = :userId AND ID_Service = :serviceId
+        ");
+        $stmtMe->execute([':userId' => $userId, ':serviceId' => $service_id]);
+        $userEval = $stmtMe->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    echo json_encode([
+        'success'  => true,
+        'ratings'  => $ratings,
+        'userEval' => $userEval,   // null si pas encore évalué
+    ]);
 
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);

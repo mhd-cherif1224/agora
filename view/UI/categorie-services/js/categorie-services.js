@@ -1,3 +1,4 @@
+//categorie-services.js
 // ── Utilitaires ──
 let currentUser = {};
 
@@ -512,6 +513,27 @@ function attachRatingEvents(container) {
                         });
                     }
                     commentsList.dataset.loaded = 'true';
+
+                    if (data.userEval) {
+                        const picker   = card.querySelector('.star-picker');
+                        const textarea = card.querySelector('.rating-comment-input');
+                        const rateBtn  = card.querySelector('.post-action-btn[data-action="rate"]');
+
+                        // Pré-remplir les étoiles
+                        if (picker) {
+                            picker.dataset.selected = data.userEval.note;
+                            renderPickerStars(picker, parseInt(data.userEval.note));
+                        }
+                        // Pré-remplir le commentaire
+                        if (textarea) {
+                            textarea.value = data.userEval.commentaire || '';
+                        }
+                        // Changer le libellé du bouton
+                        if (rateBtn) {
+                            rateBtn.classList.add('rated');
+                            rateBtn.innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Modifier l'évaluation`;
+                        }
+                    }
                 } catch (err) {
                     console.error(err);
                     commentsList.innerHTML = `
@@ -633,10 +655,15 @@ async function submitRating(card) {
         const rateBtn = card.querySelector('.post-action-btn[data-action="rate"]');
         if (rateBtn) {
             rateBtn.classList.add('rated');
-            rateBtn.innerHTML = `<i class="fa-solid fa-star"></i> Évalué`;
+            rateBtn.innerHTML = result.updated
+                ? `<i class="fa-solid fa-pen-to-square"></i> Modifier l'évaluation`
+                : `<i class="fa-solid fa-star"></i> Évalué`;
         }
 
-        showNotification('Évaluation soumise avec succès !', '#16a34a');
+        showNotification(
+            result.updated ? 'Évaluation mise à jour !' : 'Évaluation soumise avec succès !',
+            '#16a34a'
+        );
 
     } catch (err) {
         console.error('Erreur lors de la soumission :', err);
