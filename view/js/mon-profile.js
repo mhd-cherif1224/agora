@@ -45,6 +45,7 @@ async function loadProfile() {
     currentUser.nom      = data.nom || '';
     currentUser.initiales = ((data.prenom?.[0] || '') + (data.nom?.[0] || '')).toUpperCase() || '?';
     currentUser.avatar   = data.avatar || null;
+    currentUser._cvPath = data.cv_path || null;
 
     const fullName = `${data.prenom} ${data.nom}`.trim();
 
@@ -1031,19 +1032,59 @@ document.addEventListener('DOMContentLoaded', async () => {
   initChatPanel();
 
   // ── 4. CV Upload ──
-  const cvInput  = document.getElementById('cvInput');
-  const cvName   = document.getElementById('cvName');
-  let   cvFileURL = null;
-  if (cvInput) {
-    cvInput.addEventListener('change', function () {
-      if (this.files.length > 0) {
-        const file = this.files[0];
-        cvFileURL = URL.createObjectURL(file);
-        if (cvName) { cvName.textContent = '📄 ' + file.name; cvName.style.cursor = 'pointer'; cvName.style.textDecoration = 'underline'; }
-      }
-    });
+const cvInput   = document.getElementById('cvInput');
+const cvName    = document.getElementById('cvName');
+let   cvFileURL = null;
+
+// Charger le CV existant depuis le profil
+if (currentUser._cvPath) {
+  const url      = buildPhotoUrl(currentUser._cvPath);
+  const filename = currentUser._cvPath.split('/').pop();
+  cvFileURL = url;
+  if (cvName) {
+    cvName.textContent      = '📄';
+    cvName.dataset.filename = filename;
+    cvName.style.cursor     = 'pointer';
   }
-  if (cvName) cvName.addEventListener('click', function () { if (cvFileURL) window.open(cvFileURL, '_blank'); });
+}
+
+if (cvInput) {
+  cvInput.addEventListener('change', async function () {
+    if (!this.files.length) return;
+    const file = this.files[0];
+
+    // Affichage immédiat
+    cvFileURL = URL.createObjectURL(file);
+    if (cvName) {
+      cvName.textContent      = '📄';
+      cvName.dataset.filename = file.name;   // ← file.name, pas filename
+      cvName.style.cursor     = 'pointer';
+    }
+
+    // Upload
+    const fd = new FormData();
+    fd.append('cv', file);
+    try {
+      const res  = await fetch('../../api/upload-cv.php', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (data.success) {
+        currentUser._cvPath         = data.cv_path;
+        cvFileURL                   = buildPhotoUrl(data.cv_path);
+        if (cvName) cvName.dataset.filename = file.name;  // ← mettre à jour
+        showNotification('✅ CV sauvegardé !');
+      } else {
+        showNotification('❌ ' + (data.message || 'Erreur upload CV'));
+      }
+    } catch (err) {
+      console.error('CV upload error:', err);
+      showNotification('❌ Erreur réseau lors de l\'upload du CV');
+    }
+  });
+}
+
+if (cvName) {
+  cvName.addEventListener('click', () => { if (cvFileURL) window.open(cvFileURL, '_blank'); });
+}
 
   // ── 5. Help Panel ──
   const helpOverlay      = document.getElementById('helpOverlay');

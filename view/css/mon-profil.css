@@ -233,7 +233,7 @@ nav {
 .banner-user-info {
   display: flex; flex-direction: column;
   justify-content: center; gap: 2px; min-width: 0;
-  align-content: space-between;
+  overflow: visible;  
 }
 
 .banner-name {
@@ -242,7 +242,48 @@ nav {
   color: var(--color-banner-name);
   text-shadow: 0 1px 4px var(--color-banner-name-shadow);
   display: flex; align-items: center; gap: 8px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: visible; 
+  flex-wrap: nowrap;   
+}
+
+/* Nom seul (le textNode) — empêche qu'il rétrécisse */
+#displayName { flex-shrink: 0; }
+
+/* Le span du nom de fichier CV */
+#cvName {
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+#cvName::after {
+  content: attr(data-filename);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(13,13,28,0.95);
+  color: #f1f0f5;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  padding: 5px 10px;
+  border-radius: 8px;
+  white-space: nowrap;
+  border: 1px solid rgba(75,72,236,0.30);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s;
+  z-index: 100;
+}
+
+#cvName:hover::after {
+  opacity: 1;
 }
 
 .cv-btn {

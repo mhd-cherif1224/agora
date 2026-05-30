@@ -39,7 +39,8 @@ try {
     'avatar'       => $row['photo_profil'],
     'banner'       => $row['photo_banniere'],
     'banner_color_dark'  => $row['banner_color_dark']  ?? null,
-    'banner_color_light' => $row['banner_color_light'] ?? null
+    'banner_color_light' => $row['banner_color_light'] ?? null,
+    'cv_path' => $row['cv'] ?? null,
 ]);
 
 } catch (PDOException $e) {
