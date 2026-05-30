@@ -708,9 +708,25 @@ if (attachedPhotos.length > 0) {
         console.error(err);
         showNotification('❌ Erreur réseau');
       }
+    } else {
+  // ── Création immédiate ──
+  try {
+    const res    = await fetch('../../../api/create-service.php', {
+      method: 'POST', credentials: 'include', body: formData
+    });
+    const result = JSON.parse(await res.text());
+    if (result.success) {
+      showNotification('✅ Service publié avec succès !');
+      if (typeof window.loadServices === 'function') await window.loadServices();
+    } else {
+      showNotification('❌ ' + (result.message || 'Erreur'));
     }
+  } catch (err) {
+    console.error(err);
+    showNotification('❌ Erreur réseau');
+  }
 }
-
+    }
   // ════════════════════════════════════════
   // OPEN MODAL EN MODE ÉDITION (appelé depuis feed.js)
   // ════════════════════════════════════════
