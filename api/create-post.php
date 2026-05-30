@@ -1,5 +1,5 @@
 <?php
-
+// create-post.php
 session_start();
 
 require_once __DIR__ . '/../model/Database.php';

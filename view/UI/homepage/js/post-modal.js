@@ -454,21 +454,140 @@ function fileToBlob(file) {
   // ════════════════════════════════════════
   // PUBLISH BUTTON
   // ════════════════════════════════════════
-  publishBtn.addEventListener('click', async () => {
+    publishBtn.addEventListener('click', async () => {
     const isEdit = publishBtn.dataset.editMode === 'true';
+
+    // ── Mode création avec timer : ne pas publier maintenant ──
+   // Au moment de programmer, au lieu de setTimeout direct :
+if (!isEdit && scheduledAt && scheduledAt > new Date()) {
+  const titre       = document.getElementById("postTitle").value.trim();
+  const prixRaw     = document.getElementById("postPrice").value.trim();
+  const description = document.getElementById("postDesc").value.trim();
+  const prix        = isNaN(parseFloat(prixRaw)) ? 0 : parseFloat(prixRaw);
+
+  if (!titre) { showNotification('⚠️ Le titre est obligatoire'); return; }
+  if (selectedCategories.length === 0) { showNotification('⚠️ Veuillez sélectionner au moins une catégorie'); return; }
+
+  // Sauvegarder dans localStorage
+const photosBase64 = await Promise.all(
+  attachedPhotos.map(photo => {
+    if (photo.file) {
+      // Nouvelle photo : convertir en base64
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve({ base64: e.target.result });
+        reader.readAsDataURL(photo.file);
+      });
+    } else {
+      // Photo existante : garder l'URL
+      return Promise.resolve({ base64: photo.url });
+    }
+  })
+);
+
+const pendingPost = {
+  titre, description, prix, prixRaw,
+  status: selectedStatus,
+  categories: [...selectedCategories],
+  scheduledAt: scheduledAt.toISOString(),
+  photos: photosBase64   // ← tableau de { base64: "data:image/..." }
+};
+try {
+  localStorage.setItem('pendingScheduledPost', JSON.stringify(pendingPost));
+} catch (e) {
+  // Photo trop lourde pour localStorage, publier sans photo
+  pendingPost.photos = [];
+  localStorage.setItem('pendingScheduledPost', JSON.stringify(pendingPost));
+  showNotification('⚠️ Photo trop lourde, sera publiée sans image');
+}
+
+  const fmt = scheduledAt.toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+  showNotification(`🕐 Service programmé pour le ${fmt}`);
+  closeModal();
+  resetModal();
+  scheduleFromStorage(); // lancer le timer
+  return;
+}
+
+    // ── Publication immédiate (création ou édition sans timer) ──
     await publierService();
     if (!isEdit) {
-      if (scheduledAt) {
-        const delay = scheduledAt - Date.now();
-        const fmt = scheduledAt.toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-        showNotification(`🕐 Post programmé · ${fmt}`);
-        setTimeout(() => { showNotification('✓ Post publié automatiquement !'); }, delay);
-      }
       closeModal();
       resetModal();
     }
   });
 
+  async function publishPending(pending) {
+  const fd = new FormData();
+  fd.append("titre",          pending.titre);
+  fd.append("description",    pending.description);
+  fd.append("prix",           pending.prix);
+  fd.append("prix_affichage", pending.prixRaw);
+  fd.append("status",         pending.status);
+  pending.categories.forEach(cat => fd.append("categories[]", cat.ID));
+
+  // ── Reconvertir les base64 en Blob ──
+  if (pending.photos && pending.photos.length > 0) {
+    try {
+      const blobs = await Promise.all(
+        pending.photos.map((photo, i) => {
+          return new Promise((resolve, reject) => {
+            const base64 = photo.base64;
+            // Extraire le type MIME et les données
+            const [header, data] = base64.split(',');
+            const mime = header.match(/:(.*?);/)[1];
+            const binary = atob(data);
+            const arr = new Uint8Array(binary.length);
+            for (let j = 0; j < binary.length; j++) arr[j] = binary.charCodeAt(j);
+            resolve(new Blob([arr], { type: mime }));
+          });
+        })
+      );
+      blobs.forEach((blob, i) => fd.append('photos[]', blob, `photo_${i + 1}.jpg`));
+    } catch (err) {
+      console.error('Erreur reconversion photos:', err);
+    }
+  }
+
+  try {
+    const res    = await fetch('../../../api/create-service.php', { method: 'POST', credentials: 'include', body: fd });
+    const result = JSON.parse(await res.text());
+    if (result.success) {
+      localStorage.removeItem('pendingScheduledPost');
+      showNotification('✅ Service publié automatiquement !');
+      if (typeof window.loadServices === 'function') await window.loadServices();
+    }
+  } catch (err) {
+    console.error('Erreur publication planifiée:', err);
+  }
+}
+
+
+  function scheduleFromStorage() {
+  const raw = localStorage.getItem('pendingScheduledPost');
+  if (!raw) return;
+
+  let pending;
+  try { pending = JSON.parse(raw); } catch { localStorage.removeItem('pendingScheduledPost'); return; }
+
+  const scheduledAt = new Date(pending.scheduledAt);
+  const delay = scheduledAt - Date.now();
+
+  if (delay <= 0) {
+    // Heure dépassée, publier immédiatement
+    publishPending(pending);
+    return;
+  }
+
+  const fmt = scheduledAt.toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+  showNotification(`⏳ Publication programmée pour le ${fmt}`);
+
+  setTimeout(() => publishPending(pending), delay);
+}
+
+
+// Appeler au chargement de la page (dans ton DOMContentLoaded ou directement)
+scheduleFromStorage();
   // ════════════════════════════════════════
   // PUBLIER SERVICE — à l'intérieur du IIFE
   // ════════════════════════════════════════
@@ -532,8 +651,46 @@ if (attachedPhotos.length > 0) {
       formData.append("categories[]", category.ID);
     });
 
-   if (isEdit) {
+      if (isEdit) {
       formData.append("id", editId);
+
+      // ── Vérifier si publication planifiée ──
+      const scheduledChipEl = document.getElementById('scheduledChip');
+      const isScheduled = scheduledChipEl && scheduledChip.classList.contains('visible');
+
+      if (isScheduled) {
+        const rawDate = timerDate.value;
+        const rawTime = timerTime.value || '00:00';
+        if (rawDate) {
+          const scheduledDate = new Date(`${rawDate}T${rawTime}:00`);
+          const delayMs = scheduledDate - new Date();
+          if (delayMs > 0) {
+            // Capturer les données maintenant
+            const savedFormData = formData; // déjà rempli
+            const mins = Math.round(delayMs / 60000);
+            showNotification(`⏰ Modification planifiée dans ${mins < 60 ? mins + ' min' : Math.round(mins/60) + ' h'}`);
+            closeModal();
+            resetModal();
+
+            setTimeout(async () => {
+              try {
+                const res    = await fetch('../../../api/update-service.php', {
+                  method: 'POST', credentials: 'include', body: savedFormData
+                });
+                const result = JSON.parse(await res.text());
+                if (result.success) {
+                  showNotification('✅ Service modifié automatiquement !');
+                  if (typeof window.loadServices === 'function') await window.loadServices();
+                }
+              } catch (err) { console.error('Erreur publication planifiée:', err); }
+            }, delayMs);
+
+            return; // ← ne pas continuer la publication immédiate
+          }
+        }
+      }
+
+      // ── Publication immédiate ──
       try {
         const res    = await fetch('../../../api/update-service.php', {
           method: 'POST', credentials: 'include', body: formData
@@ -541,10 +698,9 @@ if (attachedPhotos.length > 0) {
         const result = JSON.parse(await res.text());
         if (result.success) {
           showNotification('✅ Service modifié avec succès !');
-          closeModal();  
-          resetModal();  
+          closeModal();
+          resetModal();
           if (typeof window.loadServices === 'function') await window.loadServices();
-          else if (typeof refreshService === 'function') await refreshService(editId);
         } else {
           showNotification('❌ ' + (result.message || 'Erreur'));
         }
@@ -552,8 +708,8 @@ if (attachedPhotos.length > 0) {
         console.error(err);
         showNotification('❌ Erreur réseau');
       }
-    } 
-  }
+    }
+}
 
   // ════════════════════════════════════════
   // OPEN MODAL EN MODE ÉDITION (appelé depuis feed.js)
