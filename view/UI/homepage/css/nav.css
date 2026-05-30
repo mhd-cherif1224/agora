@@ -44,12 +44,13 @@ nav {
 .nav-icon-btn svg          { width: 18px; height: 18px; stroke: var(--color-text); fill: none; }
 .nav-icon-btn.active svg   { stroke: var(--color-pink-light); }
 
+.nav-icon-btn { position: relative; }
+
 .notif-dot {
   width: 8px; height: 8px; border-radius: 50%;
-  background: var(--color-notif-dot);
-  position: absolute; top: 6px; right: 6px;
+  background: #4b48ec;
+  position: absolute; top: 5px; right: 5px;
   border: 2px solid var(--color-surface);
-  box-shadow: 0 0 6px var(--color-accent-glow);
 }
 
 .nav-divider { width: 1px; height: 22px; background: rgba(255,255,255,0.10); margin: 0 4px; }

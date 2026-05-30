@@ -18,13 +18,12 @@ function buildPhotoUrl(path) {
 /* ══════════════════════════════════════════
    INIT
 ══════════════════════════════════════════ */
-document.addEventListener('DOMContentLoaded', () => {
-  loadUserProfile();
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadUserProfile();   // ← loadNavDots() se termine AVANT loadNotifications()
   loadNotifications();
   setupFilters();
   setupMarkAll();
 });
-
 /* ══════════════════════════════════════════
    USER PROFILE
 ══════════════════════════════════════════ */
@@ -50,8 +49,44 @@ async function loadUserProfile() {
       navLetter.style.display = 'block';
     }
 
-    initWebSocket();
+    await loadNavDots();
   } catch (err) { console.warn('loadUserProfile:', err); }
+}
+
+async function loadNavDots() {
+  try {
+    const res  = await fetch('../../../api/get-notifications.php');
+    const data = await res.json();
+    console.log('[loadNavDots] unread_count:', data.unread_count);
+    console.log('[loadNavDots] notifBtn:', document.querySelector('.nav-icon-btn[title="Notifications"]'));
+    if (data.success && data.unread_count > 0) {
+      const notifBtn = document.querySelector('.nav-icon-btn[title="Notifications"]');
+      if (notifBtn && !notifBtn.querySelector('.notif-dot')) {
+        const dot = document.createElement('span');
+        dot.className = 'notif-dot';
+        notifBtn.appendChild(dot);
+        console.log('[loadNavDots] dot ajouté sur notifBtn');
+      }
+    }
+  } catch (e) { console.error('[loadNavDots] notif error:', e); }
+
+  try {
+    const res  = await fetch('../../../api/get-conversations.php');
+    const data = await res.json();
+    console.log('[loadNavDots] conversations:', data);
+    const hasUnread = Array.isArray(data) && data.some(c => c.unread_count > 0);
+    console.log('[loadNavDots] hasUnread messages:', hasUnread);
+    if (hasUnread) {
+      const msgBtn = document.getElementById('navChat');
+      console.log('[loadNavDots] navChat:', msgBtn);
+      if (msgBtn && !msgBtn.querySelector('.notif-dot')) {
+        const dot = document.createElement('span');
+        dot.className = 'notif-dot';
+        msgBtn.appendChild(dot);
+        console.log('[loadNavDots] dot ajouté sur navChat');
+      }
+    }
+  } catch (e) { console.error('[loadNavDots] conv error:', e); }
 }
 
 /* ══════════════════════════════════════════

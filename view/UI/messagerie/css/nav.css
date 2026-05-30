@@ -86,3 +86,17 @@ nav {
   display: flex; flex-direction: column; gap: 4px; padding: 4px;
 }
 .nav-menu-btn span { display: block; width: 18px; height: 2px; background: var(--color-muted); border-radius: 2px; }
+
+.notif-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
+  border: 2px solid var(--surface, #fff);
+}
+.nav-icon-btn {
+  position: relative;
+}

@@ -87,9 +87,41 @@ async function loadProfile() {
         `linear-gradient(to right, ${data.banner_color_dark}, ${data.banner_color_light})`;
     }
 
+  await loadNavDots();
   } catch (err) {
     console.error('loadProfile error:', err);
   }
+}
+
+async function loadNavDots() {
+  try {
+    const res  = await fetch('../../api/get-notifications.php');
+    const data = await res.json();
+    if (data.success && data.unread_count > 0) {
+      const notifBtn = document.querySelector('.nav-icon-btn[title="Notifications"]');
+      if (notifBtn && !notifBtn.querySelector('.notif-dot')) {
+        const dot = document.createElement('span');
+        dot.className = 'notif-dot';
+        notifBtn.appendChild(dot);
+        notifBtn.addEventListener('click', () => dot.remove(), { once: true });
+      }
+    }
+  } catch (e) {}
+
+  try {
+    const res  = await fetch('../../api/get-conversations.php');
+    const data = await res.json();
+    const hasUnread = Array.isArray(data) && data.some(c => c.unread_count > 0);
+    if (hasUnread) {
+      const msgBtn = document.getElementById('navChat');
+      if (msgBtn && !msgBtn.querySelector('.notif-dot')) {
+        const dot = document.createElement('span');
+        dot.className = 'notif-dot';
+        msgBtn.appendChild(dot);
+        msgBtn.addEventListener('click', () => dot.remove(), { once: true });
+      }
+    }
+  } catch (e) {}
 }
 
 // ════════════════════════════════════════
