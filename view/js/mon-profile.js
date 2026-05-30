@@ -45,7 +45,6 @@ async function loadProfile() {
     currentUser.nom      = data.nom || '';
     currentUser.initiales = ((data.prenom?.[0] || '') + (data.nom?.[0] || '')).toUpperCase() || '?';
     currentUser.avatar   = data.avatar || null;
-    currentUser.status   = data.status || '';
 
     const fullName = `${data.prenom} ${data.nom}`.trim();
 
@@ -541,21 +540,17 @@ async function loadServices() {
     if (!container) return;
 
     container.innerHTML = "";
-    
 
-  if (data.services.length === 0) {
-    if (currentUser.status === 'Proposeur') {
+    if (data.services.length === 0) {
       container.innerHTML = `
         <div style="text-align:center;padding:40px;color:#8b8a99;font-family:'DM Sans',sans-serif;">
           <i class="fa-regular fa-folder-open" style="font-size:32px;margin-bottom:12px;display:block;opacity:0.4;"></i>
-          Aucun service publié pour le moment.
+          Vous n'avez pas encore sollicité de service.
         </div>`;
+      return;
     }
-    return;
-  }
 
-  container.innerHTML = data.services.map(service => createServiceCard(service)).join("");
-  
+    container.innerHTML = data.services.map(service => createServiceCard(service)).join("");
     attachProfileCardEvents(container);
 
   } catch (error) {
