@@ -17,22 +17,10 @@ try {
     $pdo = Database::getConnection();
     $pdo->exec("SET time_zone = '+00:00'"); 
 
-    $stmt = $pdo->prepare("
-    SELECT 
-        ID,
-        nom,
-        prenom,
-        photo_profil,
-        photo_banniere,
-        banner_color_dark,
-        banner_color_light,
-        specialite,
-        niveau,
-        role,
-        localisation
-    FROM utilisateur
-    WHERE ID = :id
-");
+    $stmt = $pdo->prepare("SELECT ID, nom, prenom, role, specialite, niveau, 
+                               localisation, photo_profil, photo_banniere,
+                               banner_color_dark, banner_color_light, cv
+                        FROM utilisateur WHERE ID = :id");
 
     $stmt->execute(['id' => $id]);
 

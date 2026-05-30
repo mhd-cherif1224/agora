@@ -211,22 +211,71 @@ let cvFileURL = null;
 async function loadProfileCV() {
   const params = new URLSearchParams(window.location.search);
   const userId = params.get('id');
-  if (!userId) return;
+  
+  
+  const url = userId
+    ? `../../../api/get-user.php?id=${userId}`
+    : `../../../api/get-profile.php`;
+
   try {
-    const res  = await fetch(`../../../api/get-profile.php?id=${userId}`);  // ou get-user.php selon votre API
+    const res  = await fetch(url);
     const data = await res.json();
-    if (data.success && data.cv_path && cvName) {
-      cvFileURL = buildPhotoUrl(data.cv_path);
-      const filename = data.cv_path.split('/').pop();
-      cvName.textContent      = '📄';
-      cvName.dataset.filename = filename;
-      cvName.style.cursor     = 'pointer';
+    
+    // get-user.php retourne { success, user: {..., cv: '...'} }
+    // get-profile.php retourne { success, cv_path: '...' }
+    const cvPath = data.cv_path || data.user?.cv || null;
+    
+    if (data.success && cvPath) {
+      cvFileURL = buildPhotoUrl(cvPath);
+      const filename = cvPath.split('/').pop();
+
+      
+      if (cvName) {
+        cvName.textContent      = '📄';
+        cvName.dataset.filename = filename;
+        cvName.style.cursor     = 'pointer';
+      }
     }
-  } catch (e) {}
+  } catch (e) {
+    console.warn('loadProfileCV error:', e);
+  }
 }
 
+
 if (cvName) {
-  cvName.addEventListener('click', () => { if (cvFileURL) window.open(cvFileURL, '_blank'); });
+  cvName.addEventListener('mouseenter', () => {
+    if (!cvName.dataset.filename) return;
+    let tip = document.getElementById('_cvTooltip');
+    if (!tip) {
+      tip = document.createElement('div');
+      tip.id = '_cvTooltip';
+      tip.style.cssText = `
+        position:fixed;z-index:99999;
+        background:rgba(13,13,28,0.95);color:#f1f0f5;
+        font-family:'DM Sans',sans-serif;font-size:11px;font-weight:400;
+        padding:5px 10px;border-radius:8px;white-space:nowrap;
+        border:1px solid rgba(75,72,236,0.30);
+        box-shadow:0 4px 12px rgba(0,0,0,0.3);
+        pointer-events:none;transition:opacity .2s;opacity:0;
+      `;
+      document.body.appendChild(tip);
+    }
+    const r = cvName.getBoundingClientRect();
+    tip.textContent = cvName.dataset.filename;
+    tip.style.left  = (r.left + r.width / 2) + 'px';
+    tip.style.top   = (r.top - 36) + 'px';
+    tip.style.transform = 'translateX(-50%)';
+    tip.style.opacity   = '1';
+  });
+
+  cvName.addEventListener('mouseleave', () => {
+    const tip = document.getElementById('_cvTooltip');
+    if (tip) tip.style.opacity = '0';
+  });
+
+  cvName.addEventListener('click', () => {
+    if (cvFileURL) window.open(cvFileURL, '_blank');
+  });
 }
 
 loadProfileCV();

@@ -315,6 +315,7 @@ nav {
   z-index: 9999;
 }
 
+#cvName::after { display: none; }
 #cvName:hover::after {
   opacity: 1;
 }

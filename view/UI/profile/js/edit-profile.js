@@ -140,11 +140,11 @@ loadProfile();
 // SAVE PROFILE TO DB
 // ════════════════════════════════════════
 async function saveProfile() {
-  const nom        = document.getElementById('inputNom').value.trim();
-  const prenom     = document.getElementById('inputPrenom').value.trim();
+  const nom          = document.getElementById('inputNom').value.trim();
+  const prenom       = document.getElementById('inputPrenom').value.trim();
   const localisation = document.getElementById('inputAdresse').value.trim();
-  const niveau     = document.getElementById('inputNiveau').value.trim();
-  const specialite = document.getElementById('inputSpecialite').value.trim();
+  const niveau       = document.getElementById('inputNiveau').value.trim();
+  const specialite   = document.getElementById('inputSpecialite').value.trim();
 
   try {
     const res = await fetch('../../../api/Update profile.php', {
@@ -158,6 +158,11 @@ async function saveProfile() {
     try { data = JSON.parse(text); } catch { console.error('PHP returned:', text); return; }
 
     if (data.success) {
+      // ── Sauvegarder la couleur en attente si elle existe ──
+      if (pendingColors) {
+        await saveBannerColor(pendingColors.dark, pendingColors.light);
+        pendingColors = null;
+      }
       showNotification('✓  Profil mis à jour !');
       updatePreview();
     } else {
@@ -317,35 +322,55 @@ async function uploadImage(canvas, type) {
 // COLOR SWATCHES
 // ════════════════════════════════════════
 const COLORS = [
-  '#f5c5a3','#fbd8b4','#fce4c5','#fbcbc8','#f9b8c5',
-  '#c8e6c9','#b2ebf2','#bbdefb','#e1bee7','#fff9c4',
-  '#ffccbc','#dcedc8','#f8bbd0','#b3e5fc','#d7ccc8',
-  '#ffe0b2','#c5cae9','#b2dfdb','#e8eaf6','#fce4ec',
+  // Pastels chauds
+  '#fca5a5','#fdba74','#fcd34d','#fde68a','#bbf7d0',
+  // Pastels froids
+  '#6ee7b7','#67e8f9','#7dd3fc','#93c5fd','#c4b5fd',
+  // Tons moyens vifs
+  '#f472b6','#fb7185','#34d399','#38bdf8','#818cf8',
+  // Tons profonds / sobres
+  '#1e3a5f','#1e4d3b','#3b1f5e','#4a1f2e','#1c2340',
 ];
+
 const grid = document.getElementById('colorGrid');
-let activeSwatch = null;
+let activeSwatch  = null;
+let pendingColors = null; // { dark, light } — en attente de sauvegarde
 
 COLORS.forEach((c, i) => {
   const sw = document.createElement('button');
   sw.className = 'color-swatch' + (i === 0 ? ' active' : '');
-  sw.style.background = c; sw.title = c;
+  sw.style.background = c;
+  sw.title = c;
   if (i === 0) activeSwatch = sw;
+
   sw.addEventListener('click', () => {
     if (activeSwatch) activeSwatch.classList.remove('active');
-    sw.classList.add('active'); activeSwatch = sw;
+    sw.classList.add('active');
+    activeSwatch = sw;
+
     const dark  = adaptColor(c, 70);
     const light = c;
-    document.getElementById('bannerBottom').style.background = `linear-gradient(120deg, ${dark}, ${light})`;
-    saveBannerColor(dark, light); // ✅ save to DB
+
+    // ── Prévisualisation uniquement, pas de sauvegarde ──
+    document.getElementById('bannerBottom').style.background =
+      `linear-gradient(120deg, ${dark}, ${light})`;
+
+    // Stocker en attente
+    pendingColors = { dark, light };
   });
-  grid.appendChild(sw);
+
+    grid.appendChild(sw);
+    // Réinitialiser la prévisualisation si on quitte sans sauvegarder
+    window.addEventListener('beforeunload', () => {
+      if (pendingColors) {
+        // Le rechargement annulera automatiquement — rien à faire
+        pendingColors = null;
+      }
+    });
 });
 
 // ════════════════════════════════════════
 // LIVE PREVIEW
-// ════════════════════════════════════════
-// ════════════════════════════════════════
-// LIVE PREVIEW — ne touche pas au CV
 // ════════════════════════════════════════
 function updatePreview() {
   const nom     = document.getElementById('inputNom').value;
@@ -476,41 +501,7 @@ document.getElementById('displayName')?.addEventListener('click', e => {
   }
 });
 
-if (cvInput) {
-  cvInput.addEventListener('change', async function () {
-    if (!this.files.length) return;
-    const file = this.files[0];
 
-    // Affichage immédiat
-    cvFileURL = URL.createObjectURL(file);
-    if (cvName) {
-      cvName.textContent      = '📄';
-      cvName.dataset.filename = file.name;
-      cvName.style.cursor     = 'pointer';
-    }
-
-    // Upload
-    const fd = new FormData();
-    fd.append('cv', file);
-    try {
-      const res  = await fetch('../../../api/upload-cv.php', { method: 'POST', body: fd });
-      const data = await res.json();
-      if (data.success) {
-        cvFileURL = buildPhotoUrl(data.cv_path);
-        if (cvName) cvName.dataset.filename = file.name;
-        showNotification('✅ CV sauvegardé !');
-      } else {
-        showNotification('❌ ' + (data.message || 'Erreur upload CV'));
-      }
-    } catch (err) {
-      showNotification('❌ Erreur réseau lors de l\'upload du CV');
-    }
-  });
-}
-
-if (cvName) {
-  cvName.addEventListener('click', () => { if (cvFileURL) window.open(cvFileURL, '_blank'); });
-}
 
 // ════════════════════════════════════════
 // SEE ALL SUGGESTIONS
