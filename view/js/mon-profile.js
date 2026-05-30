@@ -555,17 +555,7 @@ async function loadServices() {
   }
 
   container.innerHTML = data.services.map(service => createServiceCard(service)).join("");
-
-    if (data.services.length === 0) {
-    container.innerHTML = `
-      <div style="text-align:center;padding:40px;color:#8b8a99;font-family:'DM Sans',sans-serif;">
-        <i class="fa-regular fa-folder-open" style="font-size:32px;margin-bottom:12px;display:block;opacity:0.4;"></i>
-        Aucun service publié pour le moment.
-      </div>`;
-    return;
-  }
-
-    container.innerHTML = data.services.map(service => createServiceCard(service)).join("");
+  
     attachProfileCardEvents(container);
 
   } catch (error) {
