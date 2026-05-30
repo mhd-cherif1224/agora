@@ -143,6 +143,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
+    window.loadServices = () => loadServices(sortSelect.value, activeCategory);
     async function applyUserEvals() {
     await Promise.all(
         [...document.querySelectorAll('.post-card')].map(async (card) => {
@@ -422,63 +423,20 @@ window.applyUserEvals = applyUserEvals;
             return;
         }
 
-        if (e.target.closest('.more-menu-item[data-action="edit"]')) {
-            const card = e.target.closest('.post-card');
-            card.querySelector('.post-more-menu').hidden = true;
-
-            const serviceId = card.dataset.serviceId;
-
-            // Récupérer les données du service
-            try {
-                const res = await fetch(`../../../api/get-single-service.php?id=${serviceId}`);
-                const data = await res.json();
-                if (!data.success) return;
-                const s = data.service;
-
-                // Ouvrir le modal
-                const overlay = document.getElementById('postModalOverlay');
-                overlay.classList.add('active');
-                document.body.style.overflow = 'hidden';
-
-                // Remplir les champs
-                document.getElementById('postTitle').value = s.titre || '';
-                document.getElementById('postDesc').value  = s.description || '';
-
-                // Prix — extraire le texte si format spécial
-                const matchPrix = (s.description || '').match(/\[prix_texte:(.+?)\]/);
-                document.getElementById('postPrice').value = matchPrix ? matchPrix[1] : (s.prix || '');
-                if (matchPrix) {
-                    document.getElementById('postDesc').value =
-                        s.description.replace(/\[prix_texte:.+?\]/, '').trim();
-                }
-
-                // Image existante — afficher en preview
-                if (s.service_photo) {
-                    const preview = document.getElementById('postPreview');
-                    preview.innerHTML = `
-                        <div class="preview-item">
-                            <img src="../../../${s.service_photo}" alt="">
-                            <button class="preview-remove" id="existingPhotoRemove">×</button>
-                        </div>
-                    `;
-                    preview.classList.add('has-items');
-                    document.getElementById('existingPhotoRemove').addEventListener('click', () => {
-                        preview.innerHTML = '';
-                        preview.classList.remove('has-items');
-                    });
-                }
-
-                // Changer le bouton publier en "Enregistrer"
-                const publishBtn = document.getElementById('postPublishBtn');
-                publishBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Enregistrer';
-                publishBtn.dataset.editMode = 'true';
-                publishBtn.dataset.editId   = serviceId;
-
-            } catch(err) {
-                console.error(err);
-            }
-            return;
-        }
+       if (e.target.closest('.more-menu-item[data-action="edit"]')) {
+    const card = e.target.closest('.post-card');
+    card.querySelector('.post-more-menu').hidden = true;
+    const serviceId = card.dataset.serviceId;
+    try {
+        const res  = await fetch(`../../../api/get-single-service.php?id=${serviceId}`);
+        const data = await res.json();
+        if (!data.success) return;
+        await window.openEditServiceFromFeed(data.service, serviceId);
+    } catch(err) {
+        console.error(err);
+    }
+    return;
+}
 
         // ── PRIORITÉ 3 : navigation vers profil ──
         const ownerClick = e.target.closest('.post-owner');

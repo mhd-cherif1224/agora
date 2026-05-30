@@ -233,18 +233,17 @@ function fileToBlob(file) {
     [scheduledChip, locationChip].forEach(c => c.classList.remove('visible'));
     [pmTimerBtn, pmCatBtn, pmLocBtn].forEach(b => b.classList.remove('active'));
 
-    // Ne réinitialiser le bouton QUE si pas en mode édition
-    if (!publishBtn.dataset.editMode) {
-      publishBtn.classList.remove('scheduled');
-      publishBtn.innerHTML = 'publier';
-    }
+    // ← Toujours réinitialiser le bouton (supprimer la condition editMode)
+    publishBtn.classList.remove('scheduled');
+    publishBtn.innerHTML = 'publier';
+    delete publishBtn.dataset.editMode;
+    delete publishBtn.dataset.editId;
 
     catDropdown.querySelectorAll('.cat-option').forEach(o => o.classList.remove('selected'));
     selectedStatus = 'disponible';
     statusModal.querySelectorAll('.status-option').forEach(o => o.classList.remove('selected'));
     pmStatusBtn.classList.remove('active');
 
-    // Réinitialiser les champs texte
     const postTitle = document.getElementById('postTitle');
     const postDesc  = document.getElementById('postDesc');
     const postPrice = document.getElementById('postPrice');
@@ -252,10 +251,9 @@ function fileToBlob(file) {
     if (postDesc)  postDesc.value  = '';
     if (postPrice) postPrice.value = '';
 
-    // Réinitialiser les catégories
     selectedCategories = [];
     if (catChipsBox) catChipsBox.innerHTML = '';
-  }
+}
 
   // ── Composer triggers ──
   const composerInput = document.getElementById('composerTrigger');
@@ -457,15 +455,18 @@ function fileToBlob(file) {
   // PUBLISH BUTTON
   // ════════════════════════════════════════
   publishBtn.addEventListener('click', async () => {
+    const isEdit = publishBtn.dataset.editMode === 'true';
     await publierService();
-    if (scheduledAt) {
-      const delay = scheduledAt - Date.now();
-      const fmt = scheduledAt.toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-      showNotification(`🕐 Post programmé · ${fmt}`);
-      setTimeout(() => { showNotification('✓ Post publié automatiquement !'); }, delay);
+    if (!isEdit) {
+      if (scheduledAt) {
+        const delay = scheduledAt - Date.now();
+        const fmt = scheduledAt.toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+        showNotification(`🕐 Post programmé · ${fmt}`);
+        setTimeout(() => { showNotification('✓ Post publié automatiquement !'); }, delay);
+      }
+      closeModal();
+      resetModal();
     }
-    closeModal();
-    resetModal();
   });
 
   // ════════════════════════════════════════
@@ -517,25 +518,19 @@ function fileToBlob(file) {
       formData.append("categories[]", category.ID);
     });
 
-    if (isEdit) {
-      // ── Mode édition ──
+   if (isEdit) {
       formData.append("id", editId);
       try {
         const res    = await fetch('../../../api/update-service.php', {
           method: 'POST', credentials: 'include', body: formData
         });
-        const text   = await res.text();
-        console.log("Raw response update:", text);
-        const result = JSON.parse(text);
+        const result = JSON.parse(await res.text());
         if (result.success) {
-          // Nettoyer APRÈS succès
-          delete publishBtn.dataset.editMode;
-          delete publishBtn.dataset.editId;
-          publishBtn.innerHTML = 'publier';
           showNotification('✅ Service modifié avec succès !');
-          if (typeof refreshService === 'function') await refreshService(editId);
-          document.getElementById('postModalOverlay').classList.remove('active');
-          document.body.style.overflow = '';
+          closeModal();  
+          resetModal();  
+          if (typeof window.loadServices === 'function') await window.loadServices();
+          else if (typeof refreshService === 'function') await refreshService(editId);
         } else {
           showNotification('❌ ' + (result.message || 'Erreur'));
         }
@@ -543,29 +538,77 @@ function fileToBlob(file) {
         console.error(err);
         showNotification('❌ Erreur réseau');
       }
-
-    } else {
-      // ── Mode création ──
-      try {
-        const response = await fetch('../../../api/create-service.php', {
-          method: "POST", credentials: "include", body: formData
-        });
-        const text   = await response.text();
-        console.log("Raw response create:", text);
-        const result = JSON.parse(text);
-        if (result.success) {
-          showNotification('✓ Service publié !');
-          document.getElementById('postModalOverlay').classList.remove('active');
-          document.body.style.overflow = '';
-        } else {
-          showNotification('❌ ' + (result.message || 'Erreur lors de la publication'));
-        }
-      } catch (error) {
-        console.error(error);
-        showNotification('❌ Erreur réseau');
-      }
-    }
+    } 
   }
+
+  // ════════════════════════════════════════
+  // OPEN MODAL EN MODE ÉDITION (appelé depuis feed.js)
+  // ════════════════════════════════════════
+  window.openEditServiceFromFeed = async function(service, serviceId) {
+
+    // 1. Réinitialiser d'abord
+    resetModal();
+
+    // 2. Remplir les champs texte
+    const matchPrix = (service.description || '').match(/\[prix_texte:(.+?)\]/);
+    const cleanDesc = matchPrix
+      ? service.description.replace(/\[prix_texte:.+?\]/, '').trim()
+      : (service.description || '');
+
+    document.getElementById('postTitle').value = service.titre || '';
+    document.getElementById('postPrice').value = matchPrix ? matchPrix[1] : (service.prix || '');
+    document.getElementById('postDesc').value  = cleanDesc;
+
+    // 3. Statut
+    selectedStatus = service.status || 'disponible';
+    statusModal.querySelectorAll('.status-option').forEach(opt => {
+      opt.classList.toggle('selected', opt.dataset.value === selectedStatus);
+    });
+    if (selectedStatus !== 'disponible') pmStatusBtn.classList.add('active');
+
+    // 4. Photo existante
+    if (service.service_photo) {
+      const photoUrl = buildPhotoUrl(service.service_photo);
+      attachedPhotos = [{ url: photoUrl, file: null, existing: true }];
+      preview.innerHTML = `
+        <div class="preview-item">
+          <img src="${photoUrl}" alt="">
+          <button class="preview-remove" id="existingPhotoRemove">×</button>
+        </div>`;
+      preview.classList.add('has-items');
+      document.getElementById('existingPhotoRemove').addEventListener('click', () => {
+        attachedPhotos = [];
+        preview.innerHTML = '';
+        preview.classList.remove('has-items');
+      });
+    }
+
+    // 5. Catégories — charger si besoin puis pré-remplir selectedCategories
+    if (categories.length === 0) {
+      try {
+        const res    = await fetch('../../../api/get-all-categories.php');
+        const result = await res.json();
+        if (result.success) categories = result.data;
+      } catch(e) { console.error(e); }
+    }
+
+    selectedCategories = [];
+    if (service.categorie) {
+      service.categorie.split(',').map(c => c.trim()).filter(Boolean).forEach(catName => {
+        const found = categories.find(c => c.titre === catName);
+        if (found) selectedCategories.push(found);
+      });
+    }
+    renderCatChips();
+
+    // 6. Marquer le bouton en mode édition
+    publishBtn.dataset.editMode = 'true';
+    publishBtn.dataset.editId   = serviceId;
+    publishBtn.innerHTML = '<i class="fa-solid fa-floppy-disk" style="margin-right:6px;"></i>Enregistrer';
+
+    // 7. Ouvrir le modal
+    openModal(false);
+  };
 
 })(); // ← fermeture du premier IIFE
 
