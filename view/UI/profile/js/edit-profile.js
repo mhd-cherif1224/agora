@@ -122,6 +122,11 @@ async function loadProfile() {
       bannerBottom.style.background = `linear-gradient(to right, ${data.banner_color_dark}, ${data.banner_color_light})`;
     }
 
+    updatePreview();         
+    
+
+    await loadExistingCV(); 
+    
     loadNavDots();
     
   } catch (err) {
@@ -339,6 +344,9 @@ COLORS.forEach((c, i) => {
 // ════════════════════════════════════════
 // LIVE PREVIEW
 // ════════════════════════════════════════
+// ════════════════════════════════════════
+// LIVE PREVIEW — ne touche pas au CV
+// ════════════════════════════════════════
 function updatePreview() {
   const nom     = document.getElementById('inputNom').value;
   const prenom  = document.getElementById('inputPrenom').value;
@@ -346,8 +354,27 @@ function updatePreview() {
   const adresse = document.getElementById('inputAdresse').value;
   const full    = [nom, prenom].filter(Boolean).join(' ');
 
-  document.getElementById('displayName').innerHTML =
-    (full || 'Votre Nom') + ' <button class="cv-btn"><label for="cvInput">+ Ajouter Votre CV</label></button><span id="cvName"></span>';
+  // ── Met à jour uniquement le texte du nom, sans toucher au bouton CV ──
+  const displayName = document.getElementById('displayName');
+  if (displayName) {
+    // Préserver le bouton CV et le span cvName s'ils existent déjà
+    const existingCvBtn  = displayName.querySelector('.cv-btn');
+    const existingCvName = displayName.querySelector('#cvName');
+
+    const nameText = full || 'Votre Nom';
+
+    if (!existingCvBtn) {
+      // Première initialisation : créer tout le HTML
+      displayName.innerHTML =
+        nameText +
+        ' <button class="cv-btn"><label for="cvInput">+ Ajouter Votre CV</label></button>' +
+        '<span id="cvName"></span>';
+    } else {
+      // Mise à jour : modifier seulement le texte du nœud sans détruire le reste
+      displayName.childNodes[0].textContent = nameText + ' ';
+    }
+  }
+
   document.getElementById('displayRole').textContent    = role    || 'Votre rôle';
   document.getElementById('displayLocation').innerHTML =
     `<i class="fa-solid fa-location-dot"></i> ${adresse || 'Votre adresse'}`;
@@ -372,21 +399,117 @@ document.getElementById('applyBtn').addEventListener('click', saveProfile);
 // ════════════════════════════════════════
 const cvInput = document.getElementById('cvInput');
 const cvName  = document.getElementById('cvName');
-let fileURL   = null;
+// ════════════════════════════════════════
+// CV UPLOAD — init après updatePreview()
+// ════════════════════════════════════════
+let cvFileURL = null;
 
-if (cvInput) {
-  cvInput.addEventListener('change', function() {
-    if (this.files.length > 0) {
-      const file = this.files[0];
-      fileURL = URL.createObjectURL(file);
-      cvName.textContent = '📄 ' + file.name;
-      cvName.style.cursor = 'pointer';
-      cvName.style.textDecoration = 'underline';
+async function loadExistingCV() {
+  try {
+    const res  = await fetch('../../../api/get-profile.php');
+    const data = await res.json();
+    if (data.success && data.cv_path) {
+      cvFileURL = buildPhotoUrl(data.cv_path);
+      const filename = data.cv_path.split('/').pop();
+
+      // Attendre que updatePreview() ait créé #cvName dans le DOM
+      const waitForCvName = () => new Promise(resolve => {
+        const check = () => {
+          const el = document.getElementById('cvName');
+          if (el) { resolve(el); return; }
+          requestAnimationFrame(check);
+        };
+        check();
+      });
+
+      const cvNameEl = await waitForCvName();
+      cvNameEl.textContent      = '📄';
+      cvNameEl.dataset.filename = filename;
+      cvNameEl.style.cursor     = 'pointer';
+    }
+  } catch (e) {
+    console.warn('loadExistingCV error:', e);
+  }
+}
+
+// Helpers pour accéder à cvName après création dynamique
+function getCvInput()  { return document.getElementById('cvInput'); }
+function getCvName()   { return document.getElementById('cvName'); }
+
+const cvInput_ref = document.getElementById('cvInput');
+if (cvInput_ref) {
+  cvInput_ref.addEventListener('change', async function () {
+    if (!this.files.length) return;
+    const file = this.files[0];
+
+    cvFileURL = URL.createObjectURL(file);
+    const cvNameEl = getCvName();
+    if (cvNameEl) {
+      cvNameEl.textContent      = '📄';
+      cvNameEl.dataset.filename = file.name;
+      cvNameEl.style.cursor     = 'pointer';
+    }
+
+    const fd = new FormData();
+    fd.append('cv', file);
+    try {
+      const res  = await fetch('../../../api/upload-cv.php', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (data.success) {
+        cvFileURL = buildPhotoUrl(data.cv_path);
+        const cvNameEl2 = getCvName();
+        if (cvNameEl2) cvNameEl2.dataset.filename = file.name;
+        showNotification('✅ CV sauvegardé !');
+      } else {
+        showNotification('❌ ' + (data.message || 'Erreur upload CV'));
+      }
+    } catch (err) {
+      showNotification('❌ Erreur réseau lors de l\'upload du CV');
     }
   });
 }
+
+// Délégation d'événement sur displayName pour gérer le clic sur #cvName (créé dynamiquement)
+document.getElementById('displayName')?.addEventListener('click', e => {
+  if (e.target.id === 'cvName' || e.target.closest('#cvName')) {
+    if (cvFileURL) window.open(cvFileURL, '_blank');
+  }
+});
+
+if (cvInput) {
+  cvInput.addEventListener('change', async function () {
+    if (!this.files.length) return;
+    const file = this.files[0];
+
+    // Affichage immédiat
+    cvFileURL = URL.createObjectURL(file);
+    if (cvName) {
+      cvName.textContent      = '📄';
+      cvName.dataset.filename = file.name;
+      cvName.style.cursor     = 'pointer';
+    }
+
+    // Upload
+    const fd = new FormData();
+    fd.append('cv', file);
+    try {
+      const res  = await fetch('../../../api/upload-cv.php', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (data.success) {
+        cvFileURL = buildPhotoUrl(data.cv_path);
+        if (cvName) cvName.dataset.filename = file.name;
+        showNotification('✅ CV sauvegardé !');
+      } else {
+        showNotification('❌ ' + (data.message || 'Erreur upload CV'));
+      }
+    } catch (err) {
+      showNotification('❌ Erreur réseau lors de l\'upload du CV');
+    }
+  });
+}
+
 if (cvName) {
-  cvName.addEventListener('click', function() { if (fileURL) window.open(fileURL, '_blank'); });
+  cvName.addEventListener('click', () => { if (cvFileURL) window.open(cvFileURL, '_blank'); });
 }
 
 // ════════════════════════════════════════

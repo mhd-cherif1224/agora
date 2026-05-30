@@ -203,26 +203,33 @@ function openCropper(file, target, aspectRatio) {
 }
 
 // ════════════════════════════════════════
-// CV UPLOAD
+// CV — lecture seule (profil visité)
 // ════════════════════════════════════════
-const cvInput = document.getElementById('cvInput');
-const cvName  = document.getElementById('cvName');
+const cvName = document.getElementById('cvName');
 let cvFileURL = null;
 
-if (cvInput) {
-  cvInput.addEventListener('change', function () {
-    if (this.files.length > 0) {
-      const file = this.files[0];
-      cvFileURL = URL.createObjectURL(file);
-      cvName.textContent = '📄 ' + file.name;
-      cvName.style.cursor = 'pointer';
-      cvName.style.textDecoration = 'underline';
+async function loadProfileCV() {
+  const params = new URLSearchParams(window.location.search);
+  const userId = params.get('id');
+  if (!userId) return;
+  try {
+    const res  = await fetch(`../../../api/get-profile.php?id=${userId}`);  // ou get-user.php selon votre API
+    const data = await res.json();
+    if (data.success && data.cv_path && cvName) {
+      cvFileURL = buildPhotoUrl(data.cv_path);
+      const filename = data.cv_path.split('/').pop();
+      cvName.textContent      = '📄';
+      cvName.dataset.filename = filename;
+      cvName.style.cursor     = 'pointer';
     }
-  });
+  } catch (e) {}
 }
+
 if (cvName) {
-  cvName.addEventListener('click', function () { if (cvFileURL) window.open(cvFileURL, '_blank'); });
+  cvName.addEventListener('click', () => { if (cvFileURL) window.open(cvFileURL, '_blank'); });
 }
+
+loadProfileCV();
 
 // ════════════════════════════════════════
 // SEE ALL SUGGESTIONS
