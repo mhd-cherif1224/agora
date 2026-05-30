@@ -251,6 +251,71 @@ function openCropper(file, target, aspectRatio) {
   `;
   document.head.appendChild(s);
 })();
+  function scheduleFromStorageProfile() {
+  const raw = localStorage.getItem('pendingScheduledPost');
+  if (!raw) return;
+
+  let pending;
+  try { pending = JSON.parse(raw); } catch { localStorage.removeItem('pendingScheduledPost'); return; }
+
+  const scheduledAt = new Date(pending.scheduledAt);
+  const delay = scheduledAt - Date.now();
+
+  if (delay <= 0) { publishPendingProfile(pending); return; }
+
+  const fmt = scheduledAt.toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+  showNotification(`⏳ Modification planifiée pour le ${fmt}`);
+  setTimeout(() => publishPendingProfile(pending), delay);
+}
+
+async function publishPendingProfile(pending) {
+  const fd = new FormData();
+  const apiUrl = pending.type === 'edit'
+    ? '../../api/update-service.php'
+    : '../../api/create-service.php';
+
+  if (pending.type === 'edit') fd.append('id', pending.editId);
+  fd.append('titre',          pending.titre);
+  fd.append('description',    pending.description);
+  fd.append('prix',           pending.prix);
+  fd.append('prix_affichage', pending.prixRaw);
+  fd.append('status',         pending.status);
+
+  if (pending.type === 'edit') {
+    (pending.categories || []).forEach(id => fd.append('categories[]', id));
+  } else {
+    (pending.categories || []).forEach(cat => fd.append('categories[]', cat.ID));
+  }
+
+  // ── Reconvertir base64 → Blob ──
+  if (pending.photos && pending.photos.length > 0) {
+    try {
+      const blobs = await Promise.all(
+        pending.photos.map(photo => new Promise(resolve => {
+          const [header, data] = photo.base64.split(',');
+          const mime   = header.match(/:(.*?);/)[1];
+          const binary = atob(data);
+          const arr    = new Uint8Array(binary.length);
+          for (let j = 0; j < binary.length; j++) arr[j] = binary.charCodeAt(j);
+          resolve(new Blob([arr], { type: mime }));
+        }))
+      );
+      blobs.forEach((blob, i) => fd.append('photos[]', blob, `photo_${i + 1}.jpg`));
+    } catch (err) { console.error('Erreur reconversion photos:', err); }
+  }
+
+  try {
+    const res    = await fetch(apiUrl, { method: 'POST', credentials: 'include', body: fd });
+    const result = JSON.parse(await res.text());
+    if (result.success) {
+      localStorage.removeItem('pendingScheduledPost');
+      const msg = pending.type === 'edit' ? '✅ Service modifié automatiquement !' : '✅ Service publié automatiquement !';
+      showNotification(msg);
+      if (typeof loadServices === 'function') await loadServices();
+    }
+  } catch (err) { console.error('Erreur publication planifiée:', err); }
+}
+
 
 // ════════════════════════════════════════
 // SHARE SHEET
@@ -925,6 +990,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadProfile();
   await loadServices();
   loadAllUsers();
+  scheduleFromStorageProfile();
 
   // ── 2. Enrich existing cards ──
   document.querySelectorAll('.post-card').forEach(enrichCard);
@@ -1413,46 +1479,59 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         // ── Vérifier le timer ──
-        const scheduledChipEl = document.getElementById('scheduledChip');
-        if (scheduledChipEl && scheduledChipEl.style.display !== 'none') {
-          const rawDate = document.getElementById('timerDate')?.value;
-          const rawTime = document.getElementById('timerTime')?.value || '00:00';
-          if (rawDate) {
-            const scheduledDate = new Date(`${rawDate}T${rawTime}:00`);
-            const delayMs       = scheduledDate - new Date();
-            if (delayMs > 0) {
-              // Capturer tout maintenant
-              const titreSaved  = titre, descSaved = desc, prixSaved = prixRaw, statusSaved = status, editIdSaved = editId;
-              const photosSaved = [...attachedPhotos];
-              const chipsSaved  = [...chips.querySelectorAll('[data-cat]')].map(c => c.dataset.cat);
+const scheduledChipEl = document.getElementById('scheduledChip');
+if (scheduledChipEl && scheduledChipEl.style.display !== 'none') {
+  const rawDate = document.getElementById('timerDate')?.value;
+  const rawTime = document.getElementById('timerTime')?.value || '00:00';
+  if (rawDate) {
+    const scheduledDate = new Date(`${rawDate}T${rawTime}:00`);
+    const delayMs = scheduledDate - new Date();
+    if (delayMs > 0) {
+      const titreSaved  = titre, descSaved = desc, prixSaved = prixRaw,
+            statusSaved = status, editIdSaved = editId;
+      const chipsSaved  = [...chips.querySelectorAll('[data-cat]')].map(c => c.dataset.cat);
 
-              const mins = Math.round(delayMs / 60000);
-              showNotification(`⏰ Publication planifiée dans ${mins < 60 ? mins + ' min' : Math.round(mins/60) + ' h'}`);
-
-              setTimeout(async () => {
-                const fd = new FormData();
-                fd.append('id', editIdSaved); fd.append('titre', titreSaved); fd.append('description', descSaved);
-                fd.append('prix', isNaN(parseFloat(prixSaved)) ? 0 : parseFloat(prixSaved)); fd.append('prix_affichage', prixSaved);
-                fd.append('status', statusSaved);
-                chipsSaved.forEach(id => fd.append('categories[]', id));
-                if (photosSaved.length > 0) {
-                  try { const blobs = await Promise.all(photosSaved.map(p => fileToBlob(p.file))); blobs.forEach((b, i) => fd.append('photos[]', b, `photo_${i+1}.jpg`)); } catch {}
-                }
-                try {
-                  const r = await fetch('../../api/update-service.php', { method: 'POST', credentials: 'include', body: fd });
-                  const result = JSON.parse(await r.text());
-                  if (result.success) { showNotification('✅ Service publié automatiquement !'); await loadServices(); }
-                } catch (err) { console.error('Erreur publication planifiée:', err); }
-              }, delayMs);
-
-              // Fermer le modal immédiatement
-              _resetAndClose();
-              scheduledChipEl.style.display = 'none';
-              return;
-            }
+      // ── Convertir photos en base64 avant localStorage ──
+      const photosBase64 = await Promise.all(
+        attachedPhotos.map(photo => {
+          if (photo.file) {
+            return new Promise(resolve => {
+              const reader = new FileReader();
+              reader.onload = e => resolve({ base64: e.target.result });
+              reader.readAsDataURL(photo.file);
+            });
           }
-        }
+          return Promise.resolve({ base64: photo.url });
+        })
+      );
 
+      const pendingEdit = {
+        editId: editIdSaved, titre: titreSaved, description: descSaved,
+        prix: isNaN(parseFloat(prixSaved)) ? 0 : parseFloat(prixSaved),
+        prixRaw: prixSaved, status: statusSaved,
+        categories: chipsSaved,
+        scheduledAt: scheduledDate.toISOString(),
+        photos: photosBase64,
+        type: 'edit'  // ← distinguer création vs édition
+      };
+
+      try {
+        localStorage.setItem('pendingScheduledPost', JSON.stringify(pendingEdit));
+      } catch (e) {
+        pendingEdit.photos = [];
+        localStorage.setItem('pendingScheduledPost', JSON.stringify(pendingEdit));
+        showNotification('⚠️ Photo trop lourde, sera publiée sans image');
+      }
+
+      const mins = Math.round(delayMs / 60000);
+      showNotification(`⏰ Modification planifiée dans ${mins < 60 ? mins + ' min' : Math.round(mins/60) + ' h'}`);
+      _resetAndClose();
+      scheduledChipEl.style.display = 'none';
+      scheduleFromStorageProfile();
+      return;
+    }
+  }
+}
         // ── Publication immédiate ──
         const formData = new FormData();
         formData.append('id', editId); formData.append('titre', titre); formData.append('description', desc);

@@ -212,9 +212,9 @@ function fileToBlob(file) {
 
   // ── Modal open / close / reset ──
   function openModal(focusOnPhoto) {
-    const tmr = new Date(Date.now() + 86400000);
-    timerDate.value = tmr.toISOString().split('T')[0];
-    timerTime.value = '10:00';
+  const now = new Date();
+  timerDate.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  timerTime.value = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
     setTimeout(() => { if (focusOnPhoto) pmPhotoInput.click(); }, 80);
