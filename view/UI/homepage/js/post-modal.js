@@ -499,19 +499,33 @@ function fileToBlob(file) {
     formData.append("status", selectedStatus);
 
     // ── Photos ──
-    if (attachedPhotos.length > 0) {
-      try {
-        const photoBlobs = await Promise.all(
-          attachedPhotos.map(photo => fileToBlob(photo.file))
-        );
-        photoBlobs.forEach((blob, i) => {
-          formData.append('photos[]', blob, `photo_${i + 1}.jpg`);
-        });
-      } catch (imgErr) {
-        showNotification('❌ Erreur lors du traitement des images');
-        return;
-      }
+    // ── Photos ──
+if (attachedPhotos.length > 0) {
+  try {
+    // Séparer les photos existantes (pas de file) des nouvelles
+    const newPhotos = attachedPhotos.filter(p => p.file !== null && p.file !== undefined);
+    const existingPhotos = attachedPhotos.filter(p => p.existing === true);
+
+    // Signaler au serveur si on garde la photo existante
+    if (existingPhotos.length > 0) {
+      formData.append('keep_existing_photo', '1');
     }
+
+    // Traiter uniquement les nouvelles photos
+    if (newPhotos.length > 0) {
+      const photoBlobs = await Promise.all(
+        newPhotos.map(photo => fileToBlob(photo.file))
+      );
+      photoBlobs.forEach((blob, i) => {
+        formData.append('photos[]', blob, `photo_${i + 1}.jpg`);
+      });
+    }
+  } catch (imgErr) {
+    console.error(imgErr);
+    showNotification('❌ Erreur lors du traitement des images');
+    return;
+  }
+}
 
     // ── Catégories ──
     selectedCategories.forEach(category => {
