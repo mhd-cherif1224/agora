@@ -924,6 +924,7 @@ async function loadAllUsers() {
     return;
   }
 
+  const PREVIEW_COUNT = 4;
   list.innerHTML = 'Chargement...';
 
   try {
@@ -946,9 +947,10 @@ async function loadAllUsers() {
 
     list.innerHTML = '';
 
-    users.forEach(user => {
+    const items = users.map((user, i) => {
       const item = document.createElement('div');
       item.className = 'suggest-item';
+      if (i >= PREVIEW_COUNT) item.classList.add('suggest-item--hidden');
 
       const avatarDiv = document.createElement('div');
       avatarDiv.className = 'suggest-avatar';
@@ -980,18 +982,39 @@ async function loadAllUsers() {
 
       infoDiv.appendChild(nameDiv);
       infoDiv.appendChild(roleDiv);
-
       item.appendChild(avatarDiv);
       item.appendChild(infoDiv);
 
-      // Make clickable to view profile
       item.style.cursor = 'pointer';
       item.addEventListener('click', () => {
-  window.location.href = `../../UI/profile/profile.html?id=${user.ID}`;
-});
+        window.location.href = `../../UI/profile/profile.html?id=${user.ID}`;
+      });
 
       list.appendChild(item);
+      return item;
     });
+
+    if (users.length > PREVIEW_COUNT) {
+  const suggestToggleBtn = document.createElement('button');  
+  suggestToggleBtn.className = 'suggest-toggle-btn';
+  suggestToggleBtn.innerHTML = `<i class="fa-solid fa-chevron-down"></i>`;
+  suggestToggleBtn.title = 'Voir plus';
+  let expanded = false;
+  suggestToggleBtn.addEventListener('click', () => {
+    expanded = !expanded;
+    items.forEach((item, i) => {
+      if (i >= PREVIEW_COUNT) {
+        item.classList.toggle('suggest-item--hidden', !expanded);
+        item.classList.toggle('suggest-item--visible', expanded);
+      }
+    });
+    suggestToggleBtn.innerHTML = expanded
+      ? `<i class="fa-solid fa-chevron-up"></i>`
+      : `<i class="fa-solid fa-chevron-down"></i>`;
+    suggestToggleBtn.title = expanded ? 'Réduire' : 'Voir plus';
+  });
+  list.appendChild(suggestToggleBtn);
+}
 
   } catch (err) {
     console.error('Fetch error:', err);

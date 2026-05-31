@@ -23,7 +23,7 @@ if (empty($password)) {
 // ── Validation email universitaire ──────────────────────────
 // Accepte : @univ-bejaia.dz (personnel/profs)
 //       ET : @fac.univ-bejaia.dz où fac ∈ {se, snv, shs, eco, droit, st} (étudiants)
-$facultes_valides = ['se', 'snv', 'shs', 'eco', 'droit', 'st'];
+$facultes_valides = ['se', 'snv', 'shs', 'eco', 'droit', 'st', 'tech'];
 $facultes_pattern = implode('|', $facultes_valides);
 
 $est_universitaire = preg_match(

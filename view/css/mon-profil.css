@@ -1298,6 +1298,40 @@ nav {
 .posts-section { overflow: visible; }
 .post-card { overflow: visible; }
 
+/* Hidden/visible extra suggest items */
+.suggest-item--hidden {
+  display: none;
+}
+.suggest-item--visible {
+  display: flex;
+  animation: suggestFadeIn 0.2s ease forwards;
+}
+@keyframes suggestFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Toggle arrow button */
+.suggest-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 6px;
+  padding: 6px 0;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--color-card-border);
+  color: var(--color-pink-light);
+  cursor: pointer;
+  font-size: 13px;
+  transition: opacity 0.2s, color 0.2s;
+}
+.suggest-toggle-btn:hover {
+  opacity: 0.7;
+  color: var(--color-accent);
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 720px) {
   .layout { grid-template-columns: 1fr; }

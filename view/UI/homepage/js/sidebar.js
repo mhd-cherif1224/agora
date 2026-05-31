@@ -40,35 +40,28 @@ let showingAll        = false;
 //     }
 // });
 
+const PREVIEW_COUNT = 4;
+
 async function loadAllUsers() {
   const list = document.getElementById('usersList');
-  if (!list) {
-    console.warn('usersList container not found');
-    return;
-  }
+  if (!list) return;
 
   list.innerHTML = 'Chargement...';
 
   try {
     const res = await fetch('../../../api/get-all-users.php');
-
-    if (!res.ok) {
-      list.innerHTML = 'Erreur serveur: ' + res.status;
-      return;
-    }
+    if (!res.ok) { list.innerHTML = 'Erreur serveur: ' + res.status; return; }
 
     const users = await res.json();
-    if (!Array.isArray(users)) {
-      list.innerHTML = 'Données invalides';
-      console.error('Expected array, got:', users);
-      return;
-    }
+    if (!Array.isArray(users)) { list.innerHTML = 'Données invalides'; return; }
 
     list.innerHTML = '';
 
-    users.forEach(user => {
+    // Build all items
+    const items = users.map((user, i) => {
       const item = document.createElement('div');
       item.className = 'suggest-item';
+      if (i >= PREVIEW_COUNT) item.classList.add('suggest-item--hidden');
 
       const avatarDiv = document.createElement('div');
       avatarDiv.className = 'suggest-avatar';
@@ -100,18 +93,43 @@ async function loadAllUsers() {
 
       infoDiv.appendChild(nameDiv);
       infoDiv.appendChild(roleDiv);
-
       item.appendChild(avatarDiv);
       item.appendChild(infoDiv);
 
-      // Make clickable to view profile
       item.style.cursor = 'pointer';
       item.addEventListener('click', () => {
-  window.location.href = `../../UI/profile/profile.html?id=${user.ID}`;
-});
+        window.location.href = `../../UI/profile/profile.html?id=${user.ID}`;
+      });
 
       list.appendChild(item);
+      return item;
     });
+
+    // Toggle button — only if there are more than PREVIEW_COUNT users
+    if (users.length > PREVIEW_COUNT) {
+      const toggleBtn = document.createElement('button');
+      toggleBtn.className = 'suggest-toggle-btn';
+      toggleBtn.innerHTML = `<i class="fa-solid fa-chevron-down"></i>`;
+      toggleBtn.title = 'Voir plus';
+
+      let expanded = false;
+
+      toggleBtn.addEventListener('click', () => {
+        expanded = !expanded;
+        items.forEach((item, i) => {
+          if (i >= PREVIEW_COUNT) {
+            item.classList.toggle('suggest-item--hidden', !expanded);
+            item.classList.toggle('suggest-item--visible', expanded);
+          }
+        });
+        toggleBtn.innerHTML = expanded
+          ? `<i class="fa-solid fa-chevron-up"></i>`
+          : `<i class="fa-solid fa-chevron-down"></i>`;
+        toggleBtn.title = expanded ? 'Réduire' : 'Voir plus';
+      });
+
+      list.appendChild(toggleBtn);
+    }
 
   } catch (err) {
     console.error('Fetch error:', err);
