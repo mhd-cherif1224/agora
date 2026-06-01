@@ -249,11 +249,6 @@
     id="postDesc" 
     placeholder="Décrivez votre service..."></textarea>
     </div>
-    <div class="location-chip" id="locationChip">
-      <i class="fa-solid fa-location-dot"></i>
-      <span id="locationText">Ma position</span>
-      <button class="location-chip-remove" id="locationRemove"><i class="fa-solid fa-xmark"></i></button>
-    </div>
     <div class="category-chips" id="categoryChips"></div>
     <div class="scheduled-chip" id="scheduledChip">
       <i class="fa-regular fa-clock"></i>
@@ -264,13 +259,6 @@
     <div class="post-modal-footer">
       <input type="file" id="pmPhotoInput" hidden accept="image/jpeg,image/png,image/jpg,image/gif">
       <button class="post-tool-btn" id="pmPhotoBtn" title="Ajouter une photo"><i class="fa-regular fa-image"></i></button>
-      <div style="position:relative;">
-        <button class="post-tool-btn" id="pmLocBtn" title="Ajouter une localisation"><i class="fa-solid fa-location-dot"></i></button>
-        <div class="loc-modal" id="locModal">
-          <input type="text" id="locInput" placeholder="Ex : Bejaia, Algeria">
-          <button class="loc-confirm-btn" id="locConfirm">Confirmer</button>
-        </div>
-      </div>
       <div style="position:relative;">
         <button class="post-tool-btn" id="pmCatBtn" title="Choisir une catégorie"><i class="fa-solid fa-plus"></i></button>
         <div class="cat-dropdown" id="catDropdown"></div>

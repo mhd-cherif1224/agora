@@ -1419,13 +1419,6 @@ if (cvName) {
     // ── Footer buttons ──
     const pmPhotoBtn   = document.getElementById('pmPhotoBtn');
     const pmPhotoInput = document.getElementById('pmPhotoInput');
-    const pmLocBtn     = document.getElementById('pmLocBtn');
-    const locModal     = document.getElementById('locModal');
-    const locConfirm   = document.getElementById('locConfirm');
-    const locInput     = document.getElementById('locInput');
-    const locationChip = document.getElementById('locationChip');
-    const locationText = document.getElementById('locationText');
-    const locationRemove = document.getElementById('locationRemove');
     const pmCatBtn     = document.getElementById('pmCatBtn');
     const catDropdown  = document.getElementById('catDropdown');
     const pmStatusBtn  = document.getElementById('pmStatusBtn');
@@ -1464,22 +1457,6 @@ if (cvName) {
         };
         reader.readAsDataURL(file); pmPhotoInput.value = '';
       });
-    }
-
-    if (pmLocBtn && !pmLocBtn._editBound) {
-      pmLocBtn._editBound = true;
-      pmLocBtn.addEventListener('click', e => { e.stopPropagation(); locModal?.classList.toggle('open'); });
-    }
-    if (locConfirm && !locConfirm._editBound) {
-      locConfirm._editBound = true;
-      locConfirm.addEventListener('click', () => {
-        const val = locInput?.value.trim();
-        if (val && locationText && locationChip) { locationText.textContent = val; locationChip.style.display = 'flex'; locModal?.classList.remove('open'); if (locInput) locInput.value = ''; }
-      });
-    }
-    if (locationRemove && !locationRemove._editBound) {
-      locationRemove._editBound = true;
-      locationRemove.addEventListener('click', () => { if (locationChip) locationChip.style.display = 'none'; });
     }
 
     // Catégories dropdown
@@ -1550,10 +1527,11 @@ if (cvName) {
     }
 
     // Fermer dropdowns au clic dehors
-    [locModal, catDropdown, statusModal, timerModal].forEach(el => el?.addEventListener('click', e => e.stopPropagation()));
+    [catDropdown, statusModal, timerModal].forEach(el => el?.addEventListener('click', e => e.stopPropagation()));
     document.addEventListener('click', () => {
-      locModal?.classList.remove('open'); catDropdown?.classList.remove('open');
-      statusModal?.classList.remove('open'); timerModal?.classList.remove('open');
+      catDropdown?.classList.remove('open');
+      statusModal?.classList.remove('open');
+      timerModal?.classList.remove('open');
     });
 
     // Ouvrir le modal

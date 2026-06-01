@@ -160,7 +160,7 @@ function fileToBlob(file) {
 // ════════════════════════════════════════
 (function () {
 
-  let selectedCats = new Set(), scheduledAt = null, locationValue = '';
+  let selectedCats = new Set(), scheduledAt = null;
   let pollActive = false, pollOptions = ['', ''], pollDuration = '1';
   let selectedStatus = 'disponible';
   let categories = [];
@@ -172,13 +172,6 @@ function fileToBlob(file) {
   const publishBtn      = document.getElementById('postPublishBtn');
   const pmPhotoBtn      = document.getElementById('pmPhotoBtn');
   const pmPhotoInput    = document.getElementById('pmPhotoInput');
-  const pmLocBtn        = document.getElementById('pmLocBtn');
-  const locModal        = document.getElementById('locModal');
-  const locInput        = document.getElementById('locInput');
-  const locConfirm      = document.getElementById('locConfirm');
-  const locationChip    = document.getElementById('locationChip');
-  const locationText    = document.getElementById('locationText');
-  const locationRemove  = document.getElementById('locationRemove');
   const pmCatBtn        = document.getElementById('pmCatBtn');
   const catDropdown     = document.getElementById('catDropdown');
   const catChipsBox     = document.getElementById('categoryChips');
@@ -226,12 +219,12 @@ function fileToBlob(file) {
   }
 
   function resetModal() {
-    selectedCats.clear(); scheduledAt = null; locationValue = '';
+    selectedCats.clear(); scheduledAt = null; 
     pollActive = false; pollOptions = ['', '']; pollDuration = '1';
     attachedPhotos = [];
     renderPreview();
-    [scheduledChip, locationChip].forEach(c => c.classList.remove('visible'));
-    [pmTimerBtn, pmCatBtn, pmLocBtn].forEach(b => b.classList.remove('active'));
+    scheduledChip.classList.remove('visible');
+    [pmTimerBtn, pmCatBtn].forEach(b => b.classList.remove('active'));
 
     // ← Toujours réinitialiser le bouton (supprimer la condition editMode)
     publishBtn.classList.remove('scheduled');
@@ -300,36 +293,12 @@ function fileToBlob(file) {
     preview.classList.toggle('has-items', attachedPhotos.length > 0);
   }
 
-  // ── Location ──
-  pmLocBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    locModal.classList.toggle('open');
-    timerModal.classList.remove('open');
-    if (locModal.classList.contains('open')) setTimeout(() => locInput.focus(), 50);
-  });
-  locConfirm.addEventListener('click', () => {
-    const val = locInput.value.trim();
-    if (!val) return;
-    locationValue = val;
-    locationText.textContent = val;
-    locationChip.classList.add('visible');
-    pmLocBtn.classList.add('active');
-    locModal.classList.remove('open');
-  });
-  locInput.addEventListener('keydown', e => { if (e.key === 'Enter') locConfirm.click(); });
-  locationRemove.addEventListener('click', () => {
-    locationValue = '';
-    locationChip.classList.remove('visible');
-    pmLocBtn.classList.remove('active');
-    locInput.value = '';
-  });
 
   // ── Category ──
   pmCatBtn.addEventListener('click', e => {
     e.stopPropagation();
     catDropdown.classList.toggle('open');
     timerModal.classList.remove('open');
-    locModal.classList.remove('open');
     pmCatBtn.classList.toggle('active', catDropdown.classList.contains('open'));
     loadCategories();
   });
@@ -384,7 +353,6 @@ function fileToBlob(file) {
     e.stopPropagation();
     timerModal.classList.toggle('open');
     catDropdown.classList.remove('open');
-    locModal.classList.remove('open');
     pmTimerBtn.classList.toggle('active', timerModal.classList.contains('open'));
   });
   timerClose.addEventListener('click', () => { timerModal.classList.remove('open'); pmTimerBtn.classList.remove('active'); });
@@ -414,7 +382,6 @@ function fileToBlob(file) {
     e.stopPropagation();
     statusModal.classList.toggle('open');
     timerModal.classList.remove('open');
-    locModal.classList.remove('open');
     catDropdown.classList.remove('open');
   });
   statusModal.querySelectorAll('.status-option').forEach(opt => {
@@ -821,24 +788,12 @@ if (attachedPhotos.length > 0) {
         <div class="edit-post-body-area">
           <textarea class="edit-post-textarea" id="editPostTextarea" placeholder="Quoi de neuf ?"></textarea>
         </div>
-        <div class="edit-loc-chip" id="editLocChip">
-          <i class="fa-solid fa-location-dot"></i>
-          <span id="editLocChipText"></span>
-          <button class="edit-loc-chip-remove" id="editLocChipRemove"><i class="fa-solid fa-xmark"></i></button>
-        </div>
         <div class="edit-cat-chips" id="editCatChips"></div>
         <div class="edit-preview-area" id="editPreviewArea"></div>
       </div>
       <div class="edit-post-footer" id="editPostFooter">
         <input type="file" id="editPhotoInput" hidden accept="image/jpeg,image/png,image/jpg" multiple>
         <button class="post-tool-btn" id="editPhotoBtn" title="Ajouter une photo"><i class="fa-regular fa-image"></i></button>
-        <div style="position:relative;">
-          <button class="post-tool-btn" id="editLocBtn" title="Localisation"><i class="fa-solid fa-location-dot"></i></button>
-          <div class="loc-modal" id="editLocModal">
-            <input type="text" id="editLocInput" placeholder="Ex : Bejaia, Algeria">
-            <button class="loc-confirm-btn" id="editLocConfirm">Confirmer</button>
-          </div>
-        </div>
         <div style="position:relative;">
           <button class="post-tool-btn" id="editCatBtn" title="Catégorie"><i class="fa-solid fa-plus"></i></button>
           <div class="cat-dropdown" id="editCatDropdown"></div>
@@ -852,7 +807,7 @@ if (attachedPhotos.length > 0) {
     </div>`;
   document.body.appendChild(editOverlay);
 
-  let editTargetCard = null, editNewPhotos = [], editKeptPhotos = [], editSelectedCats = new Set(), editLocation = '';
+  let editTargetCard = null, editNewPhotos = [], editKeptPhotos = [], editSelectedCats = new Set();
 
   function closeEditModal() {
     editOverlay.classList.remove('active');
@@ -890,48 +845,20 @@ if (attachedPhotos.length > 0) {
     this.value = '';
   });
 
-  // Location in edit modal
-  const editLocBtn   = document.getElementById('editLocBtn');
-  const editLocModal = document.getElementById('editLocModal');
-  const editLocInput = document.getElementById('editLocInput');
+
   const editCatBtn   = document.getElementById('editCatBtn');
   const editCatDD    = document.getElementById('editCatDropdown');
-
-  editLocBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    editLocModal.classList.toggle('open');
-    editCatDD.classList.remove('open');
-    if (editLocModal.classList.contains('open')) setTimeout(() => editLocInput.focus(), 40);
-  });
-  document.getElementById('editLocConfirm').addEventListener('click', () => {
-    const val = editLocInput.value.trim();
-    if (!val) return;
-    editLocation = val;
-    document.getElementById('editLocChipText').textContent = val;
-    document.getElementById('editLocChip').classList.add('visible');
-    editLocBtn.classList.add('active');
-    editLocModal.classList.remove('open');
-  });
-  editLocInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('editLocConfirm').click(); });
-  document.getElementById('editLocChipRemove').addEventListener('click', () => {
-    editLocation = '';
-    document.getElementById('editLocChip').classList.remove('visible');
-    editLocBtn.classList.remove('active');
-    editLocInput.value = '';
-  });
 
   // Category in edit modal
   editCatBtn.addEventListener('click', e => {
     e.stopPropagation();
     editCatDD.classList.toggle('open');
-    editLocModal.classList.remove('open');
     editCatBtn.classList.toggle('active', editCatDD.classList.contains('open'));
   });
 
   document.addEventListener('click', e => {
     if (editOverlay.classList.contains('active')) {
       if (!editCatDD.contains(e.target) && e.target !== editCatBtn) editCatDD.classList.remove('open');
-      if (!editLocModal.contains(e.target) && e.target !== editLocBtn) editLocModal.classList.remove('open');
     }
   });
 
@@ -956,20 +883,6 @@ if (attachedPhotos.length > 0) {
       }
       bodyEl.innerHTML = newText.replace(/\n/g, '<br>');
     } else if (bodyEl) { bodyEl.remove(); }
-
-    // 2. Location
-    let locDiv = card.querySelector('[data-loc]');
-    if (editLocation) {
-      if (!locDiv) {
-        locDiv = document.createElement('div');
-        locDiv.className = 'post-loc-chip';
-        locDiv.style.cssText = 'padding:0 18px 10px;font-size:11px;color:#8c8580;display:flex;align-items:center;gap:5px;';
-        const anchor = card.querySelector('.post-body') || card.querySelector('.post-actions') || card.querySelector('.post-rating-summary');
-        anchor ? anchor.before(locDiv) : card.appendChild(locDiv);
-      }
-      locDiv.dataset.loc = editLocation;
-      locDiv.innerHTML = `<i class="fa-solid fa-location-dot" style="color:#e8734a;font-size:10px;"></i>${editLocation}`;
-    } else if (locDiv) { locDiv.remove(); }
 
     // 3. Remove old images
     card.querySelectorAll('img.post-image, .post-card > img:not(.post-avatar)').forEach(img => img.remove());

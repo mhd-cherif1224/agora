@@ -37,10 +37,6 @@
       <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
     </button>
 
-    <button class="nav-icon-btn" title="Notifications"  onclick="window.location.href='../notification/notification.html'">
-      <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-    </button>
-
     <div class="nav-divider"></div>
 
     <div class="nav-avatar" id="navAvatar" onclick="window.location.href='../../html/mon-profil.html'" title="Mon Profil">
@@ -369,11 +365,6 @@
     <div class="post-modal-body">
       <textarea class="post-modal-textarea" id="postTextarea" placeholder="Quoi de neuf ? Partagez quelque chose…"></textarea>
     </div>
-    <div class="location-chip" id="locationChip">
-      <i class="fa-solid fa-location-dot"></i>
-      <span id="locationText">Ma position</span>
-      <button class="location-chip-remove" id="locationRemove"><i class="fa-solid fa-xmark"></i></button>
-    </div>
     <div class="category-chips" id="categoryChips"></div>
     <div class="scheduled-chip" id="scheduledChip">
       <i class="fa-regular fa-clock"></i>
@@ -384,13 +375,6 @@
     <div class="post-modal-footer">
       <input type="file" id="pmPhotoInput" hidden accept="image/jpeg,image/png,image/jpg,image/gif" multiple>
       <button class="post-tool-btn" id="pmPhotoBtn" title="Ajouter une photo"><i class="fa-regular fa-image"></i></button>
-      <div style="position:relative;">
-        <button class="post-tool-btn" id="pmLocBtn" title="Ajouter une localisation"><i class="fa-solid fa-location-dot"></i></button>
-        <div class="loc-modal" id="locModal">
-          <input type="text" id="locInput" placeholder="Ex : Bejaia, Algeria">
-          <button class="loc-confirm-btn" id="locConfirm">Confirmer</button>
-        </div>
-      </div>
       <div style="position:relative;">
         <button class="post-tool-btn" id="pmCatBtn" title="Choisir une catégorie"><i class="fa-solid fa-plus"></i></button>
         <div class="cat-dropdown" id="catDropdown"></div>
