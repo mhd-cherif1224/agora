@@ -97,16 +97,19 @@ document.getElementById("confirmAdd").onclick = function(){
                 <td>${role}</td>
             `;
 
+            
             modal.style.display = "none";
             showNotification("Admin ajouté avec succès");
 
-            // Reset du formulaire
-            document.getElementById("nomInputAdd").value = "";
+            
+            document.getElementById("nomInputAdd").value    = "";
             document.getElementById("prenomInputAdd").value = "";
-            document.getElementById("dateInputAdd").value = "";
-            document.getElementById("emailInputAdd").value = "";
-            document.getElementById("telInputAdd").value = "";
-            document.getElementById("passWordAdd").value = "";
+            document.getElementById("dateInputAdd").value   = "";
+            document.getElementById("sexeInputAdd").value   = 0;  
+            document.getElementById("emailInputAdd").value  = "";
+            document.getElementById("telInputAdd").value    = "";
+            document.getElementById("passWordAdd").value    = "";
+            document.getElementById("roleInputAdd").value   = 0;   
         } 
         else {
             showNotification("Erreur : " + (data.message || "Erreur inconnue"));
@@ -120,6 +123,20 @@ document.getElementById("confirmAdd").onclick = function(){
 /* ===========================
 MODIFIER ADMIN
 ============================== */
+
+addBtn.onclick = () => {
+    // Reset complet à l'ouverture
+    document.getElementById("nomInputAdd").value           = "";
+    document.getElementById("prenomInputAdd").value        = "";
+    document.getElementById("dateInputAdd").value          = "";
+    document.getElementById("emailInputAdd").value         = "";
+    document.getElementById("telInputAdd").value           = "";
+    document.getElementById("passWordAdd").value           = "";
+    document.getElementById("sexeInputAdd").selectedIndex  = 0; 
+    document.getElementById("roleInputAdd").selectedIndex  = 0;  
+
+    modal.style.display = "block";
+};
 
 const modifierModal = document.getElementById("modifierModal");
 const editBtn = document.getElementById("editBtn");
@@ -197,6 +214,7 @@ document.getElementById("confirmModifier").onclick = function(){
             selectedRow.cells[4].innerText = sexe;
             selectedRow.cells[5].innerText = email;
             selectedRow.cells[6].innerText = tel;
+            selectedRow.cells[7].innerText = "********";
             selectedRow.cells[8].innerText = role;
 
             modifierModal.style.display = "none";
