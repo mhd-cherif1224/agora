@@ -175,7 +175,11 @@ function initWebSocket() {
     query: { userId: currentUser.id }
   });
 
-  socket.on('connect', () => console.log('WS connected'));
+  socket.on('connect', () => {
+    console.log('WS connected');
+    // Recharger l'historique si une conversation est active
+    if (activeId) loadMessageHistory(activeId);
+  });
 
   socket.on(`msg_${currentUser.id}`, msg => {
     const otherId =
@@ -196,7 +200,7 @@ function initWebSocket() {
     renderConvList();
 
     if (activeId === otherId) {
-      loadMessageHistory(otherId);
+      loadMessageHistory(otherId);  // ← recharge depuis le serveur
     }
   });
 
@@ -205,19 +209,19 @@ function initWebSocket() {
     if (!conv) return;
 
     conv.messages = messages.map(m => ({
-        text: m.contenue,
-        time: m.DateEnvoie
-            ? (m.DateEnvoie.includes?.('Z') || m.DateEnvoie.includes?.('+')
-                ? m.DateEnvoie
-                : String(m.DateEnvoie).replace(' ', 'T') + 'Z')
-            : null,
-        sent: m.ID_Expediteur === currentUser.id
+      text: m.contenue,
+      time: m.DateEnvoie
+        ? (m.DateEnvoie.includes?.('Z') || m.DateEnvoie.includes?.('+')
+            ? m.DateEnvoie
+            : String(m.DateEnvoie).replace(' ', 'T') + 'Z')
+        : null,
+      sent: m.ID_Expediteur === currentUser.id
     }));
 
     if (activeId === otherUserId) {
-        renderMessages(otherUserId);
+      renderMessages(otherUserId);
     }
-});
+  });
 }
 
 // ─────────────────────────────────────────
@@ -333,34 +337,30 @@ function sendMessage() {
 
   if (!text || !activeId || !socket) return;
 
-  const now = new Date();
-
-  // 1. Emit to server
+  // Envoyer via socket
   socket.emit('send_message', {
-    ID_Expediteur: currentUser.id,
+    ID_Expediteur:   currentUser.id,
     ID_Destinataire: activeId,
-    contenue: text
+    contenue:        text
   });
 
-  // 2. UPDATE LOCAL STATE (this is what you're missing)
+  // Optimistic render — afficher immédiatement sans attendre le serveur
   const conv = conversations.find(c => c.id === activeId);
   if (conv) {
-    const msgObj = {
-      text: text,
-      time: now,
-      sent: true
-    };
-
-    conv.messages.push(msgObj);
+    conv.messages.push({ text, time: new Date(), sent: true });
     conv.preview = text;
-    conv.time = formatTime(now);
+    conv.time    = formatTime(new Date());
   }
 
-  // 3. Re-render immediately
   renderMessages(activeId);
   renderConvList();
 
   input.value = '';
+
+  // Recharger depuis le serveur après un court délai pour synchroniser
+  setTimeout(() => {
+    if (activeId) loadMessageHistory(activeId);
+  }, 500);
 }
 // ─────────────────────────────────────────
 // HELPERS
