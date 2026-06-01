@@ -1231,6 +1231,22 @@ function createServiceCard(service) {
   const serviceImage = service.service_photo ? `../../../${service.service_photo}` : null;
   const categories   = service.categorie ? service.categorie.split(",") : [];
 
+  // ── Parser le prix texte comme dans feed.js ──
+  let prixAffiche = service.prix + ' DZD';
+  const match = service.description.match(/\[prix_texte:(.+?)\]/);
+  if (match) {
+    prixAffiche = match[1];
+    service.description = service.description.replace(/\[prix_texte:.+?\]/, '').trim();
+  }
+
+  // ── Status ──
+  const statusConfig = {
+    'disponible': { color: '#16a34a', bg: '#eaf5ee', border: '#bbf7d0', icon: 'fa-circle-check',       label: 'Disponible' },
+    'en cours':   { color: '#d97706', bg: '#fef9c3', border: '#fde68a', icon: 'fa-circle-half-stroke', label: 'En cours'   },
+    'terminé':    { color: '#6b7280', bg: '#f3f4f6', border: '#e5e7eb', icon: 'fa-circle-xmark',       label: 'Terminé'    }
+  };
+  const st = statusConfig[service.status] || statusConfig['disponible'];
+
   return `
   <article class="post-card" data-service-id="${service.ID}">
     <div class="post-header">
@@ -1252,8 +1268,13 @@ function createServiceCard(service) {
           </span>`).join("")}
       </span>
     </div>
-    <div class="post-body">${service.description}<br>prix : ${service.prix} DZD</div>
-    <div class="post-body">${service.status}</div>
+    <div class="post-body">
+      ${service.description.replace(/\n/g, '<br>')}
+      <br>prix : ${prixAffiche}
+    </div>
+    <span style="display:inline-block;margin:0 18px 10px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;font-family:'Space Grotesk',sans-serif;background:${st.bg};color:${st.color};">
+      <i class="fa-solid fa-circle" style="font-size:7px;margin-right:4px;"></i>${st.label}
+    </span>
     ${serviceImage ? `<img class="post-image" src="${serviceImage}">` : ""}
     <div class="post-rating-summary">
       <div class="rating-stars-display">${generateStars(service.note_moyenne)}</div>
