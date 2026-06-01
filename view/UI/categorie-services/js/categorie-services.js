@@ -310,6 +310,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
             loadNavDots();
+
+            // ── Hide notification button for Chercheur users ──
+            if (data.status === 'Chercheur') {
+                const notifBtn = document.querySelector('.nav-icon-btn[title="Notifications"]');
+                if (notifBtn) notifBtn.style.display = 'none';
+            }
             
         } catch (err) {
             console.error('Profile error:', err);

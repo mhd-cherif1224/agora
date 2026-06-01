@@ -61,6 +61,17 @@ document.addEventListener("DOMContentLoaded", async () => {
                 composerCard.style.display = 'none';
             }
 
+            // ── Hide composer for Chercheur users ──
+            if (data.status === 'Chercheur' && composerCard) {
+                composerCard.style.display = 'none';
+            }
+
+            // ── Hide notification button for Chercheur users ──   ← AJOUTER ICI
+            if (data.status === 'Chercheur') {
+                const notifBtn = document.querySelector('.nav-icon-btn[title="Notifications"]');
+                if (notifBtn) notifBtn.style.display = 'none';
+            }
+
             console.log("le role,",data.status )
 
             if (data.avatar) {
@@ -643,6 +654,22 @@ async function loadNavDots() {
       }
     }
   } catch (e) {}
+
+  // ── Dot notifications ──
+    try {
+        const res  = await fetch('../../../api/get-notifications.php');
+        const data = await res.json();
+        if (data.success && data.unread_count > 0) {
+            const notifBtn = document.querySelector('.nav-icon-btn[title="Notifications"]');
+            // ← Ne pas ajouter le dot si le bouton est caché
+            if (notifBtn && notifBtn.style.display !== 'none' && !notifBtn.querySelector('.notif-dot')) {
+                const dot = document.createElement('span');
+                dot.className = 'notif-dot';
+                notifBtn.appendChild(dot);
+                notifBtn.addEventListener('click', () => dot.remove(), { once: true });
+            }
+        }
+    } catch (e) {}
 }
 
 function renderPickerStars(picker, upTo, isHover = false) {
